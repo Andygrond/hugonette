@@ -1,0 +1,21 @@
+{
+	"name": "andygrond/hugonette",
+	"description" : "PHP basic library for web sites operated on Hugo static generator",
+	"homepage": "https://github.com/Andygrond/Hugonette",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Andy Grondziowski",
+			"email" : "grond@vp.pl",
+			"role" : "Developer"
+		}
+	],
+     "require": {
+        "php": ">=7.0.0"
+    },
+   "autoload": {
+        "psr-4": {
+			"Andygrond\\Hugonette\\" : "lib"
+        }
+    }
+}
