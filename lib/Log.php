@@ -2,8 +2,8 @@
 
 namespace Andygrond\Hugonette;
 
-/* Logger for Hugonette
- * Andrzej Grondziowski 2019
+/* Simple logger for Hugonette
+ * @author Andygrond 2019
  * Dependency: https://github.com/donatj/PhpUserAgent
 **/
 

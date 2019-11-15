@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette;
 
 /* HTTP error page with status codes
- * Andrzej Grondziowski 2019
+ * @author Andygrond 2019
 **/
 
 class ErrorView

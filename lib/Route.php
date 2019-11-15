@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette;
 
 /* Simple fast routing for Hugo websites
- * Andrzej Grondziowski 2019
+ * @author Andygrond 2019
 **/
 
 class Route
@@ -45,7 +45,7 @@ class Route
 	public function __destruct()
 	{
 		if ($this->view === null) {	// page has not been found till now
-			Error_View::status(404);
+			ErrorView::status(404);
 		}
 		Log::close();
 	}
@@ -54,57 +54,53 @@ class Route
 	// view modes: plain - latte - json
 	public function viewMode($mode)
 	{
-		$this->viewClass = __NAMESPACE__ .'\\' .ucwords($mode) .'_View';
+		$this->viewClass = __NAMESPACE__ .'\\' .ucwords($mode) .'View';
 	}
 	
 	// route for single request method
 	// @method - any http method expected as a function name
-	// @args = [$pattern, $callback, $template]
+	// @args = [$pattern, $model, $template]
 	public function __call($method, $args)
     {
 		if ($this->checkMethod($method)) {
 			if ($params = $this->matchPattern($args[0])) {
 				$template = $args[2]?? $this->template();
-				$this->view = 1;
-				$this->view->render($model);
-				echo 'route to do';
-				exit;
+				$this->render($template, $args[1]);
 			}
 		}
     }
 
 	// full static GET with one common model
-	public function hugo($page)
+	public function hugo($model)
     {
 		if ($this->checkMethod('GET')) {
 			if ($template = $this->template()) {
-				$this->view = new $this->viewClass($template);
-				$this->view->render($page);
-				exit;
+				$this->render($template, $model);
 			}
 		}
     }
 
 	// redirect $to if URI starts from $pattern
-	// @permanent defaults to 302 http code
+	// @$permanent defaults to 302 http code
 	public function redirect($pattern, $to, $permanent = true)
     {
 		if ($this->startPattern($pattern)) {
 			$code = $permanent? 301 : 302;
-			$this->view = Error_View::redirect($code, $to);
+			$this->view = ErrorView::redirect($code, $to);
 			exit;
 		}
 	}
 	
 	// HTTP status code & error page response if URI starts from $pattern
+/*/ perhaps not needed anymore...
 	public function error($pattern, $code)
     {
 		if ($this->startPattern($pattern)) {
-			$this->view = Error_View::status($code);
+			$this->view = ErrorView::status($code);
 			exit;
 		}
 	}
-
+*/
 
 // ==================
 	// checking http request method
@@ -138,4 +134,11 @@ class Route
 		return is_file($template)? $template : null;
 	}
 
+	private function render($template, $model)
+	{
+		$this->view = new $this->viewClass($template);
+		$this->view->render($model);
+		exit;
+	}
+	
 }

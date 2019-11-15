@@ -2,7 +2,8 @@
 
 namespace Andygrond\Hugonette;
 
-/* CSRF Token Session Management by Andygrond
+/* CSRF Token Session Management
+ * @author Andygrond 2019
  * inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
 **/
 
