@@ -65,7 +65,7 @@ class Route
 		if ($this->checkMethod($method)) {
 			if ($params = $this->matchPattern($args[0])) {
 				$template = $args[2]?? $this->template();
-				$this->render($template, $args[1]);
+				$this->render($args[1], $template);
 			}
 		}
     }
@@ -75,7 +75,7 @@ class Route
     {
 		if ($this->checkMethod('GET')) {
 			if ($template = $this->template()) {
-				$this->render($template, $model);
+				$this->render($model, $template);
 			}
 		}
     }
@@ -92,7 +92,6 @@ class Route
 	}
 	
 	// HTTP status code & error page response if URI starts from $pattern
-/*/ perhaps not needed anymore...
 	public function error($pattern, $code)
     {
 		if ($this->startPattern($pattern)) {
@@ -100,7 +99,6 @@ class Route
 			exit;
 		}
 	}
-*/
 
 // ==================
 	// checking http request method
@@ -134,7 +132,7 @@ class Route
 		return is_file($template)? $template : null;
 	}
 
-	private function render($template, $model)
+	private function render($model, $template)
 	{
 		$this->view = new $this->viewClass($template);
 		$this->view->render($model);
