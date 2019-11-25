@@ -15,7 +15,7 @@
     },
    "autoload": {
         "psr-4": {
-			"Andygrond\\Hugonette\\" : "lib"
+			"andygrond\\hugonette\\" : "lib"
         }
     }
 }
