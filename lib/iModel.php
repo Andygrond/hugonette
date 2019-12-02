@@ -9,6 +9,6 @@ namespace Andygrond\Hugonette;
 interface iModel
 {
 		
-    public function getModel($args = null);
+    public function getModel();
 
 }

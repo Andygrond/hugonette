@@ -12,8 +12,8 @@ abstract class aView
 		
 	// configuration data
 	private $cfg = [
-		'modelDir' => MODEL_DIR,
-		'modelNamespace' => MODEL_NS,
+		'modelDir' => LIB_DIR .'app/model/',
+		'modelNamespace' => '\\App\\Model\\',
 	];
 
 	public function __construct($template)
@@ -24,12 +24,11 @@ abstract class aView
 
 	// render the previously declared template
 	// @$page identifies source of page model data
-    // extending classes must define this method
+    // extended classes must define this method
     abstract public function render($page);
 	
 	// resolve symbolic model notation
 	// return instantiated model object
-	// TODO! now only class name is valid
 	final public function pageSource($symbol)
 	{
 		require $this->cfg['modelDir'] .$symbol .'.php';
