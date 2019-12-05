@@ -11,7 +11,7 @@ class ErrorView
 	// configuration data
 	private static $cfg = [
 		'requestBase' => HOME_URI,
-		'publishBase' => HUGO_DIR,
+		'publishBase' => STATIC_DIR,
 		'errorTemplate' => ERROR_PAGE,
 		'errorEngine' => ERROR_ENGINE,
 		'lang' => LANG,

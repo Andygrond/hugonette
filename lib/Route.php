@@ -15,7 +15,7 @@ class Route
 	
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
-		'publishBase' => HUGO_DIR,
+		'publishBase' => STATIC_DIR,
 	];
 
 
