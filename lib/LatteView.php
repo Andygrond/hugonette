@@ -23,6 +23,10 @@ class LatteView extends aView
 	// use latte template engine
 		$latte = new \Latte\Engine;
 		$latte->setTempDirectory($this->cfg['cacheLatte']);
+		
+		if (!$this->template) {
+			$page->status(404);
+		}
 		$latte->render($this->template, $page->getModel());
 	}
 

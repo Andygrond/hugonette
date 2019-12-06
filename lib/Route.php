@@ -9,13 +9,15 @@ namespace Andygrond\Hugonette;
 class Route
 {
 	private $view = null;		// view object
-	private $viewClass;		// view class name
+	private $template;			// base template
+	private $viewMode = 'plain';	// view mode name
 	private $requestPath;	// path of file requested
 	private $requestFile;		// file requested
 	
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
 		'publishBase' => STATIC_DIR,
+		'errorTemplate' => ERROR_PAGE,
 	];
 
 
@@ -36,7 +38,6 @@ class Route
 			$path = substr($path, strlen($this->cfg['requestBase']));
 		}
 
-		$this->viewMode('plain');
 		$this->requestFile = $file;
 		$this->requestPath = trim($path, '/');
 	}
@@ -52,9 +53,9 @@ class Route
 
 	// set the mode of view for the subsequent routes
 	// view modes: plain - latte - json
-	public function viewMode($mode)
+	public function setViewMode($mode)
 	{
-		$this->viewClass = __NAMESPACE__ .'\\' .ucwords($mode) .'View';
+		$this->viewMode = ucwords($mode);
 	}
 	
 	// route for single request method
@@ -64,8 +65,8 @@ class Route
     {
 		if ($this->checkMethod($method)) {
 			if ($params = $this->matchPattern($args[0])) {
-				$template = $args[2]?? $this->template();
-				$this->render($args[1], $template);
+				$this->template = $args[2]?? $this->realTemplate();
+				$this->render($args[1]);
 			}
 		}
     }
@@ -74,8 +75,8 @@ class Route
 	public function hugo($model)
     {
 		if ($this->checkMethod('GET')) {
-			if ($template = $this->template()) {
-				$this->render($model, $template);
+			if ($this->template = $this->realTemplate()) {
+				$this->render($model);
 			}
 		}
     }
@@ -125,16 +126,17 @@ class Route
 	}
 
 	// get template file name if exist
-	private function template()
+	private function realTemplate()
 	{
 		$path = $this->requestPath? $this->requestPath .'/' : '';
 		$template = $this->cfg['publishBase'] .$path .$this->requestFile;
 		return is_file($template)? $template : null;
 	}
 
-	private function render($model, $template)
+	private function render($model)
 	{
-		$this->view = new $this->viewClass($template);
+		$viewClass = __NAMESPACE__ .'\\' .$this->viewMode .'View';
+		$this->view = new $viewClass($this->template);
 		$this->view->render($model);
 		exit;
 	}
