@@ -12,8 +12,7 @@ abstract class aView
 		
 	// configuration data
 	private $cfg = [
-		'modelDir' => LIB_DIR .'app/model/',
-		'modelNamespace' => '\\App\\Model\\',
+		'errorTemplate' => ERROR_PAGE,
 	];
 
 	public function __construct($template)
@@ -22,18 +21,15 @@ abstract class aView
 		bdump($template, 'hugo template');
 	}
 
-	// render the previously declared template
+	protected function getTemplate()
+	{
+		$template = $this->template?? $this->cfg['errorTemplate'];
+		return STATIC_DIR .$template;
+	}
+	
+	// render previously declared template
 	// @$page identifies source of page model data
     // extended classes must define this method
     abstract public function render($page);
 	
-	// resolve symbolic model notation
-	// return instantiated model object
-	final public function pageSource($symbol)
-	{
-		require $this->cfg['modelDir'] .$symbol .'.php';
-		$className = $this->cfg['modelNamespace'] .$symbol;
-		return new $className();
-	}
-
 }

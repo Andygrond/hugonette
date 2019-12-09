@@ -46,7 +46,8 @@ class Route
 	public function __destruct()
 	{
 		if ($this->view === null) {	// page has not been found till now
-			ErrorView::status(404);
+//			ErrorView::status(404);
+			$this->render('Homepage');
 		}
 		Log::close();
 	}

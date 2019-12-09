@@ -6,9 +6,9 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2019
 **/
 
-interface iModel
+abstract class aModel
 {
-		
-    public function getModel();
+
+    abstract public function getModel();
 
 }

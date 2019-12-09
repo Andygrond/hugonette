@@ -11,23 +11,20 @@ class LatteView extends aView
 
 	// configuration data
 	private $cfg = [
-		'cacheLatte' => TEMP_DIR .'/latte',
+		'cacheLatte' => TEMP_DIR .'latte',
 	];
 
 	// render declared template using $model class
 	public function render($model)
 	{
 	// use data model class
-		$page = $this->pageSource($model);
+		$page = PageFactory::createPage($model);
 
 	// use latte template engine
 		$latte = new \Latte\Engine;
 		$latte->setTempDirectory($this->cfg['cacheLatte']);
 		
-		if (!$this->template) {
-			$page->status(404);
-		}
-		$latte->render($this->template, $page->getModel());
+		$latte->render($this->getTemplate(), $page->getModel());
 	}
 
 }
