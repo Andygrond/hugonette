@@ -46,8 +46,7 @@ class Route
 	public function __destruct()
 	{
 		if ($this->view === null) {	// page has not been found till now
-//			ErrorView::status(404);
-			$this->render('Homepage');
+			$this->render();
 		}
 		Log::close();
 	}
@@ -72,8 +71,8 @@ class Route
 		}
     }
 
-	// full static GET with one common model
-	public function hugo($model)
+	// full static GET with one common model (all static pages)
+	public function common($model)
     {
 		if ($this->checkMethod('GET')) {
 			if ($this->template = $this->realTemplate()) {
@@ -88,19 +87,10 @@ class Route
     {
 		if ($this->startPattern($pattern)) {
 			$code = $permanent? 301 : 302;
-			$this->view = ErrorView::redirect($code, $to);
-			exit;
+			$this->redirection($code, $to);
 		}
 	}
 	
-	// HTTP status code & error page response if URI starts from $pattern
-	public function error($pattern, $code)
-    {
-		if ($this->startPattern($pattern)) {
-			$this->view = ErrorView::status($code);
-			exit;
-		}
-	}
 
 // ==================
 	// checking http request method
@@ -126,7 +116,7 @@ class Route
 		return (strpos($this->requestPath, $pattern) === 0);
 	}
 
-	// get template file name if exist
+	// get template file name if exists
 	private function realTemplate()
 	{
 		$path = $this->requestPath? $this->requestPath .'/' : '';
@@ -134,11 +124,24 @@ class Route
 		return is_file($template)? $template : null;
 	}
 
-	private function render($model)
+	private function redirection($code, $to)
+	{
+		if ($to[0] != '/' && strpos($to, '//') === false) {
+			$to = self::$cfg['requestBase'] .$to;
+		}
+		Log::info($code .' Redirected to: ' .$to);
+		header('Location: ' .$to, true, $code);
+		$this->view = true;
+		exit;
+	}
+	
+
+	private function render($model = 'Homepage')
 	{
 		$viewClass = __NAMESPACE__ .'\\' .$this->viewMode .'View';
-		$this->view = new $viewClass($this->template);
-		$this->view->render($model);
+		$view = new $viewClass($this->template);
+		$view->render(PageFactory::createPage($model));
+		$this->view = true;
 		exit;
 	}
 	
