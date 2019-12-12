@@ -6,7 +6,7 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2019
 **/
 
-class Error
+class Status
 {
 	// configuration data
 	private static $cfg = [

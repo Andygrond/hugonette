@@ -8,16 +8,15 @@ namespace Andygrond\Hugonette;
 
 class Route
 {
-	private $view = null;		// view object
-	private $template;			// base template
+	private $rendered = false;		// page was rendered
+	private $template;					// base template
 	private $viewMode = 'plain';	// view mode name
-	private $requestPath;	// path of file requested
-	private $requestFile;		// file requested
+	private $requestPath;			// path of file requested
+	private $requestFile;				// file requested
 	
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
 		'publishBase' => STATIC_DIR,
-		'errorTemplate' => ERROR_PAGE,
 	];
 
 
@@ -45,10 +44,17 @@ class Route
 	// shutdown handler
 	public function __destruct()
 	{
-		if ($this->view === null) {	// page has not been found till now
-			$this->render();
+		if (!$this->rendered) {	// page has not been routed till now
+			$this->clean();
 		}
 		Log::close();
+	}
+	
+	// not routed pages - send 404
+	public function clean()
+	{
+		$this->template = $this->cfg['publishBase'] .'index.html';
+		$this->render('Error:_404');
 	}
 
 	// set the mode of view for the subsequent routes
@@ -65,14 +71,14 @@ class Route
     {
 		if ($this->checkMethod($method)) {
 			if ($params = $this->matchPattern($args[0])) {
-				$this->template = $args[2]?? $this->realTemplate();
-				$this->render($args[1]);
+				$this->template = @$args[2]? $this->getTemplate($args[2]) : $this->realTemplate();
+				$this->render($args[1], $params);
 			}
 		}
     }
 
 	// full static GET with one common model (all static pages)
-	public function common($model)
+	public function pages($model)
     {
 		if ($this->checkMethod('GET')) {
 			if ($this->template = $this->realTemplate()) {
@@ -104,10 +110,16 @@ class Route
 	{
 		$pattern = '/^' . str_replace('/', '\/', $pattern) . '$/';
 		if (preg_match($pattern, '/' .$this->requestPath, $params) === 1) {
-			bdump($params, 'params');
 			return $params;
 		}
 		return false;
+	}
+	
+	// get params of current page
+	private function getParams()
+	{
+		preg_match('@^[^/]+$@', $this->requestPath, $params);
+		return $params;
 	}
 	
 	// check pattern starting from
@@ -116,11 +128,21 @@ class Route
 		return (strpos($this->requestPath, $pattern) === 0);
 	}
 
-	// get template file name if exists
+	// get template file name from URI if exists
 	private function realTemplate()
 	{
 		$path = $this->requestPath? $this->requestPath .'/' : '';
 		$template = $this->cfg['publishBase'] .$path .$this->requestFile;
+		return is_file($template)? $template : null;
+	}
+
+	// get template file name from given string if exists
+	private function getTemplate($path)
+	{
+		if (substr($path, -1) == '/') {
+			$path .= 'index.html';
+		}
+		$template = $this->cfg['publishBase'] .ltrim($path, '/');
 		return is_file($template)? $template : null;
 	}
 
@@ -131,17 +153,20 @@ class Route
 		}
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);
-		$this->view = true;
+		$this->rendered = true;
 		exit;
 	}
 	
-
-	private function render($model = 'Homepage')
+	// instantiate view class and render the page
+	private function render($model, $params = [])
 	{
+		if (!$params) {
+			$params = $this->getParams();
+		}
 		$viewClass = __NAMESPACE__ .'\\' .$this->viewMode .'View';
-		$view = new $viewClass($this->template);
+		$view = new $viewClass($this->template, $params);
 		$view->render(PageFactory::createPage($model));
-		$this->view = true;
+		$this->rendered = true;
 		exit;
 	}
 	

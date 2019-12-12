@@ -9,11 +9,14 @@ namespace Andygrond\Hugonette;
 abstract class aView
 {
 	protected $template;
+	protected $params;
 		
-	public function __construct($template)
+	public function __construct($template, $params)
 	{
 		$this->template = $template;
-		bdump($template, 'hugo template');
+		$this->params = $params;
+		
+		bdump($template, 'template');
 	}
 
 	// render previously declared template

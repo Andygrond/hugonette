@@ -11,8 +11,7 @@ class LatteView extends aView
 
 	// configuration data
 	private $cfg = [
-		'cacheLatte' => TEMP_DIR .'latte',
-		'errorTemplate' => ERROR_PAGE,
+		'cacheLatte' => LIB_DIR .'temp/latte',
 	];
 
 	// render declared template using $model class
@@ -20,13 +19,8 @@ class LatteView extends aView
 	{
 		$latte = new \Latte\Engine;
 		$latte->setTempDirectory($this->cfg['cacheLatte']);
-		
-		if (!$this->template) {
-			$this->template = $this->cfg['errorTemplate'];
-			$page->status(404);
-		}
 
-		$latte->render($this->template, $page->getModel());
+		$latte->render($this->template, $page->getModel($this->params));
 	}
 
 }
