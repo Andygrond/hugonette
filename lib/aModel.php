@@ -9,7 +9,7 @@ namespace Andygrond\Hugonette;
 abstract class aModel
 {
 
-//	protected $model = [];
+	protected $shared = [];		// shared model components
 	protected $method;
 	protected $params;
 
@@ -22,9 +22,10 @@ abstract class aModel
 	public function getModel($params = null)
 	{
 		$this->params = $params;
-		bdump($params, 'params-model');
+		bdump($params, 'params');
+		bdump ($shared, 'shared');
 		
-		return $this->{$this->method}();
+		return $this->{$this->method}() + $this->shared;
 	}
 	
 }

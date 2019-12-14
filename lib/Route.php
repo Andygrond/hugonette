@@ -45,7 +45,7 @@ class Route
 	public function __destruct()
 	{
 		if (!$this->rendered) {	// page has not been routed till now
-			$this->clean();
+//			$this->clean();
 		}
 		Log::close();
 	}
@@ -108,7 +108,7 @@ class Route
 	// check pattern matching
 	private function matchPattern($pattern)
 	{
-		$pattern = '/^' . str_replace('/', '\/', $pattern) . '$/';
+		$pattern = '@^' .$pattern .'$@';
 		if (preg_match($pattern, '/' .$this->requestPath, $params) === 1) {
 			return $params;
 		}
