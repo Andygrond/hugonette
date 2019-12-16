@@ -11,13 +11,13 @@ final class PageFactory
 	];
 	
 	// return instantiated model object
-	public static function createPage($model)
+	public static function createPage($model, $params)
 	{
 		[ $class, $method ] = explode(':', $model .':default');
 		bdump($class .':' .$method, 'model class');
 		
 		$class = self::$cfg['modelNamespace'] .ucwords($class);
-		return new $class($method);
+		return new $class($method, $params);
 	}
 
 }

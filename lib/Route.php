@@ -82,7 +82,7 @@ class Route
     {
 		if ($this->checkMethod('GET')) {
 			if ($this->template = $this->realTemplate()) {
-				$this->render($model);
+				$this->render($model, $this->getParams());
 			}
 		}
     }
@@ -160,12 +160,9 @@ class Route
 	// instantiate view class and render the page
 	private function render($model, $params = [])
 	{
-		if (!$params) {
-			$params = $this->getParams();
-		}
 		$viewClass = __NAMESPACE__ .'\\' .$this->viewMode .'View';
-		$view = new $viewClass($this->template, $params);
-		$view->render(PageFactory::createPage($model));
+		$view = new $viewClass($this->template);
+		$view->render(PageFactory::createPage($model, $params));
 		$this->rendered = true;
 		exit;
 	}

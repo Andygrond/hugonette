@@ -20,7 +20,9 @@ class LatteView extends aView
 		$latte = new \Latte\Engine;
 		$latte->setTempDirectory($this->cfg['cacheLatte']);
 
-		$latte->render($this->template, $page->getModel($this->params));
+		$model = $page->getModel();
+		bdump($model, 'model');
+		$latte->render($this->template, $model);
 	}
 
 }

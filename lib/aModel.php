@@ -10,22 +10,23 @@ abstract class aModel
 {
 
 	protected $shared = [];		// shared model components
-	protected $method;
-	protected $params;
+	protected $params = [];	// page parameters
+	protected $method;			// routed model methods
 
-	public function __construct($method = 'default')
+	public function __construct($method, $params)
 	{
+		bdump($params, 'params');
 		$this->method = $method;
+		$this->assign($params);
 	}
 	
 	// render declared template using $model class
-	public function getModel($params = null)
+	public function getModel()
 	{
-		$this->params = $params;
-		bdump($params, 'params');
-		bdump ($shared, 'shared');
-		
 		return $this->{$this->method}() + $this->shared;
 	}
+	
+	// collect and name all URL, GET, POST params
+	abstract protected function assign($params);
 	
 }
