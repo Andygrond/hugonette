@@ -11,8 +11,9 @@ class Route
 	private $rendered = false;		// page was rendered
 	private $template;					// base template
 	private $viewMode = 'plain';	// view mode name
+	private $publishBase;			// path to hugo public visible without trailing slash
+	private $requestBase;			// request base folder
 	private $requestPath;			// path of file requested
-	private $requestFile;				// file requested
 	
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
@@ -22,23 +23,26 @@ class Route
 
 	public function __construct()
 	{
+		$this->publishBase = rtrim($this->cfg['publishBase'], '/');
+		$this->requestBase = rtrim($this->cfg['requestBase'], '/');
+
 		$req = explode('?', urldecode($_SERVER['REQUEST_URI']));
-		if (substr($req[0], -5) == '.html') {
-			$pi = pathinfo($req[0]);
-			$file = $pi['basename'];
-			$path = $pi['dirname'];
-			
-		} else {
-			$file = 'index.html';
-			$path = $req[0];
+		$file = 'index.html';
+		$path = $req[0];
+
+		if ($path[strlen($path)-1] != '/') {
+			$path .= '/';
+		}
+		if (strpos($path, $this->requestBase) === 0) {
+			$path = substr($path, strlen($this->requestBase));
 		}
 
-		if (strpos($path, $this->cfg['requestBase']) === 0) {
-			$path = substr($path, strlen($this->cfg['requestBase']));
-		}
-
-		$this->requestFile = $file;
-		$this->requestPath = trim($path, '/');
+		$this->requestPath = $path;
+		bdump([
+			'publishBase' => $this->publishBase,
+			'requestBase' => $this->requestBase,
+			'requestPath' => $this->requestPath,
+		]);
 	}
 	
 	// shutdown handler
@@ -53,8 +57,8 @@ class Route
 	// not routed pages - send 404
 	public function clean()
 	{
-		$this->template = $this->cfg['publishBase'] .'index.html';
-		$this->render('Error:_404');
+		$this->template = $this->publishBase .'/index.html';
+		$this->render('Error:_404', $this->realParams());
 	}
 
 	// set the mode of view for the subsequent routes
@@ -82,7 +86,7 @@ class Route
     {
 		if ($this->checkMethod('GET')) {
 			if ($this->template = $this->realTemplate()) {
-				$this->render($model, $this->getParams());
+				$this->render($model, $this->realParams());
 			}
 		}
     }
@@ -91,7 +95,7 @@ class Route
 	// @$permanent defaults to 302 http code
 	public function redirect($pattern, $to, $permanent = true)
     {
-		if ($this->startPattern($pattern)) {
+		if (strpos($this->requestPath, $pattern) === 0) {
 			$code = $permanent? 301 : 302;
 			$this->redirection($code, $to);
 		}
@@ -109,47 +113,38 @@ class Route
 	private function matchPattern($pattern)
 	{
 		$pattern = '@^' .$pattern .'$@';
-		if (preg_match($pattern, '/' .$this->requestPath, $params) === 1) {
+		if (preg_match($pattern, $this->requestPath, $params) === 1) {
 			return $params;
 		}
 		return false;
 	}
 	
-	// get params of current page
-	private function getParams()
-	{
-		preg_match('@^[^/]+$@', $this->requestPath, $params);
-		return $params;
-	}
-	
-	// check pattern starting from
-	private function startPattern($pattern)
-	{
-		return (strpos($this->requestPath, $pattern) === 0);
-	}
-
 	// get template file name from URI if exists
 	private function realTemplate()
 	{
-		$path = $this->requestPath? $this->requestPath .'/' : '';
-		$template = $this->cfg['publishBase'] .$path .$this->requestFile;
+		$template = $this->publishBase .$this->requestPath .'index.html';
 		return is_file($template)? $template : null;
+	}
+
+	// get params from URI
+	private function realParams()
+	{
+		$params = explode('/', $this->requestPath);
+		$params[0] = $this->requestPath;
+		return $params;
 	}
 
 	// get template file name from given string if exists
 	private function getTemplate($path)
 	{
-		if (substr($path, -1) == '/') {
-			$path .= 'index.html';
-		}
-		$template = $this->cfg['publishBase'] .ltrim($path, '/');
+		$template = $this->publishBase .$path .'index.html';
 		return is_file($template)? $template : null;
 	}
 
 	private function redirection($code, $to)
 	{
 		if ($to[0] != '/' && strpos($to, '//') === false) {
-			$to = self::$cfg['requestBase'] .$to;
+			$to = $this->cfg['requestBase'] .$to;
 		}
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);
