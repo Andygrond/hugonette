@@ -13,6 +13,11 @@ abstract class aModel
 	protected $params = [];	// page parameters
 	protected $method;			// routed model methods
 
+	protected $cfg = [		// configuration data
+		'publishBase' => STATIC_DIR,
+		'errorBlock' => ERROR_BLOCK,
+	];
+
 	public function __construct($method, $params)
 	{
 		bdump($params, 'params');
