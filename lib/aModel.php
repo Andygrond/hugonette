@@ -22,7 +22,7 @@ abstract class aModel
 	{
 		bdump($params, 'params');
 		$this->method = $method;
-		$this->assign($params);
+		$this->prepare($params);
 	}
 	
 	// render declared template using $model class
@@ -32,6 +32,6 @@ abstract class aModel
 	}
 	
 	// collect and name all URL, GET, POST params
-	abstract protected function assign($params);
+	abstract protected function prepare($params);
 	
 }
