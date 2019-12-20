@@ -2,71 +2,86 @@
 
 namespace Andygrond\Hugonette;
 
-/* Simple logger for Hugonette
+/* Simple logger for Tracy debugger
  * @author Andygrond 2019
- * Dependency: https://github.com/donatj/PhpUserAgent
+ * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
+
+// todo: error levels and mailing: https://doc.nette.org/en/2.1/debugging
+// todo: set warnings in model
+// todo: send job $elapsed time somewhere
+
+use Tracy\Debugger;
 
 class Log
 {
-	public static $log_name;		// nazwa pliku logu
-	public static $screen;			// wyprowadzamy na ekran błędy i ostrzeżenia
-	public static $start;				// czas początkowy
-	public static $job = '';			// nazwa wykonanego zadania
-	public static $collection = '';	// wiadomości do późniejszego zbiorowego zapisania w logu
+	private static $log_name;		// nazwa pliku logu
+	private static $job = '';			// nazwa wykonanego zadania
 
-// start logger
-	public static function set($name = 'common')
+	private static $collection = [];	// wiadomości do późniejszego zbiorowego zapisania w logu
+	private static $jobStack = [];	// job names stack
+
+	// configuration data
+	private static $cfg = [
+		'logDir' => __DIR__ . '/../log/',
+	];
+
+// set log file name and Tracy debugger mode
+// default log file name = log/error.log
+// default mode = IP detection
+	public static function set($name, $mode = '')
 	{
-		self::$start = $_SERVER['REQUEST_TIME_FLOAT'];
-		self::$screen = isset($_GET['debug']);
-		self::$log_name = LOG_DIR .$name .'.log';
-		ini_set("error_log", self::$log_name);
+		$log_name = $this->cfg['logDir'] .$name .'.log';
+//		ini_set("error_log", $log_name);
 		
-		if (!file_exists(self::$log_name)) {
-			touch(self::$log_name);		// jesli nie ma pliku, załóż go
-			chmod(self::$log_name, 0666);		// nadaj uprawnienia dla cron i usera
+		if ($mode) {
+			$log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+		} else {
+			$log_mode = Debugger::DETECT;
 		}
+		
+		if (!file_exists($log_name)) {
+			touch($log_name);		// jesli nie ma pliku, załóż go
+			chmod($log_name, 0666);		// nadaj uprawnienia dla cron i usera
+		}
+
+		Debugger::enable($log_mode, $log_name);
 	}
 
 // set job name
 	public static function job($name)
 	{
 		$name = ucfirst($name);
+		self::$jobStack[] = $name;
+		self::$job = "$name: ";
+		Debugger::timer($name);
+	}
+
+// reset old job name
+	public static function jobDone()
+	{
+		$name = array_pop(self::$jobStack);
+		$elapsed = Debugger::timer($name);
+		// todo: send $elapsed somewhere
+
+		$name = end(self::$jobStack);
 		self::$job = "$name: ";
 	}
 
-// zwróć sformatowaną wiadomość (do pliku) oraz wyprowadź ją na ekran w uproszczonej formie
-	public static function prepare($record, $data)
-	{
-		if ($data) {
-			$record .= ': ' .self::format($data);
-		}
-		$record = "\t" .self::$job .$record ."\n";
-
-		if (self::$screen) {
-			echo str_replace(['\\', '"'], '', nl2br($record));
-		}
-		return $record;
-	}
-	
-// sformatuj strukturę danych jako string wygodny w czytaniu
-	private static function format($data)
-	{
-		return strtr(json_encode($data, JSON_UNESCAPED_UNICODE), ['"' => '']);
-	}
-
-// loguj zdarzenie na ekranie i zbieraj do późniejszego zapisania w pliku
+// zarejestruj wiadomość i zbieraj do późniejszego zapisania w pliku
 	public static function collect($message, $data = [])
 	{
-		self::$collection .= self::prepare($message, $data);
+		self::$collection[] = [
+			'message' => $message,
+			'data' => $data,
+		];
+		
 	}
 
 // wyprowadź error i zakończ działanie programu
 	public static function error($record, $data = [])
 	{
-		self::close('ERROR: ' .$record, $data);
-		exit;
+		self::collect('ERROR: ' .$record, $data);
 	}
 
 // wyprowadź warning
@@ -79,15 +94,6 @@ class Log
 	public static function info($record, $data = [])
 	{
 		self::collect($record, $data);
-	}
-
-// get execution time in miliseconds
-	public static function timer()
-	{
-		$delta = microtime(true) - self::$start;
-		$precise = ($delta <0.1)? 1 : 0;
-		$delta = round(1000*$delta, $precise);
-		return $delta;
 	}
 
 	public static function close($info = '', $data = [])
@@ -103,10 +109,12 @@ class Log
 			self::collect($info, $data);
 		}
 		if (self::$collection) {
-			$record .= "\n" .self::$collection;
+			foreach (self::$collection as $item) {
+				$record .= "\n" .$item['message'] .' | ' .json_encode($item['data']);
+			}
 			self::$collection = '';
 		}
-		file_put_contents(self::$log_name, $record ."\n", FILE_APPEND | LOCK_EX);
+		Debugger::log($record ."\n", FILE_APPEND | LOCK_EX);
 	}
 	
 }
