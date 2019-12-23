@@ -8,22 +8,21 @@ namespace Andygrond\Hugonette;
 **/
 
 // todo: error levels and mailing: https://doc.nette.org/en/2.1/debugging
-// todo: set warnings in model
 // todo: send job $elapsed time somewhere
 
 use Tracy\Debugger;
+use Tracy\OutputDebugger;
 
 class Log
 {
-	private static $log_name;		// nazwa pliku logu
-	private static $job = '';			// nazwa wykonanego zadania
-
-	private static $collection = [];	// wiadomości do późniejszego zbiorowego zapisania w logu
-	private static $jobStack = [];	// job names stack
+	private static $collection = [];	// messages waiting for output to file
+	private static $viewErrors = [];	// messages collected to be passed to view
+	private static $jobStack = [];		// job names stack
 
 	// configuration data
 	private static $cfg = [
-		'logDir' => __DIR__ . '/../log/',
+		'logDir' => LIB_DIR .'log/',
+		'viewErrorName' => 'VIEW',
 	];
 
 // set log file name and Tracy debugger mode
@@ -31,21 +30,46 @@ class Log
 // default mode = IP detection
 	public static function set($name, $mode = '')
 	{
-		$log_name = $this->cfg['logDir'] .$name .'.log';
-//		ini_set("error_log", $log_name);
-		
 		if ($mode) {
 			$log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
 		} else {
 			$log_mode = Debugger::DETECT;
 		}
 		
-		if (!file_exists($log_name)) {
-			touch($log_name);		// jesli nie ma pliku, załóż go
-			chmod($log_name, 0666);		// nadaj uprawnienia dla cron i usera
+		Debugger::enable($log_mode, self::$cfg['logDir']);
+		Debugger::$logSeverity = E_NOTICE | E_WARNING;
+	}
+
+// output the message 
+// $args = [record, data]
+	public static function __callStatic($type, $args)
+	{
+		$type = strtoupper($type);
+		if ($type == self::$cfg['viewErrorName']) {
+			self::$viewErrors[] = $args[0];
 		}
 
-		Debugger::enable($log_mode, $log_name);
+		$message = $type .': ';
+		if (self::$jobStack) {
+			$message .= end(self::$jobStack) .': ';
+		}
+
+		self::$collection[] = [
+			'message' => $message .$args[0],
+			'data' => isset($args[1])? json_encode($args[1]) : '',
+		];
+	}
+
+// set email address for error mailer
+	public static function email($email)
+	{
+		Debugger::$email = $email;
+	}
+
+// enable Tracy output debugger
+	public static function output()
+	{
+		OutputDebugger::enable();
 	}
 
 // set job name
@@ -53,7 +77,6 @@ class Log
 	{
 		$name = ucfirst($name);
 		self::$jobStack[] = $name;
-		self::$job = "$name: ";
 		Debugger::timer($name);
 	}
 
@@ -63,58 +86,25 @@ class Log
 		$name = array_pop(self::$jobStack);
 		$elapsed = Debugger::timer($name);
 		// todo: send $elapsed somewhere
-
-		$name = end(self::$jobStack);
-		self::$job = "$name: ";
 	}
 
-// zarejestruj wiadomość i zbieraj do późniejszego zapisania w pliku
-	public static function collect($message, $data = [])
+// put all collected messages to log file
+	public static function close()
 	{
-		self::$collection[] = [
-			'message' => $message,
-			'data' => $data,
-		];
-		
-	}
-
-// wyprowadź error i zakończ działanie programu
-	public static function error($record, $data = [])
-	{
-		self::collect('ERROR: ' .$record, $data);
-	}
-
-// wyprowadź warning
-	public static function warning($record, $data = [])
-	{
-		self::collect('WARNING: ' .$record, $data);
-	}
-
-// wyprowadź info
-	public static function info($record, $data = [])
-	{
-		self::collect($record, $data);
-	}
-
-	public static function close($info = '', $data = [])
-	{
-		$record = date('Y-m-d H:i:s ') .$_SERVER['REMOTE_ADDR'] .' [' .self::timer() .' ms] ';
+		$record = '[' .self::timer() .' ms] ' .$_SERVER['REMOTE_ADDR'];
 		if (is_callable('parse_user_agent')) {
 			$agent = parse_user_agent();
-			$record .= $agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'] .' ';
+			$record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'];
 		}
-		$record .= $_SERVER['REQUEST_METHOD'] .' ' .$_SERVER['REQUEST_URI'];
+		$record .= ' ' .$_SERVER['REQUEST_METHOD'];
 		
-		if ($info) {
-			self::collect($info, $data);
-		}
 		if (self::$collection) {
 			foreach (self::$collection as $item) {
-				$record .= "\n" .$item['message'] .' | ' .json_encode($item['data']);
+				$record .= "\n" .$item['message'] .' | ' .$item['data'];
 			}
 			self::$collection = '';
 		}
-		Debugger::log($record ."\n", FILE_APPEND | LOCK_EX);
+		Debugger::log($record);
 	}
 	
 }

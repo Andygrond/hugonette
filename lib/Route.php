@@ -48,14 +48,11 @@ class Route
 	// shutdown handler
 	public function __destruct()
 	{
-		if (!$this->rendered) {	// page has not been routed till now
-//			$this->clean();
-		}
 		Log::close();
 	}
 	
-	// not routed pages - send 404
-	public function clean()
+	// not routed pages - show status 404
+	public function notFound()
 	{
 		$this->template = $this->publishBase .'/index.html';
 		$this->render('Error:_404', $this->realParams());
