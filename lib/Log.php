@@ -18,6 +18,7 @@ class Log
 	private static $collection = [];	// messages waiting for output to file
 	private static $viewErrors = [];	// messages collected to be passed to view
 	private static $jobStack = [];		// job names stack
+	private static $wasSet = false;	// log is active
 
 	// configuration data
 	private static $cfg = [
@@ -36,6 +37,7 @@ class Log
 			$log_mode = Debugger::DETECT;
 		}
 		
+		self::$wasSet = true;
 		Debugger::enable($log_mode, self::$cfg['logDir']);
 		Debugger::$logSeverity = E_NOTICE | E_WARNING;
 	}
@@ -91,6 +93,10 @@ class Log
 // put all collected messages to log file
 	public static function close()
 	{
+		if (!self::$wasSet) {
+			return;
+		}
+		
 		$record = '[' .self::timer() .' ms] ' .$_SERVER['REMOTE_ADDR'];
 		if (is_callable('parse_user_agent')) {
 			$agent = parse_user_agent();

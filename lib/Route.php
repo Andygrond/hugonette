@@ -48,7 +48,7 @@ class Route
 	// shutdown handler
 	public function __destruct()
 	{
-		Log::close();
+		Log::close();	// effective only when set
 	}
 	
 	// not routed pages - show status 404
@@ -58,7 +58,7 @@ class Route
 		$this->render('Error:_404', $this->realParams());
 	}
 
-	// set the mode of view for the subsequent routes
+	// set view mode for the subsequent routes
 	// view modes: plain - latte - json
 	public function setViewMode($mode)
 	{
