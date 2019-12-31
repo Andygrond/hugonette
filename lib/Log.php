@@ -22,8 +22,9 @@ class Log
 
 	// configuration data
 	private static $cfg = [
-		'logDir' => LIB_DIR .'log/',
+//		'logDir' => LIB_DIR .'log/',
 		'viewErrorName' => 'VIEW',
+		'allowedTypes' => [ 'warning', 'error', 'info' ],
 	];
 
 // set log file name and Tracy debugger mode
@@ -38,7 +39,8 @@ class Log
 		}
 		
 		self::$wasSet = true;
-		Debugger::enable($log_mode, self::$cfg['logDir']);
+//		Debugger::enable($log_mode, self::$cfg['logDir']);
+		Debugger::enable($log_mode);
 		Debugger::$logSeverity = E_NOTICE | E_WARNING;
 	}
 
@@ -46,7 +48,11 @@ class Log
 // $args = [record, data]
 	public static function __callStatic($type, $args)
 	{
+		if (!in_array($type, self::$cfg['allowedTypes'])) {
+			throw new \Exception('Log message type not allowed: ' .$type);
+		}
 		$type = strtoupper($type);
+		
 		if ($type == self::$cfg['viewErrorName']) {
 			self::$viewErrors[] = $args[0];
 		}

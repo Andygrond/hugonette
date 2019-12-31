@@ -18,6 +18,7 @@ class Route
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
 		'publishBase' => STATIC_DIR,
+		'allowedMethods' => ['get', 'put', 'post' ],
 	];
 
 
@@ -70,6 +71,10 @@ class Route
 	// @args = [$pattern, $model, $template]
 	public function __call($method, $args)
     {
+		if (!in_array($method, $this->cfg['allowedMethods'])) {
+			throw new \Exception('Router HTTP method not allowed: ' .$method);
+		}
+
 		if ($this->checkMethod($method)) {
 			if ($params = $this->matchPattern($args[0])) {
 				$this->template = @$args[2]? $this->getTemplate($args[2]) : $this->realTemplate();
