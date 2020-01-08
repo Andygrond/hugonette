@@ -14,8 +14,6 @@ final class PageFactory
 	public static function createPage($model, $params)
 	{
 		[ $class, $method ] = explode(':', $model .':default');
-		bdump($class .':' .$method, 'model class');
-		
 		$class = self::$cfg['modelNamespace'] .ucwords($class);
 		return new $class($method, $params);
 	}

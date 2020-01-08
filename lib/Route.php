@@ -8,12 +8,12 @@ namespace Andygrond\Hugonette;
 
 class Route
 {
-	private $rendered = false;		// page was rendered
-	private $template;					// base template
-	private $viewMode = 'plain';	// view mode name
-	private $publishBase;			// path to hugo public visible without trailing slash
-	private $requestBase;			// request base folder
-	private $requestPath;			// path of file requested
+	private $rendered = false;	// page was rendered
+	private $template;				// base template
+	private $viewMode;			// view mode name
+	private $requestBase;		// request base folder
+	private $publishBase;		// path to hugo public visible without trailing slash
+	private $requestPath;		// path of file requested
 	
 	private $cfg = [		// configuration data
 		'requestBase' => HOME_URI,
@@ -39,11 +39,6 @@ class Route
 		}
 
 		$this->requestPath = $path;
-		bdump([
-			'publishBase' => $this->publishBase,
-			'requestBase' => $this->requestBase,
-			'requestPath' => $this->requestPath,
-		]);
 	}
 	
 	// shutdown handler
@@ -71,17 +66,17 @@ class Route
 	// @args = [$pattern, $model, $template]
 	public function __call($method, $args)
     {
-		if (!in_array($method, $this->cfg['allowedMethods'])) {
-			throw new \Exception('Router HTTP method not allowed: ' .$method);
-		}
-
-		if ($this->checkMethod($method)) {
-			if ($params = $this->matchPattern($args[0])) {
-				$this->template = @$args[2]? $this->getTemplate($args[2]) : $this->realTemplate();
-				$this->render($args[1], $params);
+		if (in_array($method, $this->cfg['allowedMethods'])) {
+			if ($this->checkMethod($method)) {
+				if ($params = $this->matchPattern($args[0])) {
+					$this->template = @$args[2]? $this->getTemplate($args[2]) : $this->realTemplate();
+					$this->render($args[1], $params);
+				}
 			}
+		} else {
+			trigger_error("Router HTTP method: $method not allowed", E_USER_WARNING);
 		}
-    }
+   }
 
 	// full static GET with one common model (all static pages)
 	public function pages($model)

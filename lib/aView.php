@@ -13,7 +13,6 @@ abstract class aView
 	public function __construct($template)
 	{
 		$this->template = $template;
-		bdump($template, 'template');
 	}
 
 	// render previously declared template

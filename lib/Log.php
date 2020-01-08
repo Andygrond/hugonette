@@ -15,63 +15,58 @@ use Tracy\OutputDebugger;
 
 class Log
 {
+	public static $viewErrors = [];	// messages collected to be passed to view
+
 	private static $collection = [];	// messages waiting for output to file
-	private static $viewErrors = [];	// messages collected to be passed to view
 	private static $jobStack = [];		// job names stack
 	private static $wasSet = false;	// log is active
 
 	// configuration data
 	private static $cfg = [
-//		'logDir' => LIB_DIR .'log/',
-		'viewErrorName' => 'VIEW',
-		'allowedTypes' => [ 'warning', 'error', 'info' ],
+		'logDir' => LIB_DIR .'log',
+		'email' => ADMIN_EMAIL,
+		'allowedTypes' => [ 'error', 'warning', 'view', 'info' ],
 	];
 
 // set log file name and Tracy debugger mode
 // default log file name = log/error.log
-// default mode = IP detection
-	public static function set($name, $mode = '')
+	public static function set($mode)
 	{
-		if ($mode) {
-			$log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
-		} else {
-			$log_mode = Debugger::DETECT;
-		}
-		
+		$log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
 		self::$wasSet = true;
-//		Debugger::enable($log_mode, self::$cfg['logDir']);
-		Debugger::enable($log_mode);
-		Debugger::$logSeverity = E_NOTICE | E_WARNING;
+		Debugger::enable($log_mode, self::$cfg['logDir']);
+		
+		if (self::$cfg['email']) {
+			Debugger::$email = $cfg['email'];
+		}
+
+//		Debugger::$strictMode = true;	// log all error types
+//		Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;	// log html screens
+//		Debugger::dispatch();		// do it after session reloading
 	}
 
 // output the message 
 // $args = [record, data]
 	public static function __callStatic($type, $args)
 	{
-		if (!in_array($type, self::$cfg['allowedTypes'])) {
-			throw new \Exception('Log message type not allowed: ' .$type);
-		}
-		$type = strtoupper($type);
-		
-		if ($type == self::$cfg['viewErrorName']) {
-			self::$viewErrors[] = $args[0];
-		}
+		if (in_array($type, self::$cfg['allowedTypes'])) {
+			if ($type == 'view') {
+				self::$viewErrors[] = $args[0];
+			}
 
-		$message = $type .': ';
-		if (self::$jobStack) {
-			$message .= end(self::$jobStack) .': ';
+			$message = strtoupper($type) .': ';
+			if (self::$jobStack) {
+				$message .= end(self::$jobStack) .': ';
+			}
+
+			self::$collection[] = [
+				'message' => $message .$args[0],
+				'data' => isset($args[1])? json_encode($args[1]) : '',
+			];
+			
+		} else {
+			trigger_error("Log message type: $type not allowed", E_USER_WARNING);
 		}
-
-		self::$collection[] = [
-			'message' => $message .$args[0],
-			'data' => isset($args[1])? json_encode($args[1]) : '',
-		];
-	}
-
-// set email address for error mailer
-	public static function email($email)
-	{
-		Debugger::$email = $email;
 	}
 
 // enable Tracy output debugger
@@ -103,7 +98,7 @@ class Log
 			return;
 		}
 		
-		$record = '[' .self::timer() .' ms] ' .$_SERVER['REMOTE_ADDR'];
+		$record = '[' .Debugger::timer() .' ms] ' .$_SERVER['REMOTE_ADDR'];
 		if (is_callable('parse_user_agent')) {
 			$agent = parse_user_agent();
 			$record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'];

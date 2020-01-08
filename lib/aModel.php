@@ -20,7 +20,6 @@ abstract class aModel
 
 	public function __construct($method, $params)
 	{
-		bdump($params, 'params');
 		$this->method = $method;
 		$this->prepare($params);
 	}
