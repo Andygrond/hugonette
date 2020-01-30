@@ -13,7 +13,7 @@ class PlainView extends aView
 	{
 	// use data model class
 		$page = $this->pageSource($model);
-		extract($page->getModel());
+		extract($page->run());
 	
 	// use native php template
 		include($this->template);

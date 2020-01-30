@@ -3,74 +3,59 @@
 namespace Andygrond\Hugonette;
 
 /* Simple fast routing for Hugo websites
- * @author Andygrond 2019
+ * @author Andygrond 2020
 **/
 
 class Route
 {
-	private $rendered = false;	// page was rendered
-	private $template;				// base template
-	private $viewMode;			// view mode name
 	private $requestBase;		// request base folder
-	private $publishBase;		// path to hugo public visible without trailing slash
-	private $requestPath;		// path of file requested
-	
-	private $cfg = [		// configuration data
-		'requestBase' => HOME_URI,
-		'publishBase' => STATIC_DIR,
-		'allowedMethods' => ['get', 'put', 'post' ],
-	];
-
+	private $requestPath;		// path of real URI requested
+	private $page;					// page presentation parameters completed during routing process
+	private $routeCounter = 0;	// counter of route trials
+	private $allowedMethods = ['get', 'put', 'post', 'delete'];
 
 	public function __construct()
 	{
-		$this->publishBase = rtrim($this->cfg['publishBase'], '/');
-		$this->requestBase = rtrim($this->cfg['requestBase'], '/');
+		$this->requestBase = rtrim(HOME_URI, '/');
+		$this->page = new \stdClass;
+		$this->page->publishBase = rtrim(STATIC_DIR, '/');	// path to visible hugo public
 
-		$req = explode('?', urldecode($_SERVER['REQUEST_URI']));
-		$file = 'index.html';
-		$path = $req[0];
-
-		if ($path[strlen($path)-1] != '/') {
-			$path .= '/';
-		}
-		if (strpos($path, $this->requestBase) === 0) {
-			$path = substr($path, strlen($this->requestBase));
-		}
-
-		$this->requestPath = $path;
+		$this->requestPath = $this->getRequestPath();
+		$this->setView('Latte');
 	}
 	
-	// shutdown handler
+	// Log shutdown needed to write to file
 	public function __destruct()
 	{
 		Log::close();	// effective only when set
 	}
 	
-	// not routed pages - show status 404
-	public function notFound()
-	{
-		$this->template = $this->publishBase .'/index.html';
-		$this->render('Error:_404', $this->realParams());
-	}
-
 	// set view mode for the subsequent routes
 	// view modes: plain - latte - json
-	public function setViewMode($mode)
+	public function setView($view)
 	{
-		$this->viewMode = ucwords($mode);
+		$this->page->view = ucwords($view);
 	}
 	
+	// should be the last of routing directives
+	// not routed URI - usually show status 404 or redirect to Homepage
+	public function notFound($presenter)
+	{
+		$this->routeCounter++;
+		$this->runPresenter($presenter);
+	}
+
 	// route for single request method
 	// @method - any http method expected as a function name
 	// @args = [$pattern, $model, $template]
 	public function __call($method, $args)
     {
-		if (in_array($method, $this->cfg['allowedMethods'])) {
+		$this->routeCounter++;
+		if (in_array($method, $this->allowedMethods)) {
 			if ($this->checkMethod($method)) {
-				if ($params = $this->matchPattern($args[0])) {
-					$this->template = @$args[2]? $this->getTemplate($args[2]) : $this->realTemplate();
-					$this->render($args[1], $params);
+				if ($this->matchPattern($args[0])) {
+					$this->template(@$args[2]);
+					$this->runPresenter($args[1]);
 				}
 			}
 		} else {
@@ -78,23 +63,25 @@ class Route
 		}
    }
 
-	// full static GET with one common model (all static pages)
-	public function pages($model)
+	// full static GET with one common presenter (all static pages)
+	public function pages($presenter)
     {
+		$this->routeCounter++;
 		if ($this->checkMethod('GET')) {
-			if ($this->template = $this->realTemplate()) {
-				$this->render($model, $this->realParams());
+			if ($this->template()) {
+				$this->runPresenter($presenter, true);
 			}
 		}
     }
 
-	// redirect $to if URI starts from $pattern
+	// redirect $to if URI simply starts from $pattern
 	// @$permanent defaults to 302 http code
 	public function redirect($pattern, $to, $permanent = true)
     {
+		$this->routeCounter++;
 		if (strpos($this->requestPath, $pattern) === 0) {
-			$code = $permanent? 301 : 302;
-			$this->redirection($code, $to);
+			$page = new Presenter('');
+			$page->redirect($permanent? 301 : 302, $to);
 		}
 	}
 	
@@ -106,57 +93,62 @@ class Route
 		return !strcasecmp($_SERVER['REQUEST_METHOD'], $method);
 	}
 
-	// check pattern matching
+	// run presenter instance and exit if presented
+	// when this case appears not relevant - presenter should return false model
+	private function runPresenter($presenter, $static = false)
+	{
+		$this->page->staticView = $static;
+		$this->page->route[$this->routeCounter] = $presenter;	// route tracer
+		PresenterFactory::create($presenter)->run($this->page);
+	}
+	
+	// check pattern matching and replace page params according to the pattern
 	private function matchPattern($pattern)
 	{
 		$pattern = '@^' .$pattern .'$@';
 		if (preg_match($pattern, $this->requestPath, $params) === 1) {
-			return $params;
+			$this->page->params = $params;
+			return true;
 		}
 		return false;
 	}
 	
-	// get template file name from URI if exists
-	private function realTemplate()
-	{
-		$template = $this->publishBase .$this->requestPath .'index.html';
-		return is_file($template)? $template : null;
-	}
-
-	// get params from URI
-	private function realParams()
-	{
-		$params = explode('/', $this->requestPath);
-		$params[0] = $this->requestPath;
-		return $params;
-	}
-
 	// get template file name from given string if exists
-	private function getTemplate($path)
+	private function template($path = null)
 	{
-		$template = $this->publishBase .$path .'index.html';
-		return is_file($template)? $template : null;
+		$path = $path ?: $this->requestPath;	// template file name from URI
+		$this->page->template = $path .'index.html';
+		return is_file($this->page->publishBase .$this->page->template);
 	}
 
-	private function redirection($code, $to)
+	// get real request path from URI
+	private function getRequestPath()
 	{
-		if ($to[0] != '/' && strpos($to, '//') === false) {
-			$to = $this->cfg['requestBase'] .$to;
-		}
-		Log::info($code .' Redirected to: ' .$to);
-		header('Location: ' .$to, true, $code);
-		$this->rendered = true;
-		exit;
+		$req = explode('?', urldecode($_SERVER['REQUEST_URI']));
+		$path = $this->cleanRequestPath($req[0]);
+
+		$this->page->params = $this->getParams($path);
+		return $path;
 	}
-	
-	// instantiate view class and render the page
-	private function render($model, $params = [])
+
+	// request path formatting
+	private function cleanRequestPath($path)
 	{
-		$viewClass = __NAMESPACE__ .'\\' .$this->viewMode .'View';
-		$view = new $viewClass($this->template);
-		$view->render(PageFactory::createPage($model, $params));
-		$this->rendered = true;
-		exit;
+		if ($path[strlen($path)-1] != '/') {
+			$path .= '/';
+		}
+		if (strpos($path, $this->requestBase) === 0) {
+			$path = substr($path, strlen($this->requestBase));
+		}
+		return $path;
+	}
+
+	// prepare page params from request path
+	private function getParams($path)
+	{
+		$params = explode('/', $path);
+		$params[0] = $path;
+		return $params;
 	}
 	
 }

@@ -14,13 +14,12 @@ class LatteView extends aView
 		'cacheLatte' => LIB_DIR .'temp/latte',
 	];
 
-	// render declared template using $model class
-	public function render($page)
+	// render declared template using Presenter object
+	public function render(&$model)
 	{
 		$latte = new \Latte\Engine;
 		$latte->setTempDirectory($this->cfg['cacheLatte']);
 
-		$model = $page->getModel();
 		bdump($model, 'model');
 		$latte->render($this->template, $model);
 	}

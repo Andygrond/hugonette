@@ -10,14 +10,14 @@ abstract class aView
 {
 	protected $template;
 		
-	public function __construct($template)
+	public function __construct($template = false)
 	{
 		$this->template = $template;
 	}
 
 	// render previously declared template
-	// @$page identifies source of page model data
+	// @$model data to be published
     // extended classes must define this method
-    abstract public function render($page);
+    abstract public function render(&$model);
 	
 }

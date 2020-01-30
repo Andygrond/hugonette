@@ -282,7 +282,7 @@ class Status
 		if (isset(self::$codes[$code])) {
 			return self::$codes[$code][self::$cfg['lang']] ?? self::$codes[$code]['en'];
 		}
-		return '';
+		return false;
 	}
 
 }
