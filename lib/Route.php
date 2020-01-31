@@ -2,7 +2,7 @@
 
 namespace Andygrond\Hugonette;
 
-/* Simple fast routing for Hugo websites
+/* Simple fast routing for Hugonette
  * @author Andygrond 2020
 **/
 
@@ -97,7 +97,7 @@ class Route
 	// when this case appears not relevant - presenter should return false model
 	private function runPresenter($presenter, $static = false)
 	{
-		$this->page->staticView = $static;
+		$this->page->staticPages = $static;
 		$this->page->route[$this->routeCounter] = $presenter;	// route tracer
 		PresenterFactory::create($presenter)->run($this->page);
 	}
