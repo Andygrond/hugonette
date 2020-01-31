@@ -42,7 +42,7 @@ class Presenter
 	public function redirect($code, $to)
 	{
 		if ($to[0] != '/' && strpos($to, '//') === false) {
-			$to = $this->cfg->homeUri .'/' .$to;
+			$to = $this->cfg->homeUri .$to;
 		}
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);

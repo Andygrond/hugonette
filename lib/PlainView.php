@@ -9,11 +9,10 @@ namespace Andygrond\Hugonette;
 class PlainView extends aView
 {
 	// render declared template using $model class
-	public function render($model)
+	public function render(&$model)
 	{
 	// use data model class
-		$page = $this->pageSource($model);
-		extract($page->run());
+		extract($model);
 	
 	// use native php template
 		include($this->template);
