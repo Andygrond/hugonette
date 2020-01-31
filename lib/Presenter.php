@@ -2,7 +2,7 @@
 
 namespace Andygrond\Hugonette;
 
-/* Abstract class for Hugonette Presenter
+/* MVP Presenter class for Hugonette
  * @author Andygrond 2020
 **/
 
@@ -10,7 +10,7 @@ class Presenter
 {
 	protected $method;	// routed presenter method
 	protected $template;	// routed model method
-	public $page;			// navigation data for response
+	protected $page;		// navigation data for response processing
 
 	protected $cfg = [
 		'homeUri' => HOME_URI,
@@ -31,10 +31,9 @@ class Presenter
 			bdump($page, 'page');
 
 			$template = $this->template ?: @$page->template;
-			$viewClass = __NAMESPACE__ .'\\' .$page->view .'View';
-			$view = new $viewClass($page->publishBase .$template);
+			$view = new View($page->publishBase .$template);
+			$view->{$page->view}($model);
 
-			$view->render($model);
 			exit;
 		}
 	}
@@ -46,6 +45,7 @@ class Presenter
 		}
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);
+		
 		exit;
 	}
 	

@@ -21,7 +21,7 @@ class Route
 		$this->page->publishBase = rtrim(STATIC_DIR, '/');	// path to visible hugo public
 
 		$this->requestPath = $this->getRequestPath();
-		$this->setView('Latte');
+		$this->setView('latte');
 	}
 	
 	// Log shutdown needed to write to file
@@ -34,7 +34,7 @@ class Route
 	// view modes: plain - latte - json
 	public function setView($view)
 	{
-		$this->page->view = ucwords($view);
+		$this->page->view = $view;
 	}
 	
 	// should be the last of routing directives
