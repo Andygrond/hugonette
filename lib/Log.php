@@ -88,7 +88,7 @@ class Log
 	{
 		$name = array_pop(self::$jobStack);
 		$elapsed = Debugger::timer($name);
-		// todo: send $elapsed somewhere
+// todo: send $elapsed somewhere
 	}
 
 // put all collected messages to log file
@@ -98,12 +98,14 @@ class Log
 			return;
 		}
 		
-		$record = '[' .Debugger::timer() .' ms] ' .$_SERVER['REMOTE_ADDR'];
-		if (is_callable('parse_user_agent')) {
+		$record = self::formatTimeframe() .$_SERVER['REMOTE_ADDR'];
+		
+		if (php_sapi_name() == "cli") {
+			$record .= ' Command Line';
+		} elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
 			$agent = parse_user_agent();
-			$record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'];
+			$record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true);	// .' on ' .$agent['platform'];
 		}
-		$record .= ' ' .$_SERVER['REQUEST_METHOD'];
 		
 		if (self::$collection) {
 			foreach (self::$collection as $item) {
@@ -111,7 +113,15 @@ class Log
 			}
 			self::$collection = '';
 		}
+
+		$record .= ' ' .$_SERVER['REQUEST_METHOD'];
 		Debugger::log($record);
+	}
+	
+	private function formatTimeframe($name = null)
+	{
+		$gap = 1000*round(Debugger::timer($name), 3);
+		return "[$gap ms] ";
 	}
 	
 }
