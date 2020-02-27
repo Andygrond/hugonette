@@ -147,7 +147,7 @@ class Route
 	}
 	
 	// set template file name from given string if exists
-	private function template(string $path = ''): bool
+	private function template(string $path = null): bool
 	{
 		$path = $path ?: $this->attrib['requestPath'];	// template file name derived from URL
 		$template = $path .'index.html';
