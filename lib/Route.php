@@ -8,20 +8,35 @@ namespace Andygrond\Hugonette;
 
 class Route
 {
-	private $requestBase;		// request base folder
-	private $requestPath;		// path of real URI requested
 	private $page;					// page presentation parameters completed during routing process
+	private $fullRequestPath;	// full URL path requested
 	private $routeCounter = 0;	// counter of route trials
-	private $allowedMethods = ['get', 'put', 'post', 'delete'];
 
-	public function __construct()
+	// attributes passed as optional 3rd argument of group method
+	private $attrib = [
+		'presenterNamespace' => 'App\Presenters',
+		'allowedMethods' => ['get', 'post'],
+		'requestBase' => '',
+		'requestPath' => null,
+		'viewMode' => '',
+	];
+
+	// @$publishBase path to static pages (e.g. hugo public folder)
+	// @$viewMode default view mode for the group: [ plain | latte | json ]
+	public function __construct(string $publishBase, string $viewMode)
 	{
-		$this->requestBase = rtrim(HOME_URI, '/');
 		$this->page = new \stdClass;
-		$this->page->publishBase = rtrim(STATIC_DIR, '/');	// path to visible hugo public
-
-		$this->requestPath = $this->getRequestPath();
-		$this->setView('latte');
+		
+		$this->attrib['publishBase'] = rtrim($publishBase, '/');
+		$this->attrib['viewMode'] = $viewMode;
+		
+		[ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
+		if (substr($path, -1) != '/') {
+			$path .= '/';
+		}
+		$this->fullRequestPath = $path;
+		
+		$this->setRequestBase('');
 	}
 	
 	// Log shutdown needed to write to file
@@ -30,125 +45,134 @@ class Route
 		Log::close();	// effective only when set
 	}
 	
-	// set view mode for the subsequent routes
-	// view modes: plain - latte - json
-	public function setView($view)
-	{
-		$this->page->view = $view;
+	// route for single request method
+	// @method - http method as a route function name
+	// @args = [$pattern, $model, $template]
+	public function __call(string $method, array $args)
+    {
+		$this->routeCounter++;
+		if ($this->checkMethod($method) && $this->regMatchPattern($args[0])) {
+			$this->template(@$args[2]);
+			$this->runPresenter($args[1]);
+		}
+		if (!in_array($method, $this->attrib['allowedMethods'])) {
+			trigger_error("Router HTTP method: $method not allowed", E_USER_WARNING);
+		}
+   }
+
+	// full static GET with one common presenter (runs all static pages at once)
+	public function pages(string $presenter)
+    {
+		$this->routeCounter++;
+		if ($this->checkMethod('GET')) {
+			if ($this->template()) {
+				$this->runPresenter($presenter);
+//				$this->runPresenter($presenter, true);
+			}
+		}
+    }
+
+	// this can be used as the last routing directive in group or freely
+	// redirect $to if URI simply starts from $pattern or $pattern is empty
+	// @$permanent defaults to http code 301 Moved Permanently
+	// @$permanent set to false = doesn/t inform search engines about the change
+	public function redirect(string $pattern, string $to, bool $permanent = true)
+    {
+		$this->routeCounter++;
+		if (!$pattern || $this->exactMatchPattern($pattern)) {
+			(new Presenter())->redirect($permanent? 301 : 302, $to);
+		}
 	}
 	
-	// should be the last of routing directives
-	// not routed URI - usually show status 404 or redirect to Homepage
-	public function notFound($presenter)
+	// if applicable, should be placed as the last routing directive in a group - for not routed URI
+	// @presenter usually shows status 404 with the native navigation panels
+	public function notFound(string $presenter)
 	{
 		$this->routeCounter++;
 		$this->runPresenter($presenter);
 	}
 
-	// route for single request method
-	// @method - any http method expected as a function name
-	// @args = [$pattern, $model, $template]
-	public function __call($method, $args)
-    {
-		$this->routeCounter++;
-		if (in_array($method, $this->allowedMethods)) {
-			if ($this->checkMethod($method)) {
-				if ($this->matchPattern($args[0])) {
-					$this->template(@$args[2]);
-					$this->runPresenter($args[1]);
-				}
-			}
-		} else {
-			trigger_error("Router HTTP method: $method not allowed", E_USER_WARNING);
-		}
-   }
+	// register a set of routes with a set of shared attributes.
+	public function group(string $pattern, \Closure $callback, array $attributes = [])
+	{
+		if ($this->exactMatchPattern($pattern)) {
+			$parentAttributes = $this->attrib;
 
-	// full static GET with one common presenter (all static pages)
-	public function pages($presenter)
-    {
-		$this->routeCounter++;
-		if ($this->checkMethod('GET')) {
-			if ($this->template()) {
-				$this->runPresenter($presenter, true);
+			if (count($attributes)) {
+				$this->attrib = $attributes + $parentAttributes;
 			}
-		}
-    }
+			$this->setRequestBase($pattern);
 
-	// redirect $to if URI simply starts from $pattern
-	// @$permanent defaults to 302 http code
-	public function redirect($pattern, $to, $permanent = true)
-    {
-		$this->routeCounter++;
-		if (strpos($this->requestPath, $pattern) === 0) {
-			$page = new Presenter('');
-			$page->redirect($permanent? 301 : 302, $to);
+			call_user_func($callback, $this);
+
+			$this->attrib = $parentAttributes;
 		}
 	}
-	
 
 // ==================
 	// checking http request method
-	private function checkMethod($method)
+	private function checkMethod(string $method): bool
 	{
 		return !strcasecmp($_SERVER['REQUEST_METHOD'], $method);
 	}
 
-	// run presenter instance and exit if presented
-	// when this case appears not relevant - presenter should return false model
-	private function runPresenter($presenter, $static = false)
+	// run presenter instance and exit if truly presented
+//	private function runPresenter(string $presenter, bool $static = false)
+	private function runPresenter(string $presenter)
 	{
-		$this->page->staticPages = $static;
+//		$this->page->staticPages = $static;
+		$this->page->view = $this->attrib['viewMode'];
+		$this->page->publishBase = $this->attrib['publishBase'];
 		$this->page->route[$this->routeCounter] = $presenter;	// route tracer
-		PresenterFactory::create($presenter)->run($this->page);
+
+		PresenterFactory::create($presenter, $this->attrib['presenterNamespace'])->run($this->page);
 	}
 	
-	// check pattern matching and replace page params according to the pattern
-	private function matchPattern($pattern)
+	// check regular expression pattern matching 
+	// replace page params according to the pattern
+	private function regMatchPattern(string $pattern): bool
 	{
 		$pattern = '@^' .$pattern .'$@';
-		if (preg_match($pattern, $this->requestPath, $params) === 1) {
+		if (preg_match($pattern, $this->attrib['requestPath'], $params) === 1) {
 			$this->page->params = $params;
 			return true;
 		}
 		return false;
 	}
 	
-	// get template file name from given string if exists
-	private function template($path = null)
+	// simple pattern matching test - no variable parts
+	private function exactMatchPattern(string $pattern): bool
 	{
-		$path = $path ?: $this->requestPath;	// template file name from URI
-		$this->page->template = $path .'index.html';
-		return is_file($this->page->publishBase .$this->page->template);
-	}
-
-	// get real request path from URI
-	private function getRequestPath()
-	{
-		$req = explode('?', urldecode($_SERVER['REQUEST_URI']));
-		$path = $this->cleanRequestPath($req[0]);
-
-		$this->page->params = $this->getParams($path);
-		return $path;
-	}
-
-	// request path formatting
-	private function cleanRequestPath($path)
-	{
-		if ($path[strlen($path)-1] != '/') {
-			$path .= '/';
-		}
-		if (strpos($path, $this->requestBase) === 0) {
-			$path = substr($path, strlen($this->requestBase));
-		}
-		return $path;
-	}
-
-	// prepare page params from request path
-	private function getParams($path)
-	{
-		$params = explode('/', $path);
-		$params[0] = $path;
-		return $params;
+		return (strpos($this->attrib['requestPath'], $pattern) === 0);
 	}
 	
+	// set template file name from given string if exists
+	private function template(string $path = ''): bool
+	{
+		$path = $path ?: $this->attrib['requestPath'];	// template file name derived from URL
+		$template = $path .'index.html';
+		
+		if (is_file($this->attrib['publishBase'] .$template)) {
+			$this->page->template = $template;
+			return true;
+		}
+		return false;
+	}
+
+	// store request base and relative path
+	// preset page params based on the path (valid for a route group)
+	private function setRequestBase(string $requestBase)
+	{
+		$this->attrib['requestBase'] .= $requestBase;
+		$path = $this->fullRequestPath;
+		
+		if ($this->attrib['requestBase'] && strpos($path, $this->attrib['requestBase']) === 0) {
+			$path = substr($path, strlen($this->attrib['requestBase']));
+		}
+		$this->attrib['requestPath'] = $path;
+
+		$this->page->params = explode('/', $path);
+		$this->page->params[0] = $path;
+	}
+
 }

@@ -8,37 +8,42 @@ namespace Andygrond\Hugonette;
 
 class Presenter
 {
-	protected $method;	// routed presenter method
-	protected $template;	// routed model method
+	private $method;		// routed presenter method
 	protected $page;		// navigation data for response processing
+
+	protected $template;	// template set in router or in presenter method
+	protected $view;		// view type set in router or in presenter method
 
 	protected $cfg = [
 		'homeUri' => HOME_URI,
 	];
 	
-	public function __construct($method)
+	public function __construct(string $method = 'default')
 	{
 		$this->method = $method;
 	}
 	
 	// return model data using presenter method declared in router
-	public function run($page)
+	// presenter method will return an array of model data
+	// when this case appears not relevant - presenter method will return false
+	public function run(\stdClass $page)
 	{
 		$this->page = $page;
-		$model = $this->{$this->method}();
+		$this->view = $page->view;
 		
-		if ($model) {
+		$model = $this->{$this->method}();	// presenter method call
+		
+		if ($model !== false) {
 			bdump($page, 'page');
 
 			$template = $this->template ?: @$page->template;
-			$view = new View($page->publishBase .$template);
-			$view->{$page->view}($model);
+			(new View($page->publishBase .$template))->{$this->view}($model);
 
 			exit;
 		}
 	}
 	
-	public function redirect($code, $to)
+	public function redirect(int $code, string $to)
 	{
 		if ($to[0] != '/' && strpos($to, '//') === false) {
 			$to = $this->cfg->homeUri .$to;
