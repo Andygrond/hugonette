@@ -43,7 +43,7 @@ class Presenter
 	// @$permanent in Presenter defaults to http code 302 Found
 	public function redirect(string $to, bool $permanent = false)
 	{
-		$code = $permanent? 301 : 302
+		$code = $permanent? 301 : 302;
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);
 		

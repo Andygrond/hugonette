@@ -14,21 +14,22 @@ class Route
 
 	// attributes passed as optional 3rd argument of group method
 	private $attrib = [
+		'publishBase' => null,	// path to rendered static site (Hugo public/)
 		'presenterNamespace' => 'App\Presenters',
 		'allowedMethods' => ['get', 'post'],
-		'requestBase' => '',
-		'requestPath' => null,
-		'viewMode' => '',
+		'viewMode' => 'plain',		// default view mode [ plain | latte | json ]
+		'cacheLatte' => null,		// path to cache in view mode = latte
+		'requestBase' => '',			// subfolder of document root
+
+		'requestPath' => null,	// not configurable - will be calculated
 	];
 
 	// @$publishBase path to static pages (e.g. hugo public folder)
-	// @$viewMode default view mode for the group: [ plain | latte | json ]
-	public function __construct(string $publishBase, string $viewMode)
+	public function __construct(array $attributes)
 	{
 		$this->page = new \stdClass;
 		
-		$this->attrib['publishBase'] = rtrim($publishBase, '/');
-		$this->attrib['viewMode'] = $viewMode;
+		$this->attrib = $attributes + $this->attrib;
 		
 		[ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
 		if (substr($path, -1) != '/') {
@@ -67,7 +68,6 @@ class Route
 		if ($this->checkMethod('GET')) {
 			if ($this->template()) {
 				$this->runPresenter($presenter);
-//				$this->runPresenter($presenter, true);
 			}
 		}
     }
@@ -100,7 +100,6 @@ class Route
 	{
 		if ($this->exactMatchPattern($pattern)) {
 			$parentAttributes = $this->attrib;
-
 			if (count($attributes)) {
 				$this->attrib = $attributes + $parentAttributes;
 			}
@@ -123,7 +122,6 @@ class Route
 //	private function runPresenter(string $presenter, bool $static = false)
 	private function runPresenter(string $presenter)
 	{
-//		$this->page->staticPages = $static;
 		$this->page->view = $this->attrib['viewMode'];
 		$this->page->publishBase = $this->attrib['publishBase'];
 		$this->page->route[$this->routeCounter] = $presenter;	// route tracer
