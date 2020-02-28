@@ -14,10 +14,6 @@ class Presenter
 	protected $template;	// template set in router or in presenter method
 	protected $view;		// view type set in router or in presenter method
 
-	protected $cfg = [
-		'homeUri' => HOME_URI,
-	];
-	
 	public function __construct(string $method = 'default')
 	{
 		$this->method = $method;
@@ -43,11 +39,11 @@ class Presenter
 		}
 	}
 	
-	public function redirect(int $code, string $to)
+	// redirect @$to if URI simply starts from $pattern or $pattern is empty
+	// @$permanent in Presenter defaults to http code 302 Found
+	public function redirect(string $to, bool $permanent = false)
 	{
-		if ($to[0] != '/' && strpos($to, '//') === false) {
-			$to = $this->cfg->homeUri .$to;
-		}
+		$code = $permanent? 301 : 302
 		Log::info($code .' Redirected to: ' .$to);
 		header('Location: ' .$to, true, $code);
 		

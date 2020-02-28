@@ -72,15 +72,18 @@ class Route
 		}
     }
 
+	// redirect @$to if URI simply starts from $pattern or $pattern is empty
 	// this can be used as the last routing directive in group or freely
-	// redirect $to if URI simply starts from $pattern or $pattern is empty
-	// @$permanent defaults to http code 301 Moved Permanently
+	// @$permanent in Route defaults to http code 301 Moved Permanently
 	// @$permanent set to false = doesn/t inform search engines about the change
 	public function redirect(string $pattern, string $to, bool $permanent = true)
     {
 		$this->routeCounter++;
 		if (!$pattern || $this->exactMatchPattern($pattern)) {
-			(new Presenter())->redirect($permanent? 301 : 302, $to);
+			if ($to[0] != '/' && strpos($to, '//') === false) {
+				$to = $this->attrib['publishBase'] .'/' .$to;
+			}
+			(new Presenter())->redirect($to, $permanent);
 		}
 	}
 	
