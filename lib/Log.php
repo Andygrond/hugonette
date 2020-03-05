@@ -3,8 +3,8 @@
 namespace Andygrond\Hugonette;
 
 /* Simple logger for Tracy debugger
- * @author Andygrond 2019
- * Optional dependency: https://github.com/donatj/PhpUserAgent
+* @author Andygrond 2019
+* Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 // todo: error levels and mailing: https://doc.nette.org/en/2.1/debugging
@@ -15,113 +15,113 @@ use Tracy\OutputDebugger;
 
 class Log
 {
-	public static $viewErrors = [];	// messages collected to be passed to view
+  public static $viewErrors = [];   // messages collected to be passed to view
 
-	private static $collection = [];	// messages waiting for output to file
-	private static $jobStack = [];		// job names stack
-	private static $wasSet = false;	// log is active
+  private static $collection = [];  // messages waiting for output to file
+  private static $jobStack = [];    // job names stack
+  private static $wasSet = false;   // log is active
 
-	// configuration data
-	private static $cfg = [
-		'logDir' => LIB_DIR .'log',
-		'email' => ADMIN_EMAIL,
-		'allowedTypes' => [ 'error', 'warning', 'view', 'info' ],
-	];
+  // configuration data
+  private static $cfg = [
+    'logDir' => LIB_DIR .'log',
+    'email' => ADMIN_EMAIL,
+    'allowedTypes' => [ 'error', 'warning', 'view', 'info' ],
+  ];
 
-// set log file name and Tracy debugger mode
-// default log file name = log/error.log
-	public static function set($mode)
-	{
-		$log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
-		self::$wasSet = true;
-		Debugger::enable($log_mode, self::$cfg['logDir']);
-		
-		if (self::$cfg['email']) {
-			Debugger::$email = $cfg['email'];
-		}
+  // set log file name and Tracy debugger mode
+  // default log file name = log/error.log
+  public static function set($mode)
+  {
+    $log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+    self::$wasSet = true;
+    Debugger::enable($log_mode, self::$cfg['logDir']);
 
-//		Debugger::$strictMode = true;	// log all error types
-//		Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;	// log html screens
-//		Debugger::dispatch();		// do it after session reloading
-	}
+    if (self::$cfg['email']) {
+      Debugger::$email = $cfg['email'];
+    }
 
-// output the message 
-// $args = [record, data]
-	public static function __callStatic($type, $args)
-	{
-		if (in_array($type, self::$cfg['allowedTypes'])) {
-			if ($type == 'view') {
-				self::$viewErrors[] = $args[0];
-			}
+    // Debugger::$strictMode = true;	// log all error types
+    // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;	// log html screens
+    // Debugger::dispatch();		// do it after session reloading
+  }
 
-			$message = strtoupper($type) .': ';
-			if (self::$jobStack) {
-				$message .= end(self::$jobStack) .': ';
-			}
+  // output the message
+  // $args = [record, data]
+  public static function __callStatic($type, $args)
+  {
+    if (in_array($type, self::$cfg['allowedTypes'])) {
+      if ($type == 'view') {
+        self::$viewErrors[] = $args[0];
+      }
 
-			self::$collection[] = [
-				'message' => $message .$args[0],
-				'data' => isset($args[1])? json_encode($args[1]) : '',
-			];
-			
-		} else {
-			trigger_error("Log message type: $type not allowed", E_USER_WARNING);
-		}
-	}
+      $message = strtoupper($type) .': ';
+      if (self::$jobStack) {
+        $message .= end(self::$jobStack) .': ';
+      }
 
-// enable Tracy output debugger
-	public static function output()
-	{
-		OutputDebugger::enable();
-	}
+      self::$collection[] = [
+        'message' => $message .$args[0],
+        'data' => isset($args[1])? json_encode($args[1]) : '',
+      ];
 
-// set job name
-	public static function job($name)
-	{
-		$name = ucfirst($name);
-		self::$jobStack[] = $name;
-		Debugger::timer($name);
-	}
+    } else {
+      trigger_error("Log message type: $type not allowed", E_USER_WARNING);
+    }
+  }
 
-// reset old job name
-	public static function jobDone()
-	{
-		$name = array_pop(self::$jobStack);
-		$elapsed = Debugger::timer($name);
-// todo: send $elapsed somewhere
-	}
+  // enable Tracy output debugger
+  public static function output()
+  {
+    OutputDebugger::enable();
+  }
 
-// put all collected messages to log file
-	public static function close()
-	{
-		if (!self::$wasSet) {
-			return;
-		}
-		
-		$record = self::formatTimeframe() .$_SERVER['REMOTE_ADDR'];
-		
-		if (php_sapi_name() == "cli") {
-			$record .= ' Command Line';
-		} elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
-			$agent = parse_user_agent();
-			$record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true);	// .' on ' .$agent['platform'];
-		}
-		
-		if (self::$collection) {
-			foreach (self::$collection as $item) {
-				$record .= "\n" .$item['message'] .' | ' .$item['data'];
-			}
-			self::$collection = '';
-		}
+  // set job name
+  public static function job($name)
+  {
+    $name = ucfirst($name);
+    self::$jobStack[] = $name;
+    Debugger::timer($name);
+  }
 
-		$record .= ' ' .$_SERVER['REQUEST_METHOD'];
-		Debugger::log($record);
-	}
-	
-	private function formatTimeframe($name = null)
-	{
-		$gap = 1000*round(Debugger::timer($name), 3);
-		return "[$gap ms] ";
-	}
-	
+  // reset old job name
+  public static function jobDone()
+  {
+    $name = array_pop(self::$jobStack);
+    $elapsed = Debugger::timer($name);
+    // todo: send $elapsed somewhere
+  }
+
+  // put all collected messages to log file
+  public static function close()
+  {
+    if (!self::$wasSet) {
+      return;
+    }
+
+    $record = self::formatTimeframe() .$_SERVER['REMOTE_ADDR'];
+
+    if (php_sapi_name() == "cli") {
+      $record .= ' Command Line';
+    } elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
+      $agent = parse_user_agent();
+      $record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
+    }
+
+    if (self::$collection) {
+      foreach (self::$collection as $item) {
+        $record .= "\n" .$item['message'] .' | ' .$item['data'];
+      }
+      self::$collection = '';
+    }
+
+    $record .= ' ' .$_SERVER['REQUEST_METHOD'];
+    Debugger::log($record);
+  }
+
+  private function formatTimeframe($name = null)
+  {
+    $gap = 1000*round(Debugger::timer($name), 3);
+    return "[$gap ms] ";
+  }
+
 }
