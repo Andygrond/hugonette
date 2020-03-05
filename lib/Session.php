@@ -3,19 +3,21 @@
 namespace Andygrond\Hugonette;
 
 /* CSRF Token Session Management
-* @author Andygrond 2019
-* inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
+ * @author Andygrond 2019
+ * inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
 **/
 
-class CsrfSession
+class Session
 {
   protected $indexKey = 'csrf_index';
   protected $tokenKey = 'csrf_token';
   protected $tokenLifetime = 900;
   protected $recycleAfter = 512;
+  protected $debug;
 
-  public function __construct()
+  public function __construct($debug = false)
   {
+    $this->debug = $debug;
     session_start();
 
     if (!isset($_SESSION['started_at'])) {
@@ -37,7 +39,7 @@ class CsrfSession
     unset($_SESSION['closed_at']);
     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
     $_SESSION['CSRF'] = [];
-    Log::info($reason .' - session renewed.');
+    self::log($reason .' - session renewed.');
 
     if ($redirect)
     header("Location: $redirect");
@@ -46,7 +48,7 @@ class CsrfSession
   // place token and index inside the form
   public function hiddenInput($lock = false)
   {
-    Log::info('Hidden input generation');
+    self::log('Hidden input generation');
     $token_array = $this->getToken($lock);
     echo implode(
       array_map(
@@ -76,7 +78,7 @@ class CsrfSession
 
       while (count($session) > $this->recycleAfter) {	// recycle if too much tokens
         array_shift($session);
-        Log::info('First token recycled');
+        self::log('First token recycled');
       }
 
       return [
@@ -101,25 +103,25 @@ class CsrfSession
       }
 
       if (!$stored = $this->getStoredToken($index)) {
-        Log::info('Token not found');
+        self::log('Token not found');
         return 3;
       }
       if ($this->tokenExpired($stored)) {
-        Log::info('Token expired');
+        self::log('Token expired');
         return 4;
       }
 
       $lock = $this->getLock();
       if (!hash_equals($lock, (string) $stored['lock'])) {
-        Log::info("$lock origin does not match lock {$stored['lock']}");
+        self::log("$lock origin does not match lock {$stored['lock']}");
         return 5;
       }
       if (!hash_equals($token, $stored['token'])) {
-        Log::info('Wrong token');
+        self::log('Wrong token');
         return 6;
       }
 
-      Log::info('Token validated');
+      self::log('Token validated');
       return 0;
     }
 
@@ -135,7 +137,7 @@ class CsrfSession
       }
       $stored = $session[$index];
       unset($session[$index]);	// delete used token
-      Log::info('Token deleted after use');
+      self::log('Token deleted after use');
 
       return $stored;
     }
@@ -156,7 +158,7 @@ class CsrfSession
       if (preg_match('#/$#', $lock)) {
         $lock = substr($lock, 0, -1);
       }
-      Log::info("Lock taken: $lock");
+      self::log("Lock taken: $lock");
 
       return $lock;
     }
@@ -164,6 +166,13 @@ class CsrfSession
     protected static function noHTML(string $untrusted): string
     {
       return htmlentities($untrusted, ENT_QUOTES, 'UTF-8');
+    }
+
+    protected static function log(string $message)
+    {
+      if ($this->debug) {
+        Log::info($message);
+      }
     }
 
   }
