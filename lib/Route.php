@@ -123,6 +123,7 @@ class Route
 	private function runPresenter(string $presenter)
 	{
 		$this->page->view = $this->attrib['viewMode'];
+		$this->page->cacheLatte = $this->attrib['cacheLatte'];
 		$this->page->publishBase = $this->attrib['publishBase'];
 		$this->page->route[$this->routeCounter] = $presenter;	// route tracer
 

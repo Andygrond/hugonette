@@ -9,36 +9,33 @@ namespace Andygrond\Hugonette;
 class View
 {
 	protected $template;
+	protected $cacheLatte;
 
-	protected $cfg = [
-		'cacheLatte' => LIB_DIR .'temp/latte',
-	];
-
-	public function __construct($template = false)
+	public function __construct(string $template, string $cacheLatte)
 	{
 		$this->template = $template;
+		$this->cacheLatte = $cacheLatte;
 	}
 
 	// render model data using Latte templating engine
-	public function latte(&$_model)
+	public function latte(array &$_model)
 	{
 		$latte = new \Latte\Engine;
-		$latte->setTempDirectory($this->cfg['cacheLatte']);
+		$latte->setTempDirectory($this->cacheLatte);
 
-		bdump($_model, 'model');
 		$latte->render($this->template, $_model);
 	}
 
 	// render model data using plain old PHP template
-	public function plain(&$_model)
+	public function plain(array &$_model)
 	{
 		extract($_model);
-		unset($_model);
+		$_model = null;
 		include($this->template);
 	}
 	
 	// send model data as JSON object
-	public function json(&$_model)
+	public function json(array &$_model)
 	{
 		echo json_encode($_model, JSON_UNESCAPED_UNICODE);
 	}

@@ -8,11 +8,11 @@ namespace Andygrond\Hugonette;
 
 class Presenter
 {
-	private $method;		// routed presenter method
+	private $method;		// presenter method determined in route
 	protected $page;		// navigation data for response processing
 
-	protected $template;	// template set in router or in presenter method
-	protected $view;		// view type set in router or in presenter method
+	protected $template;	// template set in presenter method
+	protected $view;		// view type set in presenter method
 
 	public function __construct(string $method = 'default')
 	{
@@ -25,18 +25,17 @@ class Presenter
 	public function run(\stdClass $page)
 	{
 		$this->page = $page;
-		$this->view = $page->view;
 		
 		$model = $this->{$this->method}();	// presenter method call
 		
-		if ($model !== false) {
-			bdump($page, 'page');
-
+		if ($model !== false) {	// only when passed by presenter
 			$template = $this->template ?: @$page->template;
-			(new View($page->publishBase .$template))->{$this->view}($model);
+			$view = $this->view ?: @$page->view;
+			(new View($page->publishBase .$template, $page->cacheLatte))->$view($model);
 
 			exit;
 		}
+		// else bypass to the next route
 	}
 	
 	// redirect @$to if URI simply starts from $pattern or $pattern is empty
