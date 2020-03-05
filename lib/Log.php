@@ -4,6 +4,7 @@ namespace Andygrond\Hugonette;
 
 /* Simple logger for Tracy debugger
 * @author Andygrond 2019
+* Dependency: https://github.com/nette/tracy
 * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
@@ -15,41 +16,38 @@ use Tracy\OutputDebugger;
 
 class Log
 {
-  public static $viewErrors = [];   // messages collected to be passed to view
+  // allowed names of message
+  private static $allowedTypes = [ 'error', 'warning', 'view', 'info' ];
 
+  public static $viewErrors = [];   // messages collected to be passed to view
   private static $collection = [];  // messages waiting for output to file
   private static $jobStack = [];    // job names stack
-  private static $wasSet = false;   // log is active
-
-  // configuration data
-  private static $cfg = [
-    'logDir' => LIB_DIR .'log',
-    'email' => ADMIN_EMAIL,
-    'allowedTypes' => [ 'error', 'warning', 'view', 'info' ],
-  ];
+  private static $isActive = false; // log is active
 
   // set log file name and Tracy debugger mode
   // default log file name = log/error.log
-  public static function set($mode)
+  public static function set(string $mode, string $log_dir)
   {
     $log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
-    self::$wasSet = true;
-    Debugger::enable($log_mode, self::$cfg['logDir']);
+    Debugger::enable($log_mode, $log_dir);
+    self::$isActive = true;
 
-    if (self::$cfg['email']) {
-      Debugger::$email = $cfg['email'];
-    }
+    // Debugger::$strictMode = true;  // log all error types
+    // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
+    // Debugger::dispatch();  // do it after session reloading
+  }
 
-    // Debugger::$strictMode = true;	// log all error types
-    // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;	// log html screens
-    // Debugger::dispatch();		// do it after session reloading
+  // for mailing feature (not done yet)
+  public static function email(string $email)
+  {
+    Debugger::$email = $email;
   }
 
   // output the message
   // $args = [record, data]
-  public static function __callStatic($type, $args)
+  public static function __callStatic(string $type, array $args)
   {
-    if (in_array($type, self::$cfg['allowedTypes'])) {
+    if (in_array($type, self::$allowedTypes)) {
       if ($type == 'view') {
         self::$viewErrors[] = $args[0];
       }
@@ -76,7 +74,7 @@ class Log
   }
 
   // set job name
-  public static function job($name)
+  public static function job(string $name)
   {
     $name = ucfirst($name);
     self::$jobStack[] = $name;
@@ -94,7 +92,7 @@ class Log
   // put all collected messages to log file
   public static function close()
   {
-    if (!self::$wasSet) {
+    if (!self::$isActive) {
       return;
     }
 
@@ -118,10 +116,14 @@ class Log
     Debugger::log($record);
   }
 
-  private function formatTimeframe($name = null)
+  private function formatTimeframe(string $name = null): string
   {
-    $gap = 1000*round(Debugger::timer($name), 3);
-    return "[$gap ms] ";
+    if ($gap = Debugger::timer($name)) {
+      $gap = 1000*round($gap, 3);
+      return "[$gap ms] ";
+    } else {
+      return "[n/a] ";
+    }
   }
 
 }
