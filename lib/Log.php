@@ -24,12 +24,12 @@ class Log
   private static $jobStack = [];    // job names stack
   private static $isActive = false; // log is active
 
-  // set log file name and Tracy debugger mode
-  // default log file name = log/error.log
-  public static function set(string $mode, string $log_dir)
+  // log initialization
+  // set log folder and Tracy debugger mode ['dev' | 'prod']
+  public static function set(string $logDir, string $mode = 'prod')
   {
-    $log_mode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
-    Debugger::enable($log_mode, $log_dir);
+    $logMode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+    Debugger::enable($logMode, $logDir);
     self::$isActive = true;
 
     // Debugger::$strictMode = true;  // log all error types
