@@ -30,6 +30,7 @@ class Presenter
 
     if ($model !== false) { // only when passed by presenter
       if (Log::$debug) {
+        bdump($this->page, 'page');
         bdump($model, 'model');
       }
 
