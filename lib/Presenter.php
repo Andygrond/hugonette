@@ -27,11 +27,12 @@ class Presenter
     $this->page = $page;
 
     $model = $this->{$this->method}();	// presenter method call
-    if (Log::$debug) {
-      bdump($model, 'model');
-    }
 
     if ($model !== false) { // only when passed by presenter
+      if (Log::$debug) {
+        bdump($model, 'model');
+      }
+
       $template = $this->template ?: @$page->template;
       $view = $this->view ?: @$page->view;
       (new View($page->publishBase .$template, $page->cacheLatte))->$view($model);
