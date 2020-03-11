@@ -54,4 +54,18 @@ class Presenter
     exit;
   }
 
+  // upload file
+  public function upload(string $filename, string $content)
+  {
+    $tmp = explode('.', $filename);
+    $type = $tmp[count($tmp)-1];
+
+    header('Content-Type: application/' .$type);
+    header('Content-Disposition: attachment; filename=' .$filename);
+    header('Pragma: no-cache');
+
+    echo $content;
+    exit;
+  }
+
 }

@@ -41,16 +41,4 @@ class View
     echo json_encode($_model, JSON_UNESCAPED_UNICODE);
   }
 
-  public function upload(array &$_model, string $filename)
-  {
-    $tmp = explode('.', $filename);
-    $type = $tmp[count($tmp)-1];
-
-    header('Content-Type: application/' .$type);
-    header('Content-Disposition: attachment; filename=' .$filename);
-    header('Pragma: no-cache');
-
-    echo json_encode($_model, JSON_UNESCAPED_UNICODE);
-  }
-
 }
