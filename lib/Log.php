@@ -19,16 +19,19 @@ class Log
   // allowed names of message
   private static $allowedTypes = [ 'error', 'warning', 'view', 'info' ];
 
-  public static $viewErrors = [];   // messages collected to be passed to view
   private static $collection = [];  // messages waiting for output to file
   private static $jobStack = [];    // job names stack
   private static $isActive = false; // log is active
+
+  public static $viewErrors = [];   // messages collected to be passed to view
+  public static $debug = false;     // app is in debug mode
 
   // log initialization
   // set log folder and Tracy debugger mode ['dev' | 'prod']
   public static function set(string $logDir, string $mode = 'prod')
   {
-    $logMode = strncasecmp($mode, 'dev', 3)? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+    self::$debug = !strncasecmp($mode, 'dev', 3);
+    $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
     Debugger::enable($logMode, $logDir);
     self::$isActive = true;
 
