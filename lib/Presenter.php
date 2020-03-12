@@ -55,16 +55,26 @@ class Presenter
   }
 
   // upload file
-  public function upload(string $filename, string $content)
+  public function upload(string $filename, bool $inline = false, string $content = null)
   {
-    $tmp = explode('.', $filename);
-    $type = $tmp[count($tmp)-1];
+    $file = pathinfo($filename);
+    $disposition = $inline? 'inline' : 'attachment';
 
-    header('Content-Type: application/' .$type);
-    header('Content-Disposition: attachment; filename=' .$filename);
+    header('Content-Type: application/' .$file['extension']);
+    header('Content-Disposition: ' .$disposition .'; filename=' .$file['basename']);
     header('Pragma: no-cache');
 
-    echo $content;
+    if ($content === null) {
+      if (is_file($filename)) {
+        readfile($filename);
+      } else {
+        Log::warning('Uploaded file not found: ' .$filename);
+        http_response_code(404);
+      }
+    } else {
+      echo $content;
+    }
+
     exit;
   }
 
