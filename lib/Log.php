@@ -119,7 +119,7 @@ class Log
     Debugger::log($record);
   }
 
-  private function formatTimeframe(string $name = null): string
+  private static function formatTimeframe(string $name = null): string
   {
     if ($gap = Debugger::timer($name)) {
       $gap = 1000*round($gap, 3);
