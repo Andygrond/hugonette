@@ -54,8 +54,31 @@ class Presenter
     exit;
   }
 
+  // upload content
+  public function upContent(string $content, string $filename, bool $inline = false)
+  {
+    upHeaders($filename, $inline);
+    echo $content;
+
+    exit;
+  }
+
   // upload file
-  public function upload(string $filename, bool $inline = false, string $content = null)
+  public function upFile(string $sourcePath, string $filename = null, bool $inline = false)
+  {
+    upHeaders($filename?? $sourcePath, $inline);
+
+    if (is_file($sourcePath)) {
+      readfile($sourcePath);
+    } else {
+      http_response_code(404);
+      Log::warning('Uploaded file not found: ' .$sourcePath);
+    }
+
+    exit;
+  }
+
+  private function upHeaders(string $filename, bool $inline = false)
   {
     $file = pathinfo($filename);
     $disposition = $inline? 'inline' : 'attachment';
@@ -63,19 +86,6 @@ class Presenter
     header('Content-Type: application/' .$file['extension']);
     header('Content-Disposition: ' .$disposition .'; filename=' .$file['basename']);
     header('Pragma: no-cache');
-
-    if ($content === null) {
-      if (is_file($filename)) {
-        readfile($filename);
-      } else {
-        Log::warning('Uploaded file not found: ' .$filename);
-        http_response_code(404);
-      }
-    } else {
-      echo $content;
-    }
-
-    exit;
   }
 
 }
