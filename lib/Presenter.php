@@ -57,7 +57,7 @@ class Presenter
   // upload content
   public function upContent(string $content, string $filename, bool $inline = false)
   {
-    upHeaders($filename, $inline);
+    $this->upHeaders($filename, $inline);
     echo $content;
 
     exit;
@@ -66,7 +66,7 @@ class Presenter
   // upload file
   public function upFile(string $sourcePath, string $filename = null, bool $inline = false)
   {
-    upHeaders($filename?? $sourcePath, $inline);
+    $this->upHeaders($filename?? $sourcePath, $inline);
 
     if (is_file($sourcePath)) {
       readfile($sourcePath);
