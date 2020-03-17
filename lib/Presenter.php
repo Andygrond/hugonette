@@ -8,9 +8,31 @@ namespace Andygrond\Hugonette;
 
 class Presenter
 {
-  private $method;   // presenter method determined in route
-  protected $page;   // navigation data for response processing
+  private $method;        // presenter method determined in route
+  private $mimeTypes = [  // default MIME types for uploading
+    'txt' => 'text/plain;charset=UTF-8',
+    'csv' => 'text/csv;charset=UTF-8',
+    'html' => 'text/html',
+    'xml' => 'text/xml',
+    'css' => 'text/css',
+    'js' => 'application/javascript',
+    'zip' => 'application/zip',
+    'pdf' => 'application/pdf',
+    'json' => 'application/json',
+    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'png' => 'image/png',
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    'svg' => 'image/svg+xml',
+    'gif' => 'image/gif',
+    'mp4' => 'video/mp4',
+    'webm' => 'video/webm',
+  ];
 
+  protected $page;      // navigation data for response processing
   protected $template;  // template set in presenter method
   protected $view;      // view type set in presenter method
 
@@ -55,18 +77,18 @@ class Presenter
   }
 
   // upload content
-  public function upContent(string $content, string $filename, bool $inline = false)
+  public function upContent(string $content, string $filename, bool $inline = false, string $mimeType = null)
   {
-    $this->upHeaders($filename, $inline);
+    $this->upHeaders($filename, $inline, $mimeType);
     echo $content;
 
     exit;
   }
 
   // upload file
-  public function upFile(string $sourcePath, string $filename = null, bool $inline = false)
+  public function upFile(string $sourcePath, string $filename = null, bool $inline = false, string $mimeType = null)
   {
-    $this->upHeaders($filename?? $sourcePath, $inline);
+    $this->upHeaders($filename?? $sourcePath, $inline, $mimeType);
 
     if (is_file($sourcePath)) {
       readfile($sourcePath);
@@ -78,12 +100,16 @@ class Presenter
     exit;
   }
 
-  private function upHeaders(string $filename, bool $inline = false)
+  private function upHeaders(string $filename, bool $inline, string $mimeType)
   {
     $file = pathinfo($filename);
     $disposition = $inline? 'inline' : 'attachment';
 
-    header('Content-Type: application/' .$file['extension']);
+    if (!$mimeType) {
+      $mimeType = @$this->mimeTypes[$file['extension']]?? 'application/octet-stream';
+    }
+
+    header('Content-Type: ' .$mimeType);
     header('Content-Disposition: ' .$disposition .'; filename=' .$file['basename']);
     header('Pragma: no-cache');
   }
