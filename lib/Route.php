@@ -57,7 +57,7 @@ class Route
       $this->runPresenter($args[1]);
     }
     if (!in_array($method, $this->attrib['allowedMethods'])) {
-      trigger_error("Router HTTP method: $method not allowed", E_USER_WARNING);
+      throw new \DomainException("Router HTTP method: $method currently not allowed");
     }
   }
 

@@ -2,10 +2,11 @@
 
 namespace Andygrond\Hugonette;
 
-/* Simple logger for Tracy debugger
-* @author Andygrond 2019
-* Dependency: https://github.com/nette/tracy
-* Optional dependency: https://github.com/donatj/PhpUserAgent
+/* Log facade for Hugonette
+ * Utilizes Tracy debugger if available
+ * @author Andygrond 2019
+ * Dependency: https://github.com/nette/tracy
+ * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 // todo: error levels and mailing: https://doc.nette.org/en/2.1/debugging
@@ -16,15 +17,32 @@ use Tracy\OutputDebugger;
 
 class Log
 {
-  // allowed names of message
-  private static $allowedTypes = [ 'error', 'warning', 'view', 'info' ];
+  // allowed levels of message
+  private static $allowedTypes = [ 'debug', 'info', 'notice', 'view', 'warning', 'error', 'critical', 'alert', 'emergency' ];
 
   private static $collection = [];  // messages waiting for output to file
   private static $jobStack = [];    // job names stack
   private static $isActive = false; // log is active
 
+  private static int $log_level;    // lowest log level logged
+  private static string $channel;   // active output channel
+  private static string $logFile;   // log filename with path
+
   public static $viewErrors = [];   // messages collected to be passed to view
   public static $debug = false;     // app is in debug mode
+
+
+  const LEVEL = [   // log level hierachy
+    'debug'     => 0,
+    'info'      => 1,
+    'notice'    => 2,
+    'view'      => 3,
+    'warning'   => 4,
+    'error'     => 5,
+    'critical'  => 6,
+    'alert'     => 7,
+    'emergency' => 8,
+  ];
 
   // log initialization
   // set log folder and Tracy debugger mode ['dev' | 'prod']
