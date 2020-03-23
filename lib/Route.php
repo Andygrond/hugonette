@@ -11,17 +11,17 @@ class Route
   private $page;  // page presentation parameters completed during routing process
   private $fullRequestPath;   // full URL path requested
   private $routeCounter = 0;  // counter of route trials
+  private $httpMethods = ['get', 'post', 'put', 'delete'],
 
   // attributes passed as optional 3rd argument of group method
   private $attrib = [
     'publishBase' => null,  // path to rendered static site (Hugo public/)
     'presenterNamespace' => 'App\Presenters',
-    'allowedMethods' => ['get', 'post'],
     'viewMode' => 'plain',  // default view mode [ plain | latte | json ]
     'cacheLatte' => null,   // path to cache in view mode = latte
     'requestBase' => '',    // subfolder of document root
-
-    'requestPath' => null,  // not configurable - will be calculated
+//========
+    'requestPath' => null   // not configurable - will be calculated
   ];
 
   // @$publishBase path to static pages (e.g. hugo public folder)
@@ -53,11 +53,11 @@ class Route
   {
     $this->routeCounter++;
     if ($this->checkMethod($method) && $this->regMatchPattern($args[0])) {
-      $this->template(@$args[2]);
+//      $this->template(@$args[2]);
       $this->runPresenter($args[1]);
     }
-    if (!in_array($method, $this->attrib['allowedMethods'])) {
-      throw new \DomainException("Router HTTP method: $method currently not allowed");
+    if (!in_array($method, $this->httpMethods)) {
+      throw new \BadFunctionCallException("Unknown Router method: $method");
     }
   }
 
