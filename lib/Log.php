@@ -2,89 +2,134 @@
 
 namespace Andygrond\Hugonette;
 
-/* Log facade for Hugonette
- * Utilizes Tracy debugger if available
+/* Log Facade for Hugonette
+ * Uses PSR-3 log levels + level 'view' for user awareness
+ * Channel 'tracy' and 'ajax' utilizes Tracy debugger
+ * For channel 'ajax' use Chrome with FireLogger extension
+ *
  * @author Andygrond 2019
  * Dependency: https://github.com/nette/tracy
- * Optional dependency: https://github.com/donatj/PhpUserAgent
+ * Dependency: https://github.com/donatj/PhpUserAgent
+ * todo: tests of mailing, output debugger, ajax channel
 **/
-
-// todo: error levels and mailing: https://doc.nette.org/en/2.1/debugging
-// todo: send job $elapsed time somewhere
 
 use Tracy\Debugger;
 use Tracy\OutputDebugger;
 
 class Log
 {
-  // allowed levels of message
-  private static $allowedTypes = [ 'debug', 'info', 'notice', 'view', 'warning', 'error', 'critical', 'alert', 'emergency' ];
-
-  private static $collection = [];  // messages waiting for output to file
-  private static $jobStack = [];    // job names stack
-  private static $isActive = false; // log is active
-
-  private static int $log_level;    // lowest log level logged
-  private static string $channel;   // active output channel
-  private static string $logFile;   // log filename with path
-
-  public static $viewErrors = [];   // messages collected to be passed to view
-  public static $debug = false;     // app is in debug mode
-
-
-  const LEVEL = [   // log level hierachy
-    'debug'     => 0,
-    'info'      => 1,
-    'notice'    => 2,
+  private const LEVEL = [   // message level hierachy
+    'debug'     => 1,
+    'info'      => 2,
     'view'      => 3,
-    'warning'   => 4,
-    'error'     => 5,
-    'critical'  => 6,
-    'alert'     => 7,
-    'emergency' => 8,
+    'notice'    => 4,
+    'warning'   => 5,
+    'error'     => 6,
+    'critical'  => 7,
+    'alert'     => 8,
+    'emergency' => 9,
   ];
 
+  private static $collection = []; // messages waiting for output
+  private static $jobStack = [];   // job names stack
+  private static $timeframes = []; // elapsed job times
+
+  private static $channel;         // active output channel
+  private static $logDir;          // path to log files
+  private static $logFile;         // path to log filename for file channel
+  private static $minLevel;        // lowest level of logged messages
+
+  public static $viewErrors = [];  // messages collected to be passed to view
+  public static $isActive = false; // log is set and active
+  public static $debug = false;    // debug mode flag
+
   // log initialization
-  // set log folder and Tracy debugger mode ['dev' | 'prod']
-  public static function set(string $logDir, string $mode = 'prod')
+  // @ $logDir - log folder
+  // @ $mode = debugger mode ['dev'|'prod']
+  // @ $channel - set log channel
+  public static function set(string $logDir, string $mode = 'prod', string $channel = 'auto')
   {
+    if (self::$isActive) {
+      throw new \BadMethodCallException("Log can not be set twice");
+    }
+    self::$logDir = rtrim(strtr($logDir, '\\', '/'), '/') .'/';
     self::$debug = !strncasecmp($mode, 'dev', 3);
-    $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-    Debugger::enable($logMode, $logDir);
+    self::$minLevel = self::$debug? 1 : 2;
     self::$isActive = true;
 
-    // Debugger::$strictMode = true;  // log all error types
-    // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
-    // Debugger::dispatch();  // do it after session reloading
+    self::channel($channel);
   }
 
-  // for mailing feature (not done yet)
+  // set lowest level of registered messages
+  public static function level(string $level)
+  {
+    if (!self::$minLevel = @self::LEVELS[$level]) {
+      throw new \UnexpectedValueException("Log level: $level is not valid. Use one of [" .implode('|', array_keys(self::LEVELS)) .']');
+    }
+  }
+
+  // for mailing feature in 'tracy' or 'ajax' channel (not tested)
   public static function email(string $email)
   {
     Debugger::$email = $email;
   }
 
+  // set log channel
+  // $channel auto = tracy if available, or file
+  // $filename - valid with file channel only - type .log will be added
+  public static function channel(string $channel, string $filename = 'common')
+  {
+    if (!self::$isActive) {
+      throw new \BadMethodCallException("Log must be set to be able to set channel");
+    }
+    if ($channel == 'auto') {
+      $channel = class_exists('Debugger')? 'tracy' : 'file';
+    }
+    self::$channel = $channel;
+
+    switch($channel) {
+      case 'file':
+        self::$logFile = self::$logDir .$filename .'.log';
+        break;
+      case 'tracy':
+        $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+        Debugger::enable($logMode, self::$logDir);
+        // Debugger::$strictMode = true;  // log all error types
+        // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
+        // Debugger::dispatch();  // do it after session reloading
+        break;
+      case 'ajax':
+        break;
+      default:
+        throw new \UnexpectedValueException("Log channel: $channel is not valid. Use one of [" .implode('|', array_keys(self::CHANNELS)) .']');
+    }
+  }
+
   // output the message
   // $args = [record, data]
-  public static function __callStatic(string $type, array $args)
+  public static function __callStatic(string $level, array $args)
   {
-    if (in_array($type, self::$allowedTypes)) {
-      if ($type == 'view') {
-        self::$viewErrors[] = $args[0];
-      }
+    if (!$levelNo = @self::LEVELS[$level]) {
+      throw new \BadMethodCallException('Log method not found: ' .$level);
+    }
+    if (!self::$isActive) {
+      throw new \BadMethodCallException('Log must be set to be used');
+    }
 
-      $message = strtoupper($type) .': ';
+    [$record, $data] = $args;
+    if ($level == 'view') {  // collect view errors
+      self::$viewErrors[] = $record;
+    }
+
+    if ($levelNo >= self::$minLevel) {  // message filtering
+      $message = strtoupper($level) .': ';
       if (self::$jobStack) {
         $message .= end(self::$jobStack) .': ';
       }
-
       self::$collection[] = [
-        'message' => $message .$args[0],
-        'data' => isset($args[1])? json_encode($args[1]) : '',
+        'message' => $message .$record,
+        'data' => isset($args[1])? json_encode($data, JSON_UNESCAPED_UNICODE) : '',
       ];
-
-    } else {
-      trigger_error("Log message type: $type not allowed", E_USER_WARNING);
     }
   }
 
@@ -94,36 +139,37 @@ class Log
     OutputDebugger::enable();
   }
 
-  // set job name
-  public static function job(string $name)
-  {
-    $name = ucfirst($name);
-    self::$jobStack[] = $name;
-    Debugger::timer($name);
-  }
-
-  // reset old job name
-  public static function jobDone()
-  {
-    $name = array_pop(self::$jobStack);
-    $elapsed = Debugger::timer($name);
-    // todo: send $elapsed somewhere
-  }
-
   // put all collected messages to log file
   public static function close()
   {
     if (!self::$isActive) {
       return;
     }
+    self::$isActive = false;
+    $record = self::renderRecord();
 
-    $record = self::formatTimeframe() .$_SERVER['REMOTE_ADDR'];
+    switch(self::$channel) {
+      case 'file':
+        $record = date('Y-m-d H:i:s.u ') .$record;
+        file_put_contents(self::$logFile, $record ."\n", FILE_APPEND | LOCK_EX);
+        break;
+      case 'ajax':
+        Debugger::fireLog($record);
+      case 'tracy':
+        Debugger::log($record);
+        break;
+    }
+  }
 
+  private static function renderRecord()
+  {
     if (php_sapi_name() == "cli") {
-      $record .= ' Command Line';
+      $record = 'Command Line';
     } elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       $agent = parse_user_agent();
-      $record .= ' ' .$agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
+      $record = $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
+    } else {
+      $record = '';
     }
 
     if (self::$collection) {
@@ -133,18 +179,54 @@ class Log
       self::$collection = '';
     }
 
-    $record .= ' ' .$_SERVER['REQUEST_METHOD'];
-    Debugger::log($record);
+    return self::formatTimes() .$_SERVER['REMOTE_ADDR'] ." $record " .$_SERVER['REQUEST_METHOD'];
   }
 
-  private static function formatTimeframe(string $name = null): string
+  // set job name
+  public static function job(string $name)
   {
-    if ($gap = Debugger::timer($name)) {
-      $gap = 1000*round($gap, 3);
-      return "[$gap ms] ";
-    } else {
-      return "[n/a] ";
+    $name = ucfirst($name);
+    self::$jobStack[] = $name;
+    self::$timeframes[$name]['start'] = microtime(true);
+  }
+
+  // quit current job and reset old job name
+  public static function jobDone(string $name)
+  {
+    $lastName = array_pop(self::$jobStack);
+    if ($name != $lastName || !isset(self::$timeframes[$name])) {
+
     }
+    self::timeStopper($name);
+  }
+
+  // elapsed job time stopper
+  public static function timeStopper(string $name)
+  {
+    $delta = microtime(true) - self::$timeframes[$name]['start'];
+    self::$timeframes[$name]['delta'] = formatDeltaTime($delta);
+  }
+
+  // format all elapsed time frames for output
+  private static function formatTimes(): string
+  {
+    $times = [];
+    $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+    $times[] = self::formatDeltaTime($appTime);
+
+    if (self::$timeframes) {
+      foreach (self::$timeframes as $name => $frame) {
+        $times[] = $name .': ' .$frame['delta'];
+      }
+    }
+    return '[' .implode('|', $times) .']';
+  }
+
+  private static function formatDeltaTime($delta): string
+  {
+    $precise = ($delta <0.1)? 1 : 0;
+		$delta = round(1000*$delta, $precise);
+    return $delta .' ms';
   }
 
 }

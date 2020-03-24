@@ -11,7 +11,7 @@ class Route
   private $page;  // page presentation parameters completed during routing process
   private $fullRequestPath;   // full URL path requested
   private $routeCounter = 0;  // counter of route trials
-  private $httpMethods = ['get', 'post', 'put', 'delete'],
+  private $httpMethods = ['get', 'post', 'put', 'delete'];
 
   // attributes passed as optional 3rd argument of group method
   private $attrib = [
@@ -57,7 +57,7 @@ class Route
       $this->runPresenter($args[1]);
     }
     if (!in_array($method, $this->httpMethods)) {
-      throw new \BadFunctionCallException("Unknown Router method: $method");
+      throw new \BadMethodCallException("Router method not found: $method");
     }
   }
 
