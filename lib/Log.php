@@ -18,7 +18,7 @@ use Tracy\OutputDebugger;
 
 class Log
 {
-  private const LEVEL = [   // message level hierachy
+  private const LEVELS = [   // message level hierachy
     'debug'     => 1,
     'info'      => 2,
     'view'      => 3,
@@ -74,6 +74,12 @@ class Log
     Debugger::$email = $email;
   }
 
+  // enable Tracy output debugger
+  public static function output()
+  {
+    OutputDebugger::enable();
+  }
+
   // set log channel
   // $channel auto = tracy if available, or file
   // $filename - valid with file channel only - type .log will be added
@@ -83,7 +89,7 @@ class Log
       throw new \BadMethodCallException("Log must be set to be able to set channel");
     }
     if ($channel == 'auto') {
-      $channel = class_exists('Debugger')? 'tracy' : 'file';
+      $channel = class_exists('\Tracy\Debugger')? 'tracy' : 'file';
     }
     self::$channel = $channel;
 
@@ -116,7 +122,7 @@ class Log
       throw new \BadMethodCallException('Log must be set to be used');
     }
 
-    [$record, $data] = $args;
+    [$record, $data] = array_pad($args, 2, '');
     if ($level == 'view') {  // collect view errors
       self::$viewErrors[] = $record;
     }
@@ -131,12 +137,6 @@ class Log
         'data' => isset($args[1])? json_encode($data, JSON_UNESCAPED_UNICODE) : '',
       ];
     }
-  }
-
-  // enable Tracy output debugger
-  public static function output()
-  {
-    OutputDebugger::enable();
   }
 
   // put all collected messages to log file
