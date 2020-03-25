@@ -88,9 +88,8 @@ class Presenter
   // upload file
   public function upFile(string $sourcePath, string $filename = null, bool $inline = false, string $mimeType = null)
   {
-    $this->upHeaders($filename?? $sourcePath, $inline, $mimeType);
-
     if (is_file($sourcePath)) {
+      $this->upHeaders($filename?? $sourcePath, $inline, $mimeType);
       readfile($sourcePath);
     } else {
       http_response_code(404);
@@ -100,18 +99,18 @@ class Presenter
     exit;
   }
 
-  private function upHeaders(string $filename, bool $inline, string $mimeType)
+  private function upHeaders(string $filename, bool $inline, string $mimeType = null)
   {
     $file = pathinfo($filename);
     $disposition = $inline? 'inline' : 'attachment';
 
     if (!$mimeType) {
-      $mimeType = @$this->mimeTypes[$file['extension']]?? 'application/octet-stream';
+      $mimeType = $this->mimeTypes[$file['extension']]?? 'application/octet-stream';
     }
 
     header('Content-Type: ' .$mimeType);
     header('Content-Disposition: ' .$disposition .'; filename=' .$file['basename']);
-    header('Pragma: no-cache');
+    header('Cache-Control: no-cache');
   }
 
 }
