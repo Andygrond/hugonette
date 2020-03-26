@@ -179,7 +179,7 @@ class Log
       self::$collection = '';
     }
 
-    return self::formatTimes() .$_SERVER['REMOTE_ADDR'] ." $record " .$_SERVER['REQUEST_METHOD'];
+    return $_SERVER['REMOTE_ADDR'] .self::formatTimes() .$_SERVER['REQUEST_METHOD'] .$record;
   }
 
   // set job name
