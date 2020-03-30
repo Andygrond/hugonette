@@ -32,7 +32,6 @@ class Log
 
   private static $collection = []; // messages waiting for output
   private static $jobStack = [];   // job names stack
-  private static $timeframes = []; // elapsed job times
 
   private static $channel;         // active output channel
   private static $logDir;          // path to log files
@@ -40,6 +39,7 @@ class Log
   private static $minLevel;        // lowest level of logged messages
 
   public static $viewErrors = [];  // messages collected to be passed to view
+  public static $durations = [];  // elapsed job times
   public static $isActive = false; // log is set and active
   public static $debug = false;    // debug mode flag
 
@@ -185,16 +185,15 @@ class Log
   // set job name
   public static function job(string $name)
   {
-    $name = ucfirst($name);
     self::$jobStack[] = $name;
-    self::$timeframes[$name]['start'] = microtime(true);
+    self::$durations[$name]['start'] = microtime(true);
   }
 
   // quit current job and reset old job name
-  public static function jobDone(string $name)
+  public static function done(string $name)
   {
     $lastName = array_pop(self::$jobStack);
-    if ($name != $lastName || !isset(self::$timeframes[$name])) {
+    if ($name != $lastName || !isset(self::$durations[$name])) {
 
     }
     self::timeStopper($name);
@@ -203,8 +202,8 @@ class Log
   // elapsed job time stopper
   public static function timeStopper(string $name)
   {
-    $delta = microtime(true) - self::$timeframes[$name]['start'];
-    self::$timeframes[$name]['delta'] = formatDeltaTime($delta);
+    $duration = microtime(true) - self::$durations[$name]['start'];
+    self::$durations[$name]['duration'] = self::formatDuration($duration);
   }
 
   // format all elapsed time frames for output
@@ -212,21 +211,21 @@ class Log
   {
     $times = [];
     $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-    $times[] = self::formatDeltaTime($appTime);
+    $times[] = self::formatDuration($appTime);
 
-    if (self::$timeframes) {
-      foreach (self::$timeframes as $name => $frame) {
-        $times[] = $name .': ' .$frame['delta'];
+    if (self::$durations) {
+      print_r(self::$durations);
+      foreach (self::$durations as $name => $frame) {
+        $times[] = $name .': ' .$frame['duration'];
       }
     }
     return '[' .implode('|', $times) .']';
   }
 
-  private static function formatDeltaTime($delta): string
+  private static function formatDuration($duration): string
   {
-    $precise = ($delta <0.1)? 1 : 0;
-		$delta = round(1000*$delta, $precise);
-    return $delta .' ms';
+    $precise = ($duration <0.1)? 1 : 0;
+    return round(1000*$duration, $precise) .' ms';
   }
 
 }
