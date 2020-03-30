@@ -216,7 +216,6 @@ class Log
     $times[] = self::formatDuration($appTime);
 
     if (self::$durations) {
-      print_r(self::$durations);
       foreach (self::$durations as $name => $frame) {
         $times[] = $name .': ' .$frame['duration'];
       }
