@@ -46,8 +46,8 @@ class Log
   // log initialization
   // @ $logDir - log folder
   // @ $mode = debugger mode ['dev'|'prod']
-  // @ $channel - set log channel
-  public static function set(string $logDir, string $mode = 'prod', string $channel = 'auto')
+  // @ $channel - set main log channel
+  public static function set(string $logDir, string $channel, string $mode = 'prod')
   {
     if (self::$isActive) {
       throw new \BadMethodCallException("Log can not be set twice");
@@ -81,15 +81,17 @@ class Log
   }
 
   // set log channel
-  // $channel auto = tracy if available, or file
-  // $filename - valid with file channel only - type .log will be added
-  public static function channel(string $channel, string $filename = 'common')
+  // $channel tracy, ajax, or file:filename
+  // filename type .log will be added
+  public static function channel(string $channel)
   {
     if (!self::$isActive) {
       throw new \BadMethodCallException("Log must be set to be able to set channel");
     }
-    if ($channel == 'auto') {
-      $channel = class_exists('\Tracy\Debugger')? 'tracy' : 'file';
+    $ch = explode(':', $channel);
+    if (@$ch[1]) {
+      $channel = $ch[0];
+      $filename = $ch[1];
     }
     self::$channel = $channel;
 
@@ -179,7 +181,7 @@ class Log
       self::$collection = '';
     }
 
-    return $_SERVER['REMOTE_ADDR'] .self::formatTimes() .$_SERVER['REQUEST_METHOD'] .$record;
+    return $_SERVER['REMOTE_ADDR'] .' ' .self::times() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$record;
   }
 
   // set job name
@@ -207,7 +209,7 @@ class Log
   }
 
   // format all elapsed time frames for output
-  private static function formatTimes(): string
+  public static function times(): string
   {
     $times = [];
     $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
@@ -219,7 +221,7 @@ class Log
         $times[] = $name .': ' .$frame['duration'];
       }
     }
-    return '[' .implode('|', $times) .']';
+    return '[' .implode('; ', $times) .']';
   }
 
   private static function formatDuration($duration): string
