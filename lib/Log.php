@@ -181,7 +181,7 @@ class Log
       self::$collection = '';
     }
 
-    return $_SERVER['REMOTE_ADDR'] .' ' .self::times() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$record;
+    return $_SERVER['REMOTE_ADDR'] .' ' .self::timesTxt() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$record;
   }
 
   // set job name
@@ -191,25 +191,21 @@ class Log
     self::$durations[$name]['start'] = microtime(true);
   }
 
-  // quit current job and reset old job name
+  // quit current job
+  // reset old job name and save job duration
   public static function done(string $name)
   {
     $lastName = array_pop(self::$jobStack);
     if ($name != $lastName || !isset(self::$durations[$name])) {
-
+      throw new \InvalidArgumentException("Job $name interlaces with another. Jobs should be nested.");
     }
-    self::timeStopper($name);
-  }
 
-  // elapsed job time stopper
-  public static function timeStopper(string $name)
-  {
     $duration = microtime(true) - self::$durations[$name]['start'];
     self::$durations[$name]['duration'] = self::formatDuration($duration);
   }
 
-  // format all elapsed time frames for output
-  public static function times(): string
+  // get array of all durations
+  public static function times(): array
   {
     $times = [];
     $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
@@ -220,7 +216,13 @@ class Log
         $times[] = $name .': ' .$frame['duration'];
       }
     }
-    return '[' .implode('; ', $times) .']';
+    return $times;
+  }
+
+  // format all durations for output
+  public static function timesTxt(): string
+  {
+    return '[' .implode('; ', $this->times()) .']';
   }
 
   private static function formatDuration($duration): string
