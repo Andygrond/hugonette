@@ -188,7 +188,13 @@ class Log
   public static function job(string $name)
   {
     self::$jobStack[] = $name;
+    if (@self::$durations[$name]['start'])
+      throw new \InvalidArgumentException("Job $name double start.");
+
     self::$durations[$name]['start'] = microtime(true);
+    if (!@self::$durations[$name]['duration']) {
+      self::$durations[$name]['duration'] = 0;
+    }
   }
 
   // quit current job
@@ -196,12 +202,13 @@ class Log
   public static function done(string $name)
   {
     $lastName = array_pop(self::$jobStack);
-    if ($name != $lastName || !isset(self::$durations[$name])) {
-      throw new \InvalidArgumentException("Job $name interlaces with another. Jobs should be nested.");
-    }
+    if ($name != $lastName || !isset(self::$durations[$name]))
+      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
+    if (!@self::$durations[$name]['start'])
+      throw new \InvalidArgumentException("Job $name done but not started.");
 
-    $duration = microtime(true) - self::$durations[$name]['start'];
-    self::$durations[$name]['duration'] = self::formatDuration($duration);
+    self::$durations[$name]['duration'] += microtime(true) - self::$durations[$name]['start'];
+    self::$durations[$name]['start'] = 0;
   }
 
   // get array of all durations
@@ -213,7 +220,7 @@ class Log
 
     if (self::$durations) {
       foreach (self::$durations as $name => $frame) {
-        $times[] = $name .': ' .$frame['duration'];
+        $times[] = $name .': ' .self::formatDuration($frame['duration']);
       }
     }
     return $times;
