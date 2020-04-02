@@ -34,28 +34,38 @@ class Log
   private static $jobStack = [];   // job names stack
 
   private static $channel;         // active output channel
-  private static $logDir;          // path to log files
-  private static $logFile;         // path to log filename for file channel
+  private static $logPath;         // path to log files
+  private static $logFile = '';    // path to log filename for file channel
   private static $minLevel;        // lowest level of logged messages
 
   public static $viewErrors = [];  // messages collected to be passed to view
-  public static $durations = [];  // elapsed job times
+  public static $durations = [];   // elapsed job times
   public static $isActive = false; // log is set and active
   public static $debug = false;    // debug mode flag
 
-  // log initialization
-  // @ $logDir - log folder
-  // @ $mode = debugger mode ['dev'|'prod']
-  // @ $channel - set main log channel
-  public static function set(string $logDir, string $channel, string $mode = 'prod')
+  /* log initialization
+    @ $path - /path/to/log/filename.log or /path/to/log/folder/
+    extension .log is obligatory for files
+    omitted filename can be set later, or native tracy log will be used
+    @ $channel - set main log channel
+    @ $mode = debugger mode ['dev'|'prod']
+  */
+  public static function set(string $path, string $channel, string $mode = 'prod')
   {
     if (self::$isActive) {
       throw new \BadMethodCallException("Log can not be set twice");
     }
-    self::$logDir = rtrim(strtr($logDir, '\\', '/'), '/') .'/';
+    self::$isActive = true;
     self::$debug = !strncasecmp($mode, 'dev', 3);
     self::$minLevel = self::$debug? 1 : 2;
-    self::$isActive = true;
+
+    if (strrchr($path, '.') == '.log') {
+      $pos = strrpos($path, '/')+1;
+      self::$logPath = rtrim(substr($path, 0, $pos), '/') .'/';
+      self::$logFile = $path;
+    } else {
+      self::$logPath = rtrim($path, '/') .'/';
+    }
 
     self::channel($channel);
   }
@@ -66,6 +76,12 @@ class Log
     if (!self::$minLevel = @self::LEVELS[$level]) {
       throw new \UnexpectedValueException("Log level: $level is not valid. Use one of [" .implode('|', array_keys(self::LEVELS)) .']');
     }
+  }
+
+  // set or change log file name, relative to path used in "set" method
+  public static function filename(string $filename)
+  {
+    self::$logFile = self::$logPath .$filename;
   }
 
   // for mailing feature in 'tracy' or 'ajax' channel (not tested)
@@ -81,31 +97,23 @@ class Log
   }
 
   // set log channel
-  // $channel tracy, ajax, or file:filename
-  // filename type .log will be added
+  // $channel: tracy, ajax, or plain - Tracy will not be used in "plain" channel
   public static function channel(string $channel)
   {
     if (!self::$isActive) {
       throw new \BadMethodCallException("Log must be set to be able to set channel");
     }
-    $ch = explode(':', $channel);
-    if (@$ch[1]) {
-      $channel = $ch[0];
-      $filename = $ch[1];
-    }
     self::$channel = $channel;
 
     switch($channel) {
-      case 'file':
-        self::$logFile = self::$logDir .$filename .'.log';
-        break;
       case 'tracy':
         $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-        Debugger::enable($logMode, self::$logDir);
+        Debugger::enable($logMode, self::$logPath);
         // Debugger::$strictMode = true;  // log all error types
         // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
         // Debugger::dispatch();  // do it after session reloading
         break;
+      case 'file':
       case 'ajax':
         break;
       default:
