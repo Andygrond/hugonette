@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette;
 
 /* Log Facade for Hugonette
- * Uses PSR-3 log levels + level 'view' for user awareness
+ * Uses PSR-3 log levels + level 'view' which collects messages for user awareness
  * Channel 'tracy' and 'ajax' utilizes Tracy debugger
  * For channel 'ajax' use Chrome with FireLogger extension
  *
@@ -158,16 +158,14 @@ class Log
     self::$isActive = false;
     $record = self::renderRecord();
 
-    switch(self::$channel) {
-      case 'file':
-        $record = date('Y-m-d H:i:s.u ') .$record;
-        file_put_contents(self::$logFile, $record ."\n", FILE_APPEND | LOCK_EX);
-        break;
-      case 'ajax':
-        Debugger::fireLog($record);
-      case 'tracy':
-        Debugger::log($record);
-        break;
+    if (self::$logFile) {
+      file_put_contents(self::$logFile, date('Y-m-d H:i:s.u ') .$record ."\n", FILE_APPEND | LOCK_EX);
+    } else {
+      Debugger::log($record);
+    }
+
+    if (self::$channel == 'ajax') {
+      Debugger::fireLog($record);
     }
   }
 
@@ -224,26 +222,30 @@ class Log
   {
     $times = [];
     $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-    $times[] = self::formatDuration($appTime);
+    $times[] = self::easyTime($appTime);
 
     if (self::$durations) {
       foreach (self::$durations as $name => $frame) {
-        $times[] = $name .': ' .self::formatDuration($frame['duration']);
+        $times[] = $name .': ' .self::easyTime($frame['duration']);
       }
     }
     return $times;
   }
 
-  // format all durations for output
-  public static function timesTxt(): string
-  {
-    return '[' .implode('; ', $this->times()) .']';
-  }
+  // get time diration in user friendly format
+  // argument in milliseconds
+  	public static function easyTime(int $duration): string
+  	{
+  		if ($duration > 90000) {
+  			$info =  round($duration/60000, 1) .' min';
+  		} elseif ($duration > 800) {
+  			$lo = ($duration > 10000)? 1 : ($duration > 1000)? 2 : 3;
+  			$info = round($duration/1000, $lo) .' s';
+  		} else {
+  			$info = round($duration) .' ms';
+  		}
+  		return $info;
+  	}
 
-  private static function formatDuration($duration): string
-  {
-    $precise = ($duration <0.1)? 1 : 0;
-    return round(1000*$duration, $precise) .' ms';
-  }
 
 }
