@@ -68,6 +68,15 @@ class Log
     }
 
     self::channel($channel);
+
+    if ($channel == 'tracy') {
+      register_shutdown_function(function(){  // Tracy seems to be skipping some warnings
+        $error = error_get_last();
+        if (null !== $error) {
+          Log::error('caught at shutdown', $error);
+        }
+      });
+    }
   }
 
   // set lowest level of registered messages
@@ -171,23 +180,24 @@ class Log
 
   private static function renderRecord()
   {
+    $record = ' ';
     if (php_sapi_name() == "cli") {
-      $record = 'Command Line';
+      $record .= 'Command Line';
     } elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       $agent = parse_user_agent();
-      $record = $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
-    } else {
-      $record = '';
+      $record .= $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
     }
 
     if (self::$collection) {
       foreach (self::$collection as $item) {
-        $record .= "\n" .$item['message'] .' | ' .$item['data'];
+        $record .= "\n" .$item['message'] .'  ' .$item['data'];
       }
+      $record .= "\n";
       self::$collection = '';
     }
 
-    return $_SERVER['REMOTE_ADDR'] .' ' .self::timesTxt() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$record;
+    $times = ' [' .implode('; ', self::times()) .'] ';
+    return $_SERVER['REMOTE_ADDR'] .$times .$_SERVER['REQUEST_METHOD'] .$record;
   }
 
   // set job name
