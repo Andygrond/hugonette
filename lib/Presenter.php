@@ -56,8 +56,8 @@ class Presenter
         bdump($model, 'model');
       }
 
-      $template = $this->template ?: @$page->template;
-      $view = $this->view ?: @$page->view;
+      $template = $this->template ?: $page->template;
+      $view = $this->view ?: $page->view;
       (new View($page->publishBase .$template, $page->cacheLatte))->$view($model);
 
       exit;

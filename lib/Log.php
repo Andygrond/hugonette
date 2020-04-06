@@ -44,9 +44,9 @@ class Log
   public static $debug = false;    // debug mode flag
 
   /* log initialization
-    @ $path - /path/to/log/filename.log or /path/to/log/folder/
-    extension .log is obligatory for files
-    omitted filename can be set later, or native tracy log will be used
+    @ $path = /path/to/log/filename.log or /path/to/log/folder/
+      extension .log is obligatory for files
+      omitted filename can be set later, or native tracy log will be used
     @ $channel - set main log channel
     @ $mode = debugger mode ['dev'|'prod']
   */
@@ -63,20 +63,16 @@ class Log
       $pos = strrpos($path, '/')+1;
       self::$logPath = rtrim(substr($path, 0, $pos), '/') .'/';
       self::$logFile = $path;
+
+      ini_set('error_log', $path);
+      if (self::$debug) {
+        ini_set('display_errors', true);
+      }
     } else {
       self::$logPath = rtrim($path, '/') .'/';
     }
 
     self::channel($channel);
-
-    if ($channel == 'tracy') {
-      register_shutdown_function(function(){  // Tracy seems to be skipping some warnings
-        $error = error_get_last();
-        if (null !== $error) {
-          Log::error('caught at shutdown', $error);
-        }
-      });
-    }
   }
 
   // set lowest level of registered messages
@@ -100,7 +96,7 @@ class Log
   }
 
   // enable Tracy output debugger
-  public static function output()
+  public static function outputDebugger()
   {
     OutputDebugger::enable();
   }
@@ -208,7 +204,7 @@ class Log
       throw new \InvalidArgumentException("Job $name double start.");
 
     self::$durations[$name]['start'] = microtime(true);
-    if (!@self::$durations[$name]['duration']) {
+    if (!isset(self::$durations[$name]['duration'])) {
       self::$durations[$name]['duration'] = 0;
     }
   }
