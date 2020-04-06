@@ -63,11 +63,7 @@ class Log
       $pos = strrpos($path, '/')+1;
       self::$logPath = rtrim(substr($path, 0, $pos), '/') .'/';
       self::$logFile = $path;
-
       ini_set('error_log', $path);
-      if (self::$debug) {
-        ini_set('display_errors', true);
-      }
     } else {
       self::$logPath = rtrim($path, '/') .'/';
     }
@@ -112,14 +108,17 @@ class Log
 
     switch($channel) {
       case 'tracy':
+      case 'ajax':
         $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
         Debugger::enable($logMode, self::$logPath);
         // Debugger::$strictMode = true;  // log all error types
         // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
         // Debugger::dispatch();  // do it after session reloading
         break;
-      case 'file':
-      case 'ajax':
+      case 'plain':
+        if (self::$debug) {
+          ini_set('display_errors', true);
+        }
         break;
       default:
         throw new \UnexpectedValueException("Log channel: $channel is not valid. Use one of [" .implode('|', array_keys(self::CHANNELS)) .']');
