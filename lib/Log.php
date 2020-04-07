@@ -160,6 +160,12 @@ class Log
       return;
     }
     self::$isActive = false;
+    self::flush();
+  }
+
+  // forced write to file
+  public static function flush()
+  {
     $record = self::renderRecord();
 
     if (self::$logFile) {
