@@ -243,15 +243,15 @@ class Log
     return $times;
   }
 
-  // get time diration in user friendly format
+  // get time duration in user friendly format
   // argument in milliseconds
   	public static function easyTime(int $duration): string
   	{
-  		if ($duration > 90000) {
-  			$info =  round($duration/60000, 1) .' min';
-  		} elseif ($duration > 800) {
-  			$lo = ($duration > 10000)? 1 : ($duration > 1000)? 2 : 3;
-  			$info = round($duration/1000, $lo) .' s';
+  		if ($duration > 90.) {
+  			$info =  round($duration/60, 1) .' min';
+  		} elseif ($duration > .8) {
+  			$lo = ($duration > 10)? 1 : ($duration > 1)? 2 : 3;
+  			$info = round($duration, $lo) .' s';
   		} else {
   			$info = round($duration) .' ms';
   		}
