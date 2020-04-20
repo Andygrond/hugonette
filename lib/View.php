@@ -6,6 +6,8 @@ namespace Andygrond\Hugonette;
 * @author Andygrond 2020
 **/
 
+use Latte\Engine;
+
 class View
 {
   protected $template;
@@ -20,7 +22,7 @@ class View
   // render model data using Latte templating engine
   public function latte(array &$_model)
   {
-    $latte = new \Latte\Engine;
+    $latte = new Engine;
     $latte->setTempDirectory($this->cacheLatte);
 
     $latte->render($this->template, $_model);

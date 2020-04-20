@@ -3,38 +3,16 @@
 namespace Andygrond\Hugonette;
 
 /* MVP Presenter class for Hugonette
-* @author Andygrond 2020
+ * @author Andygrond 2020
 **/
 
 class Presenter
 {
   private $method;        // presenter method determined in route
-  private $mimeTypes = [  // default MIME types for uploading
-    'txt' => 'text/plain;charset=UTF-8',
-    'csv' => 'text/csv;charset=UTF-8',
-    'html' => 'text/html',
-    'xml' => 'text/xml',
-    'css' => 'text/css',
-    'js' => 'application/javascript',
-    'zip' => 'application/zip',
-    'pdf' => 'application/pdf',
-    'json' => 'application/json',
-    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'png' => 'image/png',
-    'jpg' => 'image/jpeg',
-    'jpeg' => 'image/jpeg',
-    'webp' => 'image/webp',
-    'svg' => 'image/svg+xml',
-    'gif' => 'image/gif',
-    'mp4' => 'video/mp4',
-    'webm' => 'video/webm',
-  ];
 
   protected $page;      // navigation data for response processing
-  protected $template;  // template set in presenter method
-  protected $view;      // view type set in presenter method
+  protected $template;  // template set in presenter extension
+  protected $view;      // view type set in presenter extension
 
   public function __construct(string $method = 'default')
   {
@@ -43,7 +21,7 @@ class Presenter
 
   // return model data using presenter method declared in router
   // presenter method will return an array of model data
-  // when this case appears not relevant - presenter method will return false
+  // when this case appears not relevant - presenter extended method will return false
   public function run(\stdClass $page)
   {
     $this->page = $page;
@@ -56,13 +34,20 @@ class Presenter
         bdump($model, 'model');
       }
 
-      $template = $this->template ?: $page->template;
       $view = $this->view ?: $page->view;
-      (new View($page->publishBase .$template, $page->cacheLatte))->$view($model);
+      $template = $this->template ?? $page->template;
+      $template = ($view == 'json')? '' : $page->publishBase .$template;
+      (new View($template, $page->cacheLatte))->$view($model);
 
       exit;
     }
     // else bypass to the next route
+  }
+
+  // data or file transfer
+  public function upload(\stdClass $page)
+  {
+    
   }
 
   // redirect @$to if URI simply starts from $pattern or $pattern is empty
@@ -77,19 +62,28 @@ class Presenter
   }
 
   // upload content
-  public function upContent(string $content, string $filename, bool $inline = false, string $mimeType = null)
+  public function upContent(string $content, string $filename)
   {
-    $this->upHeaders($filename, $inline, $mimeType);
+    $this->upHeaders($filename);
+    echo $content;
+
+    exit;
+  }
+
+  // upload content
+  public function upJson(string $content)
+  {
+    $this->upHeaders('json');
     echo $content;
 
     exit;
   }
 
   // upload file
-  public function upFile(string $sourcePath, string $filename = null, bool $inline = false, string $mimeType = null)
+  public function upFile(string $sourcePath, string $filename = null)
   {
     if (is_file($sourcePath)) {
-      $this->upHeaders($filename?? $sourcePath, $inline, $mimeType);
+      $this->upHeaders($filename?? );
       readfile($sourcePath);
     } else {
       http_response_code(404);
@@ -97,20 +91,6 @@ class Presenter
     }
 
     exit;
-  }
-
-  private function upHeaders(string $filename, bool $inline, string $mimeType = null)
-  {
-    $file = pathinfo($filename);
-    $disposition = $inline? 'inline' : 'attachment';
-
-    if (!$mimeType) {
-      $mimeType = $this->mimeTypes[$file['extension']]?? 'application/octet-stream';
-    }
-
-    header('Content-Type: ' .$mimeType);
-    header('Content-Disposition: ' .$disposition .'; filename=' .$file['basename']);
-    header('Cache-Control: no-cache');
   }
 
 }
