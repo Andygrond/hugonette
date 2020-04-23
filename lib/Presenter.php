@@ -19,9 +19,9 @@ class Presenter
     $this->method = $method;
   }
 
-  // return model data using presenter method declared in router
-  // presenter method will return an array of model data
-  // when this case appears not relevant - presenter extended method will return false
+  // return model data using presenter class@method declared in router
+  // method of extended presenter class will return an array of model data
+  // when the route appears not relevant - presenter method will return false
   public function run(\stdClass $page)
   {
     $this->page = $page;
@@ -45,9 +45,13 @@ class Presenter
   }
 
   // data or file transfer
-  public function upload(\stdClass $page)
+  public function file(\stdClass $page)
   {
-    
+    $this->page = $page;
+
+    $model = $this->{$this->method}();	// presenter method call
+
+    (new Upload($page))->file($model);
   }
 
   // redirect @$to if URI simply starts from $pattern or $pattern is empty
@@ -57,38 +61,6 @@ class Presenter
     $code = $permanent? 301 : 302;
     Log::info($code .' Redirected to: ' .$to);
     header('Location: ' .$to, true, $code);
-
-    exit;
-  }
-
-  // upload content
-  public function upContent(string $content, string $filename)
-  {
-    $this->upHeaders($filename);
-    echo $content;
-
-    exit;
-  }
-
-  // upload content
-  public function upJson(string $content)
-  {
-    $this->upHeaders('json');
-    echo $content;
-
-    exit;
-  }
-
-  // upload file
-  public function upFile(string $sourcePath, string $filename = null)
-  {
-    if (is_file($sourcePath)) {
-      $this->upHeaders($filename?? );
-      readfile($sourcePath);
-    } else {
-      http_response_code(404);
-      Log::warning('Uploaded file not found: ' .$sourcePath);
-    }
 
     exit;
   }

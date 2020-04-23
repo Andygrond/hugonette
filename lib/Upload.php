@@ -33,41 +33,35 @@ class Upload
   ];
 
   // send headers
-  // $fileExt = 'filename.ext' of received file or 'ext' only to open in browser
-  public function __construct(string $fileExt)
+  // $fileExt = suggested 'filename.ext' of received file or 'ext' when saving file is not intended
+  // $inline = browser tries to display the content, otherwise tries to save the file
+  public function __construct(string $fileExt, bool $inline = true)
   {
     header('Cache-Control: no-cache');
+    $disposition = $inline? 'inline' : 'attachment';
 
     if ($pos = strrpos($fileExt, '.')) {
-      $this->mimeType(substr($fileExt, $pos));
-      header('Content-Disposition: attachment; filename=' .$fileExt);
+      $disposition .= '; filename=' .$fileExt);
+      $extension = substr($fileExt, $pos);
     } else {
-      $this->mimeType($fileExt);
-      header('Content-Disposition: inline');
+      $extension = $fileExt;
     }
-  }
 
-  // send mime type header
-  private function mimeType(string $ext)
-  {
-    $mimeType = $this->mimeTypes[$ext]?? 'application/octet-stream';
+    $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
     header('Content-Type: ' .$mimeType);
+    header('Content-Disposition: ' .$disposition);
   }
 
   // upload content
   public function content(string $content)
   {
     echo $content;
-
-    exit;
   }
 
   // upload JSON content
-  public function json(array $data)
+  public function json($data)
   {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
-
-    exit;
   }
 
   // upload file
@@ -79,8 +73,6 @@ class Upload
       http_response_code(404);
       Log::warning('Uploaded file not found: ' .$sourceFile);
     }
-
-    exit;
   }
 
 }

@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette;
 
 /* Simple fast routing for Hugonette
-* @author Andygrond 2020
+ * @author Andygrond 2020
 **/
 
 class Route
@@ -48,12 +48,11 @@ class Route
 
   // route for single request method
   // @method - http method as a route function name
-  // @args = [$pattern, $model, $template]
+  // @args = [$pattern, $model]
   public function __call(string $method, array $args)
   {
     $this->routeCounter++;
     if ($this->checkMethod($method) && $this->regMatchPattern($args[0])) {
-//      $this->template(@$args[2]);
       $this->runPresenter($args[1]);
     }
     if (!in_array($method, $this->httpMethods)) {
@@ -66,10 +65,18 @@ class Route
   {
     $this->routeCounter++;
     if ($this->checkMethod('GET')) {
-      if ($this->template()) {
+      if ($this->page->template = $this->template()) {
         $this->runPresenter($presenter);
       }
     }
+  }
+
+  // if applicable, should be placed as the last routing directive in a group - for not routed URI
+  // @presenter usually shows status 404 with the native navigation panels
+  public function notFound(string $presenter)
+  {
+    $this->routeCounter++;
+    $this->runPresenter($presenter);
   }
 
   // redirect @$to if URI simply starts from $pattern or $pattern is empty
@@ -85,14 +92,6 @@ class Route
       }
       (new Presenter())->redirect($to, $permanent);
     }
-  }
-
-  // if applicable, should be placed as the last routing directive in a group - for not routed URI
-  // @presenter usually shows status 404 with the native navigation panels
-  public function notFound(string $presenter)
-  {
-    $this->routeCounter++;
-    $this->runPresenter($presenter);
   }
 
   // register a set of routes with a set of shared attributes.
@@ -148,17 +147,11 @@ class Route
     return (strpos($this->attrib['requestPath'], $pattern) === 0);
   }
 
-  // set template file name from given string if exists
-  private function template(string $path = null): bool
+  // return template file name if exists based on the URL
+  private function template(): string
   {
-    $path = $path ?: $this->attrib['requestPath'];  // template file name derived from URL
-    $template = $path .'index.html';
-
-    if (is_file($this->attrib['publishBase'] .$template)) {
-      $this->page->template = $template;
-      return true;
-    }
-    return false;
+    $template = $this->attrib['requestPath'] .'index.html';
+    return is_file($this->attrib['publishBase'] .$template)? $template : '';
   }
 
   // store request base and relative path
