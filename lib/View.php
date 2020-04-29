@@ -11,19 +11,20 @@ use Latte\Engine;
 class View
 {
   protected $template;
-  protected $cacheLatte;
+//  protected $cacheLatte;
 
-  public function __construct(string $template, string $cacheLatte)
+//  public function __construct(string $template, string $cacheLatte)
+  public function __construct(string $template)
   {
     $this->template = $template;
-    $this->cacheLatte = $cacheLatte;
+//    $this->cacheLatte = $cacheLatte;
   }
 
   // render model data using Latte templating engine
   public function latte(array &$_model)
   {
     $latte = new Engine;
-    $latte->setTempDirectory($this->cacheLatte);
+//    $latte->setTempDirectory($this->cacheLatte);
 
     $latte->render($this->template, $_model);
   }

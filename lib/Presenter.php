@@ -8,25 +8,23 @@ namespace Andygrond\Hugonette;
 
 class Presenter
 {
-  private $method;        // presenter method determined in route
-
-  protected $page;      // navigation data for response processing
+  protected $page;      // page attributes
   protected $template;  // template set in presenter extension
   protected $view;      // view type set in presenter extension
 
-  public function __construct(string $method = 'default')
+  // @page = object of page attributes
+  public function __construct(\stdClass $page)
   {
-    $this->method = $method;
+    $this->page = $page;
   }
 
   // return model data using presenter class@method declared in router
   // method of extended presenter class will return an array of model data
-  // when the route appears not relevant - presenter method will return false
-  public function run(\stdClass $page)
+  // when presenter method will return false, the route appears not relevant
+  // @method = presenter method determined in route definition
+  public function run(string $method)
   {
-    $this->page = $page;
-
-    $model = $this->{$this->method}();	// presenter method call
+    $model = $this->$method();	// presenter method call
 
     if ($model !== false) { // only when passed by presenter
       if (Log::$debug) {
@@ -37,7 +35,7 @@ class Presenter
       $view = $this->view ?: $page->view;
       $template = $this->template ?? $page->template;
       $template = ($view == 'json')? '' : $page->publishBase .$template;
-      (new View($template, $page->cacheLatte))->$view($model);
+      (new View($template))->$view($model);
 
       exit;
     }
@@ -52,17 +50,6 @@ class Presenter
     $model = $this->{$this->method}();	// presenter method call
 
     (new Upload($page))->file($model);
-  }
-
-  // redirect @$to if URI simply starts from $pattern or $pattern is empty
-  // @$permanent in Presenter defaults to http code 302 Found
-  public function redirect(string $to, bool $permanent = false)
-  {
-    $code = $permanent? 301 : 302;
-    Log::info($code .' Redirected to: ' .$to);
-    header('Location: ' .$to, true, $code);
-
-    exit;
   }
 
 }

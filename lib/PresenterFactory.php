@@ -10,12 +10,12 @@ final class PresenterFactory
 {
 
   // return instantiated presenter object
-  public static function create(string $presenter, string $namespace): Presenter
+  public static function create(string $presenter, $page)
   {
     [ $class, $method ] = explode(':', $presenter .':default');
-    $class = $namespace .'\\' .ucwords($class);
+    $class = $page['presenterNamespace'] .'\\' .ucwords($class);
 
-    return new $class($method);
+    (new $class((object) $page))->run($method);
   }
 
 }
