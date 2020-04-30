@@ -8,16 +8,15 @@ namespace Andygrond\Hugonette;
 
 class Page
 {
-  public $trialCounter = 0; // counter of route trials
+  public $trialCounter = 0; // route trials counter
   private $attrib = [
 //===== must be declared
-    'publishBase' => null,  // path to rendered static site (Hugo public/ folder)
-//    'tempDir' => null,    // path to cache used in view mode = latte
+//    'staticBase' => null,  // path to rendered static site (Hugo public/ folder)
 //===== defaults can be altered
     'view' => 'plain',      // view mode [ plain | latte | json | file | inline ]
     'presenterNamespace' => 'App\Presenters',
 //===== not configurable - will be calculated
-//    'pathInfo' => null,    // full request URI without GET args
+//    'requestPath' => null,    // full request URI without GET args
 //    'requestBase' => null, // group part of request URI
 //    'template' => null,    // template file name
 //    'request' => [],       // request URI args with [0] variable part of request URI
@@ -30,14 +29,15 @@ class Page
 
     // base string for current route group (subfolder of document root)
     $this->attrib['requestBase'] = dirname($_SERVER['SCRIPT_NAME']);
+    // path to rendered static site (Hugo public/ folder)
+    $this->attrib['staticBase'] = $_SERVER['DOCUMENT_ROOT'] .'/static' .$this->attrib['requestBase'] .'/';
     // http request method
     $this->attrib['httpMethod'] = strtolower($_SERVER['REQUEST_METHOD']);
 
-    // safe PATH_INFO calculation
-    [ $pathInfo ] = explode('?', $_SERVER['REQUEST_URI']);
-    $this->attrib['pathInfo'] = rtrim($pathInfo, '/') .'/';
+    [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
+    $this->attrib['requestPath'] = rtrim($path, '/');
 
-    $this->setRequest();
+    $this->setGroupRequest();
   }
 
   // run presenter instance and exit if truly presented
@@ -53,7 +53,7 @@ class Page
   public function redirect(string $to, bool $permanent)
   {
     if ($to[0] != '/' && strpos($to, '//') === false) {
-      $to = $this->attrib['publishBase'] .$to;
+      $to = $this->attrib['staticBase'] .$to;
     }
 
     $code = $permanent? 301 : 302;
@@ -68,7 +68,7 @@ class Page
   private function template(): bool
   {
     $this->attrib['template'] = $this->$this->attrib['request'][0] .'/index.html';
-    return is_file($this->attrib['publishBase'] .$template);
+    return is_file($this->attrib['staticBase'] .$template);
   }
 
   /*/ get a named page attribute
@@ -84,7 +84,7 @@ class Page
     if (count($attributes)) {
       $this->attrib = $attributes + $arch;
     }
-    $this->setRequest($pattern);
+    $this->setGroupRequest($pattern);
     return $arch;
   }
 
@@ -100,10 +100,10 @@ class Page
     return ($this->attrib['httpMethod'] == $method);
   }
 
-  // check matching URL from left
+  // simple pattern matching test - no variable parts
   public function exactMatch(string $pattern): bool
   {
-    return (strpos($this->attrib['requestPath'], $pattern) === 0);
+    return (strpos($this->attrib['request'][0], $pattern) === 0);
   }
 
   // check regular expression pattern matching
@@ -111,25 +111,25 @@ class Page
   public function regMatch(string $pattern): bool
   {
     $pattern = '@^' .$pattern .'$@';
-    if (preg_match($pattern, $this->attrib['requestPath'], $params) === 1) {
+    if (preg_match($pattern, $this->attrib['request'][0], $params) === 1) {
       $this->attrib['request'] = $params;
       return true;
     }
     return false;
   }
 
-  // simple pattern matching test - no variable parts
   // calculate requestBase for a group and request URI variables
-  private function setRequest(string $groupBase = '')
+  private function setGroupRequest(string $groupBase = '')
   {
     if ($groupBase) {
       $this->attrib['requestBase'] .= $groupBase;
     }
 
-    $path = $this->attrib['pathInfo'];
+    $path = $this->attrib['requestPath'];
     if ($this->attrib['requestBase']) {
       $path = substr($path, strlen($this->attrib['requestBase']));
     }
+
     $this->attrib['request'] = explode('/', $path);
     $this->attrib['request'][0] = $path;
   }
