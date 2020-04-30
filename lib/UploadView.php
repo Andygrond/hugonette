@@ -2,11 +2,13 @@
 
 namespace Andygrond\Hugonette;
 
-/* Upload methods for Hugonette
- * @author Andygrond 2020
+/* MVP Upload View strategy for Hugonette
+* @author Andygrond 2020
 **/
 
-class Upload
+use stdClass;
+
+class UploadView
 {
   // default MIME types for uploading
   private $mimeTypes = [
@@ -32,40 +34,42 @@ class Upload
     'webm' => 'video/webm',
   ];
 
+  private $page;
+
   // send headers
   // $fileExt = suggested 'filename.ext' of received file or 'ext' when saving file is not intended
   // $inline = browser tries to display the content, otherwise tries to save the file
-  public function __construct(string $fileExt, bool $inline = true)
+  public function __construct(stdClass $page)
   {
-    header('Cache-Control: no-cache');
-    $disposition = $inline? 'inline' : 'attachment';
+    $this->page = $page;
+  }
 
-    if ($pos = strrpos($fileExt, '.')) {
-      $disposition .= '; filename=' .$fileExt);
-      $extension = substr($fileExt, $pos);
-    } else {
-      $extension = $fileExt;
-    }
+  public function view(array $model)
+  {
+    //    string $fileExt, bool $inline = true
+      $disposition = $inline? 'inline' : 'attachment';
 
-    $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
-    header('Content-Type: ' .$mimeType);
-    header('Content-Disposition: ' .$disposition);
+      if ($pos = strrpos($fileExt, '.')) {
+        $disposition .= '; filename=' .$fileExt);
+        $extension = substr($fileExt, $pos);
+      } else {
+        $extension = $fileExt;
+      }
+
+      $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
+      header('Cache-Control: no-cache');
+      header('Content-Type: ' .$mimeType);
+      header('Content-Disposition: ' .$disposition);
   }
 
   // upload content
-  public function content(string $content)
+  private function content(string $content)
   {
     echo $content;
   }
 
-  // upload JSON content
-  public function json($data)
-  {
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
-  }
-
   // upload file
-  public function file(string $sourceFile)
+  private function file(string $sourceFile)
   {
     if (is_file($sourceFile)) {
       readfile($sourceFile);
