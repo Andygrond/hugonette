@@ -11,8 +11,8 @@ namespace Andygrond\Hugonette;
 class Presenter
 {
   protected $page;  // page object attributes (can be altered in Presenter)
-  protected $view;  // View strategy execution object
-  protected $model; // model collected by Presenter for view
+//  protected $view;  // View strategy execution object
+//  protected $model; // model collected by Presenter for view
 
   // @page = object of page attributes
   public function __construct(\stdClass $page)
@@ -24,15 +24,15 @@ class Presenter
   // this method can be replaced to reflect more sophisticated logic based on $page attribs
   protected function viewStrategy()
   {
-    $view = ucfirst($this->page->view) .'View';
-    return new $view($this->page);
+    $viewClass = '\\Andygrond\\Hugonette\\' .ucfirst($this->page->view) .'View';
+    return new $viewClass();
   }
 
-  // view model data using presenter class@method declared in router
+  // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
   public function run(string $method)
   {
-    $this->viewStrategy()->view($this->$method());
+    $this->viewStrategy()->view($this->$method(), $this->page);
   }
 
 }

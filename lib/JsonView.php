@@ -6,26 +6,20 @@ namespace Andygrond\Hugonette;
 * @author Andygrond 2020
 **/
 
-use stdClass;
-
-class JsonView
+class JsonView implements View
 {
-  public function __construct(stdClass $page)
-  {
-  }
 
   // send model data as JSON object
-  public function view(array $model)
+  public function view(array $model, \stdClass $page)
   {
-    if ($model === false) {
-      return;
+    if ($model !== false) {
+
+      header('Cache-Control: no-cache');
+      header('Content-Type: application/json');
+      echo json_encode($model, JSON_UNESCAPED_UNICODE);
+
+      exit;
     }
-
-    header('Cache-Control: no-cache');
-    header('Content-Type: application/json');
-    echo json_encode($model, JSON_UNESCAPED_UNICODE);
-
-    exit;
   }
 
 }

@@ -6,30 +6,20 @@ namespace Andygrond\Hugonette;
 * @author Andygrond 2020
 **/
 
-use stdClass;
-
-class PlainView
+class PlainView implements View
 {
-  protected $template;
-
-  public function __construct(stdClass $page)
-  {
-    $this->template = $page->staticBase .$page->template;
-//    $this->cacheLatte = $cacheLatte;
-  }
 
   // render model data using plain old PHP template
-  public function view(array $model)
+  public function view(array $model, \stdClass $page)
   {
-    if ($model === false) {
-      return;
+    if ($model !== false) {
+
+      extract($model);
+      $model = null;
+      include($page->staticBase .$page->template);
+
+      exit;
     }
-
-    extract($model);
-    $model = null;
-    include($this->template);
-
-    exit;
   }
 
 }

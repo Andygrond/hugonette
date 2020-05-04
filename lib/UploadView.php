@@ -6,9 +6,7 @@ namespace Andygrond\Hugonette;
 * @author Andygrond 2020
 **/
 
-use stdClass;
-
-class UploadView
+class UploadView implements View
 {
   // default MIME types for uploading
   private $mimeTypes = [
@@ -34,17 +32,10 @@ class UploadView
     'webm' => 'video/webm',
   ];
 
-  private $page;
-
-  // send headers
-  // $fileExt = suggested 'filename.ext' of received file or 'ext' when saving file is not intended
-  // $inline = browser tries to display the content, otherwise tries to save the file
-  public function __construct(stdClass $page)
-  {
-    $this->page = $page;
-  }
-
-  public function view(array $model)
+// send headers
+// $fileExt = suggested 'filename.ext' of received file or 'ext' when saving file is not intended
+// $inline = browser tries to display the content, otherwise tries to save the file
+  public function view(array $model, \stdClass $page)
   {
     //    string $fileExt, bool $inline = true
       $disposition = $inline? 'inline' : 'attachment';

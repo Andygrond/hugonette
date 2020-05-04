@@ -9,28 +9,24 @@ namespace Andygrond\Hugonette;
 class Page
 {
   public $trialCounter = 0; // route trials counter
+
+  // page attributes
+  // this keys can be altered by route group attributes
   private $attrib = [
-//===== must be declared
-//    'staticBase' => null,  // path to rendered static site (Hugo public/ folder)
-//===== defaults can be altered
-    'view' => 'plain',      // view mode [ plain | latte | json | file | inline ]
+    'view' => 'plain',    // view mode [ plain | latte | json | file | inline ]
+    'tempDir' => null,    // necessary in view mode latte
     'presenterNamespace' => 'App\Presenters',
-//===== not configurable - will be calculated
-//    'requestPath' => null,    // full request URI without GET args
-//    'requestBase' => null, // group part of request URI
-//    'template' => null,    // template file name
-//    'request' => [],       // request URI args with [0] variable part of request URI
-//    'route' => [],         // recorded route passes
+    'staticBase' => null, // path to rendered static site (Hugo public/ folder)
   ];
 
   public function __construct(array $attributes)
   {
-    $this->attrib = $attributes + $this->attrib;
-
-    // base string for current route group (subfolder of document root)
+    // base for current route group (subfolder of document root)
     $this->attrib['requestBase'] = dirname($_SERVER['SCRIPT_NAME']);
     // path to rendered static site (Hugo public/ folder)
-    $this->attrib['staticBase'] = $_SERVER['DOCUMENT_ROOT'] .'/static' .$this->attrib['requestBase'] .'/';
+    $this->attrib['staticBase'] = $_SERVER['DOCUMENT_ROOT'] .'/static' .$this->attrib['requestBase'];
+    $this->attrib = $attributes + $this->attrib;
+
     // http request method
     $this->attrib['httpMethod'] = strtolower($_SERVER['REQUEST_METHOD']);
 
@@ -53,7 +49,7 @@ class Page
   public function redirect(string $to, bool $permanent)
   {
     if ($to[0] != '/' && strpos($to, '//') === false) {
-      $to = $this->attrib['staticBase'] .$to;
+      $to = $this->attrib['requestBase'] .$to;
     }
 
     $code = $permanent? 301 : 302;
@@ -68,14 +64,8 @@ class Page
   private function template(): bool
   {
     $this->attrib['template'] = $this->$this->attrib['request'][0] .'/index.html';
-    return is_file($this->attrib['staticBase'] .$template);
+    return is_file($this->attrib['staticBase'] .$this->attrib['template']);
   }
-
-  /*/ get a named page attribute
-  public function get($name)
-  {
-    return $this->attrib[$name];
-  }*/
 
   // get initial array of page attributes and update them to group values
   public function updateAttributes(string $pattern, array $attributes = []): array
@@ -125,11 +115,7 @@ class Page
       $this->attrib['requestBase'] .= $groupBase;
     }
 
-    $path = $this->attrib['requestPath'];
-    if ($this->attrib['requestBase']) {
-      $path = substr($path, strlen($this->attrib['requestBase']));
-    }
-
+    $path = substr($this->attrib['requestPath'] .'/', strlen($this->attrib['requestBase']));
     $this->attrib['request'] = explode('/', $path);
     $this->attrib['request'][0] = $path;
   }

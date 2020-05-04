@@ -7,31 +7,25 @@ namespace Andygrond\Hugonette;
 **/
 
 use Latte\Engine;
-use stdClass;
 
-class LatteView
+class LatteView implements View
 {
-  protected $template;
-//  protected $cacheLatte;
-
-  public function __construct(stdClass $page)
-  {
-    $this->template = $page->staticBase .$page->template;
-//    $this->cacheLatte = $cacheLatte;
-  }
 
   // render model data using Latte templating engine
-  public function view(array $model)
+  public function view(array $model, \stdClass $page)
   {
-    if ($model === false) {
-      return;
+    if ($model !== false) {
+      bdump($model);
+
+      $template = $page->staticBase .$page->template;
+      $latte = new Engine;
+      if ($page->tempDir) {
+        $latte->setTempDirectory($page->tempDir .'/latte');
+      }
+      $latte->render($template, $model);
+
+      exit;
     }
-
-    $latte = new Engine;
-//    $latte->setTempDirectory($this->cacheLatte);
-    $latte->render($this->template, $model);
-
-    exit;
   }
 
 }
