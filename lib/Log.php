@@ -3,14 +3,14 @@
 namespace Andygrond\Hugonette;
 
 /* Log Facade for Hugonette
- * Uses PSR-3 log levels + level 'view' which collects messages for user awareness
- * Channel 'tracy' and 'ajax' utilizes Tracy debugger
- * For channel 'ajax' use Chrome with FireLogger extension
- *
- * @author Andygrond 2019
- * Dependency: https://github.com/nette/tracy
- * Dependency: https://github.com/donatj/PhpUserAgent
- * todo: tests of mailing, output debugger, ajax channel
+* Uses PSR-3 log levels + level 'view' which collects messages for user awareness
+* Channel 'tracy' and 'ajax' utilizes Tracy debugger
+* For channel 'ajax' use Chrome with FireLogger extension
+*
+* @author Andygrond 2019
+* Dependency: https://github.com/nette/tracy
+* Dependency: https://github.com/donatj/PhpUserAgent
+* todo: tests of mailing, output debugger, ajax channel
 **/
 
 use Tracy\Debugger;
@@ -44,19 +44,18 @@ class Log
   public static $debug = false;    // debug mode flag
 
   /* log initialization
-    @ $path = /path/to/log/filename.log or /path/to/log/folder/
-      extension .log is obligatory for files
-      omitted filename can be set later, or native tracy log will be used
-    @ $channel - set main log channel
-    @ $mode = debugger mode ['dev'|'prod']
+  @ $path = /path/to/log/filename.log or /path/to/log/folder/
+  extension .log is obligatory for files
+  omitted filename can be set later, or native tracy log will be used
+  @ $channel - set main log channel
+  @ $mode = debugger mode ['dev'|'prod']
   */
   public static function set(string $path, string $channel, string $mode = 'prod')
   {
     // calculate init time duration
-    self::$durations['init'] = [
-      'start' => $_SERVER["REQUEST_TIME_FLOAT"],
-      'duration' => microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"],
-    ];
+    $runTime = microtime(true);
+    self::$durations['pre']['duration'] = $runTime - $_SERVER['REQUEST_TIME_FLOAT'];
+    self::$durations['run']['start'] = $runTime;
 
     // initialize variables
     if (self::$isActive) {
@@ -117,19 +116,19 @@ class Log
     switch($channel) {
       case 'tracy':
       case 'ajax':
-        $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-        Debugger::enable($logMode, self::$logPath);
-        // Debugger::$strictMode = true;  // log all error types
-        // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
-        // Debugger::dispatch();  // do it after session reloading
-        break;
+      $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+      Debugger::enable($logMode, self::$logPath);
+      // Debugger::$strictMode = true;  // log all error types
+      // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
+      // Debugger::dispatch();  // do it after session reloading
+      break;
       case 'plain':
-        if (self::$debug) {
-          ini_set('display_errors', true);
-        }
-        break;
+      if (self::$debug) {
+        ini_set('display_errors', true);
+      }
+      break;
       default:
-        throw new \UnexpectedValueException("Log channel: $channel is not valid. Use one of [" .implode('|', array_keys(self::CHANNELS)) .']');
+      throw new \UnexpectedValueException("Log channel: $channel is not valid. Use one of [" .implode('|', array_keys(self::CHANNELS)) .']');
     }
   }
 
@@ -220,11 +219,12 @@ class Log
   }
 
   // set job name
+  // names reserved: [pre] for preprocessing and [run] for runtime
   public static function job(string $name)
   {
     self::$jobStack[] = $name;
     if (@self::$durations[$name]['start'])
-      throw new \InvalidArgumentException("Job $name double start.");
+    throw new \InvalidArgumentException("Job $name double start.");
 
     self::$durations[$name]['start'] = microtime(true);
     if (!isset(self::$durations[$name]['duration'])) {
@@ -238,9 +238,9 @@ class Log
   {
     $lastName = array_pop(self::$jobStack);
     if ($name != $lastName || !isset(self::$durations[$name]))
-      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
+    throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
     if (!@self::$durations[$name]['start'])
-      throw new \InvalidArgumentException("Job $name done but not started.");
+    throw new \InvalidArgumentException("Job $name done but not started.");
 
     self::$durations[$name]['duration'] += microtime(true) - self::$durations[$name]['start'];
     self::$durations[$name]['start'] = 0;
@@ -249,10 +249,9 @@ class Log
   // get array of all durations
   public static function times(): array
   {
-    $times = [];
-    $appTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-    $times[] = self::easyTime($appTime);
+    self::$durations['run']['duration'] = microtime(true) - self::$durations['run']['start'];
 
+    $times = [];
     if (self::$durations) {
       foreach (self::$durations as $name => $frame) {
         $times[] = $name .': ' .self::easyTime($frame['duration']);
@@ -263,17 +262,17 @@ class Log
 
   // get time duration in user friendly format
   // argument in milliseconds
-  	public static function easyTime(float $duration): string
-  	{
-      if ($duration < .9) {
-        return round(1000 * $duration) .' ms';
-      } elseif ($duration < 9.) {
-        return round($duration, 2) .' s';
-      } elseif ($duration < 90.) {
-        return round($duration, 1) .' s';
-      } else {
-        return round($duration/60, 1) .' min';
-      }
-  	}
+  public static function easyTime(float $duration): string
+  {
+    if ($duration < .9) {
+      return round(1000 * $duration) .' ms';
+    } elseif ($duration < 9.) {
+      return round($duration, 2) .' s';
+    } elseif ($duration < 90.) {
+      return round($duration, 1) .' s';
+    } else {
+      return round($duration/60, 1) .' min';
+    }
+  }
 
 }
