@@ -52,13 +52,21 @@ class Log
   */
   public static function set(string $path, string $channel, string $mode = 'prod')
   {
+    // calculate init time duration
+    self::$durations['init'] = [
+      'start' => $_SERVER["REQUEST_TIME_FLOAT"],
+      'duration' => microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"],
+    ];
+
+    // initialize variables
     if (self::$isActive) {
-      throw new \BadMethodCallException("Log can not be set twice");
+      throw new \BadMethodCallException("Log cannot be set twice");
     }
     self::$isActive = true;
     self::$debug = !strncasecmp($mode, 'dev', 3);
     self::$minLevel = self::$debug? 1 : 2;
 
+    // set log file
     if (strrchr($path, '.') == '.log') {
       $pos = strrpos($path, '/')+1;
       self::$logPath = rtrim(substr($path, 0, $pos), '/') .'/';
@@ -166,39 +174,49 @@ class Log
   // forced write to file
   public static function flush()
   {
-    $record = self::renderRecord();
+    $request = self::renderRequest();
+    $message = self::renderMessage();
 
     if (self::$logFile) {
-      file_put_contents(self::$logFile, date('Y-m-d H:i:s.u ') .$record ."\n", FILE_APPEND | LOCK_EX);
+      $date = \DateTime::createFromFormat('U,u', (string) $_SERVER["REQUEST_TIME_FLOAT"]);
+      $request .= ' ' .$_SERVER['REQUEST_URI'];
+      file_put_contents(self::$logFile, $date->format('Y-m-d H:i:s.v ') .$request .$message ."\n", FILE_APPEND | LOCK_EX);
     } else {
-      Debugger::log($record);
+      Debugger::log($request .$message);
     }
 
     if (self::$channel == 'ajax') {
-      Debugger::fireLog($record);
+      Debugger::fireLog($request .$message);
     }
   }
 
-  private static function renderRecord()
+  // format request information for printing
+  private static function renderRequest()
   {
-    $record = ' ';
+    $record =  ' ' .$_SERVER['REMOTE_ADDR'] .' [' .implode('; ', self::times()) .'] ';
+
+    // user agent
     if (php_sapi_name() == "cli") {
-      $record .= 'Command Line';
+      $record .= 'Command';
     } elseif (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       $agent = parse_user_agent();
       $record .= $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
     }
 
+    return $record .' ' .$_SERVER['REQUEST_METHOD'];
+  }
+
+  // format message collection foor printing
+  private static function renderMessage()
+  {
+    $record = '';
     if (self::$collection) {
       foreach (self::$collection as $item) {
-        $record .= "\n" .$item['message'] .'  ' .$item['data'];
+        $record .= "\n\t" .$item['message'] .'  ' .$item['data'];
       }
-      $record .= "\n";
       self::$collection = '';
     }
-
-    $times = ' [' .implode('; ', self::times()) .'] ';
-    return $_SERVER['REMOTE_ADDR'] .$times .$_SERVER['REQUEST_METHOD'] .$record;
+    return $record;
   }
 
   // set job name
@@ -245,18 +263,17 @@ class Log
 
   // get time duration in user friendly format
   // argument in milliseconds
-  	public static function easyTime(int $duration): string
+  	public static function easyTime(float $duration): string
   	{
-  		if ($duration > 90.) {
-  			$info =  round($duration/60, 1) .' min';
-  		} elseif ($duration > .8) {
-  			$lo = ($duration > 10)? 1 : ($duration > 1)? 2 : 3;
-  			$info = round($duration, $lo) .' s';
-  		} else {
-  			$info = round($duration) .' ms';
-  		}
-  		return $info;
+      if ($duration < .9) {
+        return round(1000 * $duration) .' ms';
+      } elseif ($duration < 9.) {
+        return round($duration, 2) .' s';
+      } elseif ($duration < 90.) {
+        return round($duration, 1) .' s';
+      } else {
+        return round($duration/60, 1) .' min';
+      }
   	}
-
 
 }
