@@ -18,9 +18,10 @@ class Session
   protected $tokenKey = 'csrf_token';
   protected $debug;
 
-  public function __construct($debug = false)
+  public function __construct($debug = false, $cfg = [])
   {
     $this->debug = $debug;
+    $this->cfg = $cfg + $this->cfg;
     session_start();
 
     if (!isset($_SESSION['started_at'])) {
@@ -53,7 +54,7 @@ class Session
   {
     self::log('Hidden input generation');
     $token_array = $this->getToken($lock);
-    echo implode(
+    return implode(
       array_map(
         function(string $key, string $value): string {
           return "<input type=\"hidden\" name=\"$key\" value=\"" .self::noHTML($value) ."\"/>\n";
@@ -142,11 +143,6 @@ class Session
     self::log('Token deleted after use');
 
     return $stored;
-  }
-
-  public function setCfg($name, $value)
-  {
-    $this->cfg[$name] = $value;
   }
 
   public function tokenExpired(array $token): bool
