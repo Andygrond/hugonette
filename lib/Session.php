@@ -2,7 +2,7 @@
 
 namespace Andygrond\Hugonette;
 
-/* Anti CSRF Session Management
+/* Secure Session Management
  * @author Andygrond 2019
 **/
 
@@ -30,7 +30,7 @@ class Session
   }
 
   // renew session optionally reloading the page to given URL
-  protected function renewSession($reason)
+  protected function renewSession()
   {
     $time = time();
     $_SESSION['closed_at'] = $time;
