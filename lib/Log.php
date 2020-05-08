@@ -132,15 +132,15 @@ class Log
     }
   }
 
-  // output the message
+  // output the message - Log must be set prior to calling this
   // $args = [record, data]
   public static function __callStatic(string $level, array $args)
   {
+    if (!self::$isActive) {
+      return;
+    }
     if (!$levelNo = @self::LEVELS[$level]) {
       throw new \BadMethodCallException('Log method not found: ' .$level);
-    }
-    if (!self::$isActive) {
-      throw new \BadMethodCallException('Log must be set to be used');
     }
 
     [$record, $data] = array_pad($args, 2, '');
