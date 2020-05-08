@@ -4,19 +4,18 @@ namespace Andygrond\Hugonette;
 
 /* CSRF Token Session Management
  * @author Andygrond 2019
- * inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
+ * inspired by https://github.com/paragonie/anti-csrf
 **/
 
 class Token
 {
+  protected $debug;
   protected $cfg = [
     'tokenLifetime' => 900,
     'recycleAfter' => 512,
+    'indexKey' => 'csrf_index';
+    'tokenKey' => 'csrf_token';
   ];
-
-  protected $indexKey = 'csrf_index';
-  protected $tokenKey = 'csrf_token';
-  protected $debug;
 
   public function __construct($debug = false, $cfg = [])
   {
@@ -60,8 +59,8 @@ class Token
     }
 
     return [
-      $this->indexKey => $index,
-      $this->tokenKey => $token,
+      $this->cfg['indexKey'] => $index,
+      $this->cfg['tokenKey'] => $token,
     ];
   }
 
@@ -71,8 +70,8 @@ class Token
     if (!$post) {
       $post =& $_POST;
     }
-    $index = @$post[$this->indexKey];
-    $token = @$post[$this->tokenKey];
+    $index = @$post[$this->cfg['indexKey']];
+    $token = @$post[$this->cfg['tokenKey']];
     if (!$index || !$token) {
       return 1;
     }

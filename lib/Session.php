@@ -4,7 +4,6 @@ namespace Andygrond\Hugonette;
 
 /* Anti CSRF Session Management
  * @author Andygrond 2019
- * inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
 **/
 
 class Session
@@ -16,10 +15,8 @@ class Session
     if (!isset($_SESSION['started_at'])) {
       $this->renewSession();
     } elseif (isset($_SESSION['closed_at']) && $_SESSION['closed_at'] < time() - 300) {
-      $this->renewSession();
       $this->redirect('Delayed hijacking', '/');
     } elseif ($_SESSION['ip'] != $_SERVER['REMOTE_ADDR']) {
-      $this->renewSession();
       $this->redirect('Hijacking from another IP', '/');
     }
   }
