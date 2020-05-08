@@ -2,12 +2,14 @@
 
 namespace Andygrond\Hugonette;
 
-/* Anti CSRF Session Management
+/* Anti CSRF Session Management with NTLM communication
+ * Retrieves Windows user name in corporate intranet environment with Active Directory
+ * Warning: it is mere presumption that logged in person actually uses the client workstation
+ * This solution is not reliable for severe security demands
  * @author Andygrond 2019
- * inspired by Paragon Initiative Enterprises <https://paragonie.com> AntiCSFR class
 **/
 
-class Session
+class SessionNTLM
 {
   public function __construct()
   {
