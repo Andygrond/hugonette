@@ -32,42 +32,42 @@ class UploadView implements View
     'webm' => 'video/webm',
   ];
 
-// send headers
-// $fileExt = suggested 'filename.ext' of received file or 'ext' when saving file is not intended
-// $inline = browser tries to display the content, otherwise tries to save the file
-  public function view(array $model, \stdClass $page)
+// upload file
+// $model['destinationFile'] suggested 'filename.ext' of received file or '.ext' when saving file is not intended
+// $model['inline'] true: try to display the content, false: try save the file
+// $model['sourceFile'] uploaded file name or $model['data'] uploaded content
+  public function view(array $model, \stdClass $page = null)
   {
-    //    string $fileExt, bool $inline = true
-      $disposition = $inline? 'inline' : 'attachment';
+    if ($model === false)
+      return;
 
-      if ($pos = strrpos($fileExt, '.')) {
-        $disposition .= '; filename=' .$fileExt);
-        $extension = substr($fileExt, $pos);
-      } else {
-        $extension = $fileExt;
-      }
+    $disposition = @$model['inline']? 'inline' : 'attachment';
+    $file = $model['destinationFile'];
 
-      $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
+    if ($pos = strrpos($file, '.')) {
+      $disposition .= '; filename=' .$file;
+    }
+    $extension = substr($file, $pos+1);
+    $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
+
+    $file = @$model['sourceFile'];
+    if ($file && !is_file($file)) {
+      http_response_code(404);
+      Log::warning('Uploaded file not found: ' .$file);
+
+    } else {
       header('Cache-Control: no-cache');
       header('Content-Type: ' .$mimeType);
       header('Content-Disposition: ' .$disposition);
-  }
 
-  // upload content
-  private function content(string $content)
-  {
-    echo $content;
-  }
-
-  // upload file
-  private function file(string $sourceFile)
-  {
-    if (is_file($sourceFile)) {
-      readfile($sourceFile);
-    } else {
-      http_response_code(404);
-      Log::warning('Uploaded file not found: ' .$sourceFile);
+      if ($file) {
+        readfile($file);
+      } else {
+        echo $model['data'];
+      }
     }
+
+    exit;
   }
 
 }

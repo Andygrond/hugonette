@@ -12,14 +12,14 @@ class PlainView implements View
   // render model data using plain old PHP template
   public function view(array $model, \stdClass $page)
   {
-    if ($model !== false) {
+    if ($model === false)
+      return;
 
-      extract($model);
-      $model = null;
-      include($page->staticBase .$page->template);
+    extract($model);
+    $model = null;
+    include($page->staticBase .$page->template);
 
-      exit;
-    }
+    exit;
   }
 
 }

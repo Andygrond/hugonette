@@ -14,18 +14,20 @@ class LatteView implements View
   // render model data using Latte templating engine
   public function view(array $model, \stdClass $page)
   {
-    if ($model !== false) {
-      bdump($model);
+    if ($model === false)
+      return;
 
-      $template = $page->staticBase .$page->template;
-      $latte = new Engine;
-      if ($page->tempDir) {
-        $latte->setTempDirectory($page->tempDir .'/latte');
-      }
-      $latte->render($template, $model);
+    bdump($page, 'page');
+    bdump($model, 'model');
 
-      exit;
+    $template = $page->staticBase .$page->template;
+    $latte = new Engine;
+    if ($page->tempDir) {
+      $latte->setTempDirectory($page->tempDir .'/latte');
     }
+    $latte->render($template, $model);
+
+    exit;
   }
 
 }
