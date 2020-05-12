@@ -62,8 +62,10 @@ class UploadView implements View
 
       if ($file) {
         readfile($file);
+      } elseif (@$model['sourceData']) {
+        echo $model['sourceData'];
       } else {
-        echo $model['data'];
+        throw new \InvalidArgumentException("Upload source not specified.");
       }
     }
 

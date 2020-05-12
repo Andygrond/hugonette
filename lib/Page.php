@@ -44,21 +44,6 @@ class Page
     PresenterFactory::create($presenter, $this->attrib);
   }
 
-  // redirect to another URL
-  // @$permanent true = 301 Moved Permanently; false = 302 Found
-  public function redirect(string $to, bool $permanent)
-  {
-    if ($to[0] != '/' && strpos($to, '//') === false) {
-      $to = $this->attrib['requestBase'] .$to;
-    }
-
-    $code = $permanent? 301 : 302;
-    Log::info($code .' Redirected to: ' .$to);
-    header('Location: ' .$to, true, $code);
-
-    exit;
-  }
-
   // calculate template file name based on the URL
   // return = file exists
   private function template(): bool

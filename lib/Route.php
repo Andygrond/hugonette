@@ -59,11 +59,14 @@ class Route
   // this can be used as the last routing directive in group or freely
   // @$permanent in Route defaults to http code 301 Moved Permanently
   // @$permanent set to false = doesn't inform search engines about the change
-  public function redirect(string $pattern, string $to, bool $permanent = true)
+  public function redirect(string $pattern, string $url, bool $permanent = true)
   {
     $this->page->trialCounter++;
     if (!$pattern || $this->page->exactMatch($pattern)) {
-      $this->page->redirect($to, $permanent);
+      (new RedirectView())->view([
+        'url' => $url,
+        'permanent' => $permanent,
+      ]);
     }
   }
 

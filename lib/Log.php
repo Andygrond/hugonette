@@ -237,10 +237,12 @@ class Log
   public static function done(string $name)
   {
     $lastName = array_pop(self::$jobStack);
-    if ($name != $lastName || !isset(self::$durations[$name]))
-    throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
-    if (!@self::$durations[$name]['start'])
-    throw new \InvalidArgumentException("Job $name done but not started.");
+    if ($name != $lastName || !isset(self::$durations[$name])) {
+      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
+    }
+    if (!@self::$durations[$name]['start']) {
+      throw new \InvalidArgumentException("Job $name done but not started.");
+    }
 
     self::$durations[$name]['duration'] += microtime(true) - self::$durations[$name]['start'];
     self::$durations[$name]['start'] = 0;
