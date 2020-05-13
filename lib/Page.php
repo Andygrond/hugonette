@@ -18,6 +18,7 @@ class Page
     'presenterNamespace' => 'App\Presenters',
     'staticBase' => null, // path to rendered static site (Hugo public/ folder)
   ];
+  private $requestPath;
 
   public function __construct(array $attributes)
   {
@@ -31,7 +32,8 @@ class Page
     $this->attrib['httpMethod'] = strtolower($_SERVER['REQUEST_METHOD']);
 
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
-    $this->attrib['requestPath'] = rtrim($path, '/');
+//    $this->attrib['requestPath'] = rtrim($path, '/');
+    $this->requestPath = rtrim($path, '/');
 
     $this->setGroupRequest();
   }
@@ -100,7 +102,8 @@ class Page
       $this->attrib['requestBase'] .= $groupBase;
     }
 
-    $path = substr($this->attrib['requestPath'] .'/', strlen($this->attrib['requestBase']));
+//    $path = substr($this->attrib['requestPath'] .'/', strlen($this->attrib['requestBase']));
+    $path = substr($this->requestPath .'/', strlen($this->attrib['requestBase']));
     $this->attrib['request'] = explode('/', $path);
     $this->attrib['request'][0] = $path;
   }

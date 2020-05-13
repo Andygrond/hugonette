@@ -18,10 +18,6 @@ class RedirectView implements View
       return;
 
     $to = $model['url'];
-    if ($to[0] != '/' && strpos($to, '//') === false) {
-      $to = $this->attrib['requestBase'] .$to;
-    }
-
     $code = (@$model['permanent'] !== false)? 301 : 302;
     Log::info($code .' Redirected to: ' .$to);
     header('Location: ' .$to, true, $code);
