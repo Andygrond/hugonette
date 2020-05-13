@@ -10,25 +10,17 @@ class Page
 {
   public $trialCounter = 0; // route trials counter
 
-  // page attributes
-  // this keys can be altered by route group attributes
+  // page attributes - this can be altered by route group attributes
   private $attrib = [
-    'view' => 'plain',    // view mode [ plain | latte | json | file | inline ]
-    'tempDir' => null,    // necessary in view mode latte
+    'view' => 'plain',    // view mode [ plain | latte | json | upload | redirect ]
     'presenterNamespace' => 'App\Presenters',
-    'staticBase' => null, // path to rendered static site (Hugo public/ folder)
   ];
+
   private $requestPath;
 
   public function __construct(array $attributes)
   {
-    // base for current route group (subfolder of document root)
-    $this->attrib['requestBase'] = dirname($_SERVER['SCRIPT_NAME']);
-    // path to rendered static site (Hugo public/ folder)
-    $this->attrib['staticBase'] = $_SERVER['DOCUMENT_ROOT'] .'/static' .$this->attrib['requestBase'];
     $this->attrib = $attributes + $this->attrib;
-
-    // http request method
     $this->attrib['httpMethod'] = strtolower($_SERVER['REQUEST_METHOD']);
 
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
@@ -51,7 +43,7 @@ class Page
   private function template(): bool
   {
     $this->attrib['template'] = $this->$this->attrib['request'][0] .'/index.html';
-    return is_file($this->attrib['staticBase'] .$this->attrib['template']);
+    return is_file($this->attrib['base']['static'] .$this->attrib['template']);
   }
 
   // get initial array of page attributes and update them to group values
@@ -99,11 +91,10 @@ class Page
   private function setGroupRequest(string $groupBase = '')
   {
     if ($groupBase) {
-      $this->attrib['requestBase'] .= $groupBase;
+      $this->attrib['base']['request'] .= $groupBase; // base for current route group
     }
 
-//    $path = substr($this->attrib['requestPath'] .'/', strlen($this->attrib['requestBase']));
-    $path = substr($this->requestPath .'/', strlen($this->attrib['requestBase']));
+    $path = substr($this->requestPath .'/', strlen($this->attrib['base']['request']));
     $this->attrib['request'] = explode('/', $path);
     $this->attrib['request'][0] = $path;
   }

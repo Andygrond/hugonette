@@ -17,14 +17,17 @@ class LatteView implements View
     if ($model === false)
       return;
 
-    bdump($page, 'page');
-    bdump($model, 'model');
-
-    $template = $page->staticBase .$page->template;
-    $latte = new Engine;
-    if ($page->tempDir) {
-      $latte->setTempDirectory($page->tempDir .'/latte');
+    if (Log::$debugMode && Log::$channel != 'plain') {
+      bdump($page, 'page');
+      bdump($model, 'model');
     }
+
+    $latte = new Engine;
+    if ($page->base['temp']) {
+      $latte->setTempDirectory($page->base['temp'] .'/latte');
+    }
+
+    $template = $page->base['static'] .$page->template;
     $latte->render($template, $model);
 
     exit;

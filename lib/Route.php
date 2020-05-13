@@ -11,10 +11,10 @@ class Route
   private $page;  // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
 
-  // @$publishBase path to static pages (e.g. hugo public folder)
-  public function __construct(array $attributes)
+  // @$attrib - page attributes
+  public function __construct(array $attrib)
   {
-    $this->page = new Page($attributes);
+    $this->page = new Page($attrib);
   }
 
   // Log shutdown needed to write to file

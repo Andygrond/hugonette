@@ -30,27 +30,27 @@ class Log
     'emergency' => 9,
   ];
 
-  private static $collection = []; // messages waiting for output
-  private static $jobStack = [];   // job names stack
+  private static $collection = [];  // messages waiting for output
+  private static $jobStack = [];    // job names stack
 
-  private static $channel;         // active output channel
-  private static $logPath;         // path to log files
-  private static $logFile = '';    // path to log filename for file channel
-  private static $minLevel;        // lowest level of logged messages
+  private static $logPath;          // path to log files
+  private static $logFile = '';     // path to log filename for file channel
+  private static $minLevel;         // lowest level of logged messages
 
-  public static $viewErrors = [];  // messages collected to be passed to view
-  public static $durations = [];   // elapsed job times
-  public static $isActive = false; // log is set and active
-  public static $debug = false;    // debug mode flag
+  public static $channel;           // active output channel
+  public static $viewErrors = [];   // messages collected to be passed to view
+  public static $durations = [];    // elapsed job times
+  public static $isActive = false;  // log is set and active
+  public static $debugMode = false; // debug mode flag
 
   /* log initialization
   @ $path = /path/to/log/filename.log or /path/to/log/folder/
   extension .log is obligatory for files
   omitted filename can be set later, or native tracy log will be used
-  @ $channel - set main log channel
+  @ $channel - set main log channel ['plain'|'tracy'|'ajax']
   @ $mode = debugger mode ['dev'|'prod']
   */
-  public static function set(string $path, string $channel, string $mode = 'prod')
+  public static function set(string $path, string $channel = 'plain', string $debug = null)
   {
     // calculate init time duration
     $runTime = microtime(true);
@@ -62,8 +62,8 @@ class Log
       throw new \BadMethodCallException("Log cannot be set twice");
     }
     self::$isActive = true;
-    self::$debug = !strncasecmp($mode, 'dev', 3);
-    self::$minLevel = self::$debug? 1 : 2;
+    self::$debugMode = (bool) $debug;
+    self::$minLevel = self::$debugMode? 1 : 2;
 
     // set log file
     if (strrchr($path, '.') == '.log') {
@@ -116,14 +116,11 @@ class Log
     switch($channel) {
       case 'tracy':
       case 'ajax':
-        $logMode = self::$debug? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-        Debugger::enable($logMode, self::$logPath);
-        // Debugger::$strictMode = true;  // log all error types
-        // Debugger::$logSeverity = E_NOTICE | E_WARNING | E_USER_WARNING;  // log html screens
-        // Debugger::dispatch();  // do it after session reloading
+        $mode = self::$debugMode? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+        Debugger::enable($mode, self::$logPath);
         break;
       case 'plain':
-        if (self::$debug) {
+        if (self::$debugMode) {
           ini_set('display_errors', true);
         }
         break;
@@ -177,7 +174,8 @@ class Log
     $message = self::renderMessage();
 
     if (self::$logFile) {
-      $date = \DateTime::createFromFormat('U,u', (string) $_SERVER["REQUEST_TIME_FLOAT"]);
+      $locinfo = localeconv();
+      $date = \DateTime::createFromFormat('U' .$locinfo['decimal_point'] .'u', (string) $_SERVER["REQUEST_TIME_FLOAT"]);
       $request .= ' ' .$_SERVER['REQUEST_URI'];
       file_put_contents(self::$logFile, $date->format('Y-m-d H:i:s.v ') .$request .$message ."\n", FILE_APPEND | LOCK_EX);
     } else {
