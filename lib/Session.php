@@ -8,25 +8,33 @@ namespace Andygrond\Hugonette;
 
 class Session
 {
-  public function __construct()
+  public function __construct(string $redirectUrl = null)
   {
     session_start();
+    if (!$redirectUrl) {
+      $redirectUrl = $_SERVER['PHP_SELF'];
+    }
 
     if (!isset($_SESSION['started_at'])) {
+      Log::debug('Renewing session');
       $this->renewSession();
     } elseif (isset($_SESSION['closed_at']) && $_SESSION['closed_at'] < time() - 300) {
-      $this->redirect('Delayed hijacking', '/');
+      $this->redirect('Delayed hijacking', $redirectUrl);
     } elseif ($_SESSION['ip'] != $_SERVER['REMOTE_ADDR']) {
-      $this->redirect('Hijacking from another IP', '/');
+      $this->redirect('Hijacking from another IP', $redirectUrl);
     }
   }
 
   // log the incident and reload the page to given URL
-  protected function redirect($reason, $url)
+  protected function redirect(string $reason, string $redirectUrl = null)
   {
-    Log::warning($reason .' - session renewed.');
-    header("Location: $url");
-    exit;
+    Log::warning($reason .' - redirected to ' .$redirectUrl);
+    $this->renewSession();
+
+    if ($redirectUrl) {
+      header("Location: $redirectUrl");
+      exit;
+    }
   }
 
   // renew session optionally reloading the page to given URL
