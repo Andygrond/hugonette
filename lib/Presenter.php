@@ -4,7 +4,7 @@ namespace Andygrond\Hugonette;
 
 /* MVP Presenter class for Hugonette
  * methods of Presenter extension class will return an array of model data
- * when Presenter method will return false, next route will be checked
+ * when Presenter method is empty, next route will be checked
  * @author Andygrond 2020
 **/
 
@@ -32,7 +32,11 @@ class Presenter
   // @method = presenter method name determined in route definition
   public function run(string $method)
   {
-    $this->viewStrategy()->view($this->$method(), $this->page);
+    $model = $this->$method();
+    if (empty($model)) {
+      return;
+    }
+    $this->viewStrategy()->view($model, $this->page);
   }
 
 }

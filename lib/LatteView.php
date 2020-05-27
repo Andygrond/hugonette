@@ -14,9 +14,6 @@ class LatteView implements View
   // render model data using Latte templating engine
   public function view(array $model, \stdClass $page)
   {
-    if ($model === false)
-      return;
-
     if (Log::$debugMode && Log::$channel != 'plain') {
       bdump($page, 'page');
       bdump($model, 'model');

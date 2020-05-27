@@ -14,9 +14,6 @@ class RedirectView implements View
   // @$model['permanent'] true = default = 301 Moved Permanently; false = 302 Found
   public function view(array $model, \stdClass $page = null)
   {
-    if ($model === false)
-      return;
-
     $to = $model['url'];
     $code = (@$model['permanent'] !== false)? 301 : 302;
     Log::info($code .' Redirected to: ' .$to);

@@ -38,9 +38,6 @@ class UploadView implements View
 // $model['sourceFile'] uploaded file name or $model['data'] uploaded content
   public function view(array $model, \stdClass $page = null)
   {
-    if ($model === false)
-      return;
-
     $disposition = @$model['inline']? 'inline' : 'attachment';
     $file = $model['destinationFile'];
 
