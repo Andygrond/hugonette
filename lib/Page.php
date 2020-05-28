@@ -8,8 +8,6 @@ namespace Andygrond\Hugonette;
 
 class Page
 {
-  public $trialCounter = 0; // route trials counter
-
   // page attributes - this can be altered by route group attributes
   private $attrib = [
     'view' => 'plain',    // view mode [ plain | latte | json | upload | redirect ]
@@ -34,7 +32,6 @@ class Page
   // private function runPresenter(string $presenter, bool $static = false)
   public function run(string $presenter)
   {
-    $this->attrib['route'][$this->trialCounter] = $presenter; // route tracer
     PresenterFactory::create($presenter, $this->attrib);
   }
 

@@ -28,7 +28,6 @@ class Route
   // @args = [$pattern, $model]
   public function __call(string $method, array $args)
   {
-    $this->page->trialCounter++;
     if ($this->page->checkMethod($method)) {
       if ($this->page->regMatch($args[0])) {
         $this->page->run($args[1]);
@@ -41,7 +40,6 @@ class Route
   // full static GET with one common presenter (runs all static pages at once)
   public function pages(string $presenter)
   {
-    $this->page->trialCounter++;
     if ($this->page->checkMethod('get') && $this->page->template()) {
       $this->page->run($presenter);
     }
@@ -51,7 +49,6 @@ class Route
   // @presenter usually shows status 404 with the native navigation panels
   public function notFound(string $presenter)
   {
-    $this->page->trialCounter++;
     $this->page->run($presenter);
   }
 
@@ -61,7 +58,6 @@ class Route
   // @$permanent set to false = doesn't inform search engines about the change
   public function redirect(string $pattern, string $url, bool $permanent = true)
   {
-    $this->page->trialCounter++;
     if (!$pattern || $this->page->exactMatch($pattern)) {
       (new RedirectView())->view([
         'url' => $url,
