@@ -47,7 +47,7 @@ class Page
   }
 
   // get initial array of page attributes and update them to group values
-  public function updateAttributes(string $pattern, array $attributes = []): array
+  public function updateAttributes(string $pattern, array $attributes): array
   {
     $arch = $this->attrib;
     if (count($attributes)) {
