@@ -8,28 +8,26 @@ namespace Andygrond\Hugonette;
 
 class Page
 {
-  // page attributes - this can be altered by route group attributes
-  private $attrib = [
+  // page attributes
+  public $attrib = [
     'view' => 'plain',    // view mode [ plain | latte | json | upload | redirect ]
     'presenterNamespace' => 'App\Presenters',
   ];
 
-  private $requestPath;
+  private $requestPath; // base for pattern comparison
+  private $httpMethod;  // http method lowercase
 
-  public function __construct(array $attributes)
+  public function __construct(array $attrib)
   {
-    $this->attrib = $attributes + $this->attrib;
-    $this->attrib['httpMethod'] = strtolower($_SERVER['REQUEST_METHOD']);
-
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
-//    $this->attrib['requestPath'] = rtrim($path, '/');
     $this->requestPath = rtrim($path, '/');
+    $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
+    $this->attrib = $attrib + $this->attrib;
     $this->setGroupRequest();
   }
 
   // run presenter instance and exit if truly presented
-  // private function runPresenter(string $presenter, bool $static = false)
   public function run(string $presenter)
   {
     PresenterFactory::create($presenter, $this->attrib);
@@ -43,27 +41,10 @@ class Page
     return is_file($this->attrib['base']['static'] .$this->attrib['template']);
   }
 
-  // get initial array of page attributes and update them to group values
-  public function updateAttributes(string $pattern, array $attributes): array
-  {
-    $arch = $this->attrib;
-    if (count($attributes)) {
-      $this->attrib = $attributes + $arch;
-    }
-    $this->setGroupRequest($pattern);
-    return $arch;
-  }
-
-  // set full array of page attributes
-  public function refreshAttributes(array $attrib)
-  {
-    $this->attrib = $attrib;
-  }
-
   // checking http request method
   public function checkMethod(string $method): bool
   {
-    return ($this->attrib['httpMethod'] == $method);
+    return ($this->httpMethod == $method);
   }
 
   // simple pattern matching test - no variable parts
@@ -85,10 +66,10 @@ class Page
   }
 
   // calculate requestBase for a group and request URI variables
-  private function setGroupRequest(string $groupBase = '')
+  public function setGroupRequest(string $groupBase = '')
   {
     if ($groupBase) {
-      $this->attrib['base']['request'] .= $groupBase; // base for current route group
+      $this->attrib['base']['request'] .= $groupBase; // base URL set for current route group
     }
 
     $path = substr($this->requestPath .'/', strlen($this->attrib['base']['request']));

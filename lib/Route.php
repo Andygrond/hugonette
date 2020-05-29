@@ -67,13 +67,22 @@ class Route
   }
 
   // register a set of routes with shared attributes.
-  public function group(string $pattern, \Closure $callback, array $attributes = [])
+  public function group(string $pattern, \Closure $callback, array $attrib = [])
   {
     if (!$pattern || $this->page->exactMatch($pattern)) {
-      $parentAttributes = $this->page->updateAttributes($pattern, $attributes);
+      $this->page->setGroupRequest($pattern);
+
+      $parentAttrib = $this->page->attrib;  // it's the only place you can use it directly
+      $this->attributes($attrib);
       call_user_func($callback, $this);
-      $this->page->refreshAttributes($parentAttributes);
+      $this->page->attrib = $parentAttrib;  // it's the only place you can use it directly
     }
+  }
+
+  // update given page attributes
+  public function attributes($attrib)
+  {
+    $this->page->attrib = $attrib + $this->page->attrib;
   }
 
 }
