@@ -11,10 +11,13 @@ class Route
   private $page;  // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
 
-  // @$attrib - page attributes
-  public function __construct(array $attrib)
+  // @$base - array of 3 base directories:
+  // 'request' => base path for all routes (subfolder of document root)
+  // 'static' => path to rendered static site (Hugo public/ folder)
+  // 'temp' => path to temp folder (used in view mode latte)
+  public function __construct(array $base)
   {
-    $this->page = new Page($attrib);
+    $this->page = new Page(['base' => $base]);
   }
 
   // Log shutdown needed to write to file
