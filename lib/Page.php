@@ -36,6 +36,11 @@ class Page
   // run presenter instance and exit if truly presented
   public function run(string $presenter)
   {
+    // keep trace of matched routes for the request
+    $trace = debug_backtrace()[2];
+    $this->attrib['route'][$trace['line']] = $presenter;
+
+    // call Presenter
     PresenterFactory::create($presenter, $this->attrib);
   }
 
