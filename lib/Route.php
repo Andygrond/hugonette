@@ -15,8 +15,17 @@ class Route
   // 'request' => base path for all routes (subfolder of document root)
   // 'static' => path to rendered static site (Hugo public/ folder)
   // 'temp' => path to temp folder (used in view mode latte)
-  public function __construct(array $base)
+  public function __construct(string $request)
   {
+    $base = [
+      // base path for all routes (subfolder of document root)
+      'request' => $request,
+      // path to rendered static site (Hugo public/ folder)
+      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,
+      // path to temp folder (used in view mode latte)
+      'temp' => dirname(__DIR__) .'/temp',
+    ];
+
     $this->page = new Page(['base' => $base]);
   }
 
