@@ -17,13 +17,19 @@ class Page
   private $requestPath; // base for pattern comparison
   private $httpMethod;  // http method lowercase
 
-  public function __construct(array $attrib)
+  public function __construct(string $sysDir)
   {
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
     $this->requestPath = rtrim($path, '/');
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
-    $this->attrib = $attrib + $this->attrib;
+    $request = dirname($_SERVER['SCRIPT_NAME']);
+    $this->attrib['base'] = [
+      'request' => $request,  // base path for all routes (subfolder of document root)
+      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,  // path to rendered static site (Hugo public/ folder)
+      'system' => $sysDir,  // path to Nette system folder
+    ];
+
     $this->setGroupRequest();
   }
 

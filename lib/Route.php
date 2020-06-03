@@ -11,28 +11,16 @@ class Route
   private $page;  // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
 
-  // @$base - array of 3 base directories:
-  // 'request' => base path for all routes (subfolder of document root)
-  // 'static' => path to rendered static site (Hugo public/ folder)
-  // 'temp' => path to temp folder (used in view mode latte)
-  public function __construct(string $request)
+  // $sysDir - path to Nette system if exists
+  public function __construct(string $sysDir = null)
   {
-    $base = [
-      // base path for all routes (subfolder of document root)
-      'request' => $request,
-      // path to rendered static site (Hugo public/ folder)
-      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,
-      // path to temp folder (used in view mode latte)
-      'temp' => dirname(__DIR__) .'/temp',
-    ];
-
-    $this->page = new Page(['base' => $base]);
+    $this->page = new Page($sysDir);
   }
 
   // Log shutdown needed to write to file
   public function __destruct()
   {
-    Log::close(); // effective only when set
+    Log::close(); // effective only when set previously
   }
 
   // route for single request method

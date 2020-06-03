@@ -20,8 +20,8 @@ class LatteView implements View
     }
 
     $latte = new Engine;
-    if ($page->base['temp']) {
-      $latte->setTempDirectory($page->base['temp'] .'/latte');
+    if ($page->base['system']) {
+      $latte->setTempDirectory($page->base['system'] .'/temp/latte');
     }
 
     $template = $page->base['static'] .$page->template;
