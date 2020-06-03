@@ -10,25 +10,21 @@ class Page
 {
   // page attributes
   public $attrib = [
-    'view' => 'plain',    // view mode [ plain | latte | json | upload | redirect ]
+    'view' => 'plain',  // view mode [ plain | latte | json | upload | redirect ]
     'presenterNamespace' => 'App\Presenters',
   ];
 
   private $requestPath; // base for pattern comparison
   private $httpMethod;  // http method lowercase
 
+  // $sysDir - Nette framework folder
   public function __construct(string $sysDir)
   {
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
     $this->requestPath = rtrim($path, '/');
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
-    $request = dirname($_SERVER['SCRIPT_NAME']);
-    $this->attrib['base'] = [
-      'request' => $request,  // base path for all routes (subfolder of document root)
-      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,  // path to rendered static site (Hugo public/ folder)
-      'system' => $sysDir,  // path to Nette system folder
-    ];
+    $this->setBase($sysDir);
 
     $this->setGroupRequest();
   }
@@ -37,7 +33,7 @@ class Page
   public function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    $trace = debug_backtrace()[2];
+    $trace = debug_backtrace()[1];
     $this->attrib['route'][$trace['line']] = $presenter;
 
     // call Presenter
@@ -74,6 +70,18 @@ class Page
       return true;
     }
     return false;
+  }
+
+  // set base folders
+  // $sysDir - Nette framework folder
+  protected function setBase(string $sysDir)
+  {
+    $request = dirname($_SERVER['SCRIPT_NAME']);
+    $this->attrib['base'] = [
+      'request' => $request,  // base path for all routes (subfolder of document root)
+      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,  // path to rendered static site (Hugo public/ folder)
+      'system' => $sysDir,  // path to Nette framework
+    ];
   }
 
   // calculate requestBase for a group and request URI variables
