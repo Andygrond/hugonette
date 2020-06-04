@@ -28,18 +28,21 @@ class Presenter
   }
 
   // calculate base model data for application
+  // return false for not relevant route
   protected function baseModel()
   {
     $this->model = [];
+    return true;
   }
 
   // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
   public function run(string $method)
   {
-    $this->baseModel();
-    $model = $this->$method();
-    if ($model === false)) {
+    if (false === $this->baseModel()) {
+      return;
+    }
+    if (false === $model = $this->$method()) {
       return;
     }
     $this->viewStrategy()->view($this->model + $model, $this->page);
