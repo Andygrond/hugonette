@@ -28,10 +28,9 @@ class Presenter
   }
 
   // calculate base model data for application
-  // return false if irrelevant
   protected function baseModel()
   {
-    return true;
+    $this->model = [];
   }
 
   // view model data calculated by presenter class@method declared in router
@@ -40,7 +39,7 @@ class Presenter
   {
     $this->baseModel();
     $model = $this->$method();
-    if (empty($model)) {
+    if ($model === false)) {
       return;
     }
     $this->viewStrategy()->view($this->model + $model, $this->page);
