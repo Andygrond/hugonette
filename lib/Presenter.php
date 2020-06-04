@@ -24,7 +24,7 @@ class Presenter
   protected function viewStrategy()
   {
     $viewClass = '\\Andygrond\\Hugonette\\' .ucfirst($this->page->view) .'View';
-    return new $viewClass();
+    return new $viewClass($this->page);
   }
 
   // calculate base model data for application
@@ -45,7 +45,7 @@ class Presenter
     if (false === $model = $this->$method()) {
       return;
     }
-    $this->viewStrategy()->view($this->model + $model, $this->page);
+    $this->viewStrategy()->view($this->model + $model);
   }
 
 }

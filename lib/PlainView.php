@@ -8,13 +8,19 @@ namespace Andygrond\Hugonette;
 
 class PlainView implements View
 {
+  private $template;
+
+  public function __construct(\stdClass $page)
+  {
+    $this->template = $page->base['static'] .$page->template;
+  }
 
   // render model data using plain old PHP template
-  public function view(array $_model, \stdClass $page)
+  public function view(array $_model)
   {
     extract($_model);
     unset($_model);
-    include($page->base['static'] .$page->template);
+    include($this->template);
 
     exit;
   }

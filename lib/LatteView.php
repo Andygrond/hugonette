@@ -10,21 +10,27 @@ use Latte\Engine;
 
 class LatteView implements View
 {
+  private $page;
+
+  public function __construct(\stdClass $page)
+  {
+    $this->page = $page;
+  }
 
   // render model data using Latte templating engine
-  public function view(array $model, \stdClass $page)
+  public function view(array $model)
   {
     if (Log::$debugMode && Log::$channel != 'plain') {
-      bdump($page, 'page');
+      bdump($this->page, 'page');
       bdump($model, 'model');
     }
 
     $latte = new Engine;
-    if ($page->base['system']) {
-      $latte->setTempDirectory($page->base['system'] .'/temp/latte');
+    if ($this->page->base['system']) {
+      $latte->setTempDirectory($this->page->base['system'] .'/temp/latte');
     }
 
-    $template = $page->base['static'] .$page->template;
+    $template = $this->page->base['static'] .$this->page->template;
     $latte->render($template, $model);
 
     exit;

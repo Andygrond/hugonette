@@ -9,6 +9,8 @@ namespace Andygrond\Hugonette;
 interface View
 {
 
-  public function view(array $model, \stdClass $page);
+  public function __construct(\stdClass $page);
+
+  public function view(array $model);
 
 }

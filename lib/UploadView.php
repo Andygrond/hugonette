@@ -32,11 +32,15 @@ class UploadView implements View
     'webm' => 'video/webm',
   ];
 
+  public function __construct(\stdClass $page = null)
+  {
+  }
+
 // upload file
 // $model['destinationFile'] suggested 'filename.ext' of received file or '.ext' when saving file is not intended
 // $model['inline'] true: try to display the content, false: try save the file
 // $model['sourceFile'] uploaded file name or $model['data'] uploaded content
-  public function view(array $model, \stdClass $page = null)
+  public function view(array $model)
   {
     $disposition = @$model['inline']? 'inline' : 'attachment';
     $file = $model['destinationFile'];

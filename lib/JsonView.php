@@ -9,8 +9,12 @@ namespace Andygrond\Hugonette;
 class JsonView implements View
 {
 
+  public function __construct(\stdClass $page = null)
+  {
+  }
+
   // send model data as JSON object
-  public function view(array $model, \stdClass $page)
+  public function view(array $model)
   {
     if ($model === false)
       return;
