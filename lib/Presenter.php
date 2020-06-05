@@ -11,7 +11,7 @@ namespace Andygrond\Hugonette;
 class Presenter
 {
   protected $page;  // page object attributes (can be altered in Presenter)
-  protected $model; // common base model collected by Presenter
+  protected $model = []; // base model data
 
   // @page = object of page attributes
   public function __construct(\stdClass $page)
@@ -27,25 +27,13 @@ class Presenter
     return new $viewClass($this->page);
   }
 
-  // calculate base model data for application
-  // return false for not relevant route
-  protected function baseModel()
-  {
-    $this->model = [];
-    return true;
-  }
-
   // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
   public function run(string $method)
   {
-    if (false === $this->baseModel()) {
-      return;
+    if (false !== $model = $this->$method()) {
+      $this->viewStrategy()->view($this->model + $model);
     }
-    if (false === $model = $this->$method()) {
-      return;
-    }
-    $this->viewStrategy()->view($this->model + $model);
   }
 
 }
