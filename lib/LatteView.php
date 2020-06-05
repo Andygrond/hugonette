@@ -10,28 +10,33 @@ use Latte\Engine;
 
 class LatteView implements View
 {
-  private $page;
+  private $base;
+  private $template;
+  private $debug;
 
   public function __construct(\stdClass $page)
   {
-    $this->page = $page;
+    $this->base = $page->base;
+    $this->template = $page->base['static'] .($page->template?? '/index.html');
+    $this->debug = (Log::$debugMode && Log::$channel != 'plain'); // Log is set in debug mode and uses Tracy
+    if ($this->debug) {
+      bdump($page, 'page');
+    }
   }
 
   // render model data using Latte templating engine
   public function view(array $model)
   {
-    if (Log::$debugMode && Log::$channel != 'plain') {
-      bdump($this->page, 'page');
+    if ($this->debug) {
       bdump($model, 'model');
     }
 
     $latte = new Engine;
-    if ($this->page->base['system']) {
-      $latte->setTempDirectory($this->page->base['system'] .'/temp/latte');
+    if ($this->base['system']) {
+      $latte->setTempDirectory($this->base['system'] .'/temp/latte');
     }
 
-    $template = $this->page->base['static'] .$this->page->template;
-    $latte->render($template, $model);
+    $latte->render($this->template, $model);
 
     exit;
   }
