@@ -12,7 +12,7 @@ class Session
   {
     session_start();
     if (!$redirectUrl) {
-      $redirectUrl = $_SERVER['PHP_SELF'];
+      $redirectUrl = $_SERVER['REQUEST_URI'];
     }
 
     if (!isset($_SESSION['started_at'])) {
