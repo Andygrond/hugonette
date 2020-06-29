@@ -44,22 +44,14 @@ class Page
   // return = file exists
   public function template(): bool
   {
-    $base = $this->attrib['base']['request'] .$this->attrib['request'][0];
-//    $this->attrib['template'] = $base .'/index.html';
-    $this->attrib['template'] = $base;
-//    if (is_file($this->attrib['base']['static'] .$this->requestPath)) {
-//      $this->attrib['template'] = $this->requestPath;
-//      return true;
-//    }
-    $file = $this->attrib['base']['static'] .$this->attrib['template'];
-//exit ($file);
-    if (is_file($file)) {
+    $this->attrib['base']['template'] = '';
+    $template = $this->attrib['base']['request'] .$this->attrib['request'][0];
+    $template .= (substr($template, -1) == '/')? 'index.html' : '.html';
+
+    if (is_file($this->attrib['base']['static'] .$template)) {
+      $this->attrib['template'] = $template;
       return true;
     }
-//    $this->attrib['template'] = $base .'.html';
-//    if (is_file($this->attrib['base']['static'] .$this->attrib['template'])) {
-//      return true;
-//    }
     return false;
   }
 
@@ -107,9 +99,16 @@ class Page
       $this->attrib['base']['request'] .= $groupBase; // base URL set for current route group
     }
 
-    $path = substr($this->requestPath .'/', strlen($this->attrib['base']['request']));
+//    $path = substr($this->requestPath .'/', strlen($this->attrib['base']['request']));
+    $path = substr($this->requestPath, strlen($this->attrib['base']['request']));
+    $ending = '/';
+    if (substr($this->requestPath, -5) == '.html') {
+      $path = substr($path, 0, -5);
+      $ending = '';
+    }
     $this->attrib['request'] = explode('/', $path);
-    $this->attrib['request'][0] = $path;
+    $this->attrib['request'][0] = $path .$ending;
+//    $this->attrib['request'][0] = $path .'/';
   }
 
 }
