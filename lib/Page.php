@@ -33,8 +33,8 @@ class Page
   public function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    $trace = debug_backtrace()[1];
-    $this->attrib['route'][$trace['line']] = $presenter;
+    $trace = debug_backtrace()[1]['line'];
+    $this->attrib['route'][$trace] = $presenter;
 
     // call Presenter
     PresenterFactory::create($presenter, $this->attrib);
@@ -42,10 +42,25 @@ class Page
 
   // calculate template file name based on the URL
   // return = file exists
-  private function template(): bool
+  public function template(): bool
   {
-    $this->attrib['template'] = $this->$this->attrib['request'][0] .'/index.html';
-    return is_file($this->attrib['base']['static'] .$this->attrib['template']);
+    $base = $this->attrib['base']['request'] .$this->attrib['request'][0];
+//    $this->attrib['template'] = $base .'/index.html';
+    $this->attrib['template'] = $base;
+//    if (is_file($this->attrib['base']['static'] .$this->requestPath)) {
+//      $this->attrib['template'] = $this->requestPath;
+//      return true;
+//    }
+    $file = $this->attrib['base']['static'] .$this->attrib['template'];
+//exit ($file);
+    if (is_file($file)) {
+      return true;
+    }
+//    $this->attrib['template'] = $base .'.html';
+//    if (is_file($this->attrib['base']['static'] .$this->attrib['template'])) {
+//      return true;
+//    }
+    return false;
   }
 
   // checking http request method
@@ -78,9 +93,10 @@ class Page
   {
     $request = dirname($_SERVER['SCRIPT_NAME']);
     $this->attrib['base'] = [
-      'request' => $request,  // base path for all routes (subfolder of document root)
-      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$request,  // path to rendered static site (Hugo public/ folder)
-      'system' => $sysDir,  // path to Nette framework
+      'request' => $request,  // base path for route (subfolder of document root)
+      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static',  // path to rendered static site (containing template base)
+      'template' => $request, // base path for static template (subfolder of static base)
+      'system' => $sysDir,    // path to Nette framework
     ];
   }
 
