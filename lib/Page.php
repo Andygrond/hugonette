@@ -14,6 +14,7 @@ class Page
     'presenterNamespace' => 'App\Presenters',
   ];
 
+  private $trace = [];  // trace of matched routes
   private $requestPath; // base for pattern comparison
   private $httpMethod;  // http method lowercase
 
@@ -33,8 +34,9 @@ class Page
   public function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    $trace = debug_backtrace()[1]['line'];
-    $this->attrib['route'][$trace] = $presenter;
+    $lineNo = debug_backtrace()[1]['line'];
+    $this->trace[$lineNo] = $presenter;
+    $this->attrib['trace'] = $this->trace;
 
     // call Presenter
     PresenterFactory::create($presenter, $this->attrib);
@@ -99,7 +101,6 @@ class Page
       $this->attrib['base']['request'] .= $groupBase; // base URL set for current route group
     }
 
-//    $path = substr($this->requestPath .'/', strlen($this->attrib['base']['request']));
     $path = substr($this->requestPath, strlen($this->attrib['base']['request']));
     $ending = '/';
     if (substr($this->requestPath, -5) == '.html') {
@@ -108,7 +109,6 @@ class Page
     }
     $this->attrib['request'] = explode('/', $path);
     $this->attrib['request'][0] = $path .$ending;
-//    $this->attrib['request'][0] = $path .'/';
   }
 
 }
