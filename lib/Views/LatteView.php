@@ -1,12 +1,13 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Views;
 
 /* MVP Latte View strategy rendering for Hugonette
 * @author Andygrond 2020
 **/
 
 use Latte\Engine;
+use Andygrond\Hugonette\Log;
 
 class LatteView implements View
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Views;
 
 /* MVP Plain View strategy rendering for Hugonette
 * @author Andygrond 2020

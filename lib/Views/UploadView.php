@@ -1,10 +1,12 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Views;
 
 /* MVP Upload View strategy for Hugonette
 * @author Andygrond 2020
 **/
+
+use Andygrond\Hugonette\Log;
 
 class UploadView implements View
 {

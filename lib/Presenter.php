@@ -23,7 +23,7 @@ class Presenter
   // this method can be replaced to reflect more sophisticated logic based on $page attribs
   protected function viewStrategy()
   {
-    $viewClass = '\\Andygrond\\Hugonette\\' .ucfirst($this->page->view) .'View';
+    $viewClass = '\\Andygrond\\Hugonette\\Views\\' .ucfirst($this->page->view) .'View';
     return new $viewClass($this->page);
   }
 
@@ -32,6 +32,7 @@ class Presenter
   public function run(string $method)
   {
     if (false !== $model = $this->$method()) {
+      Log::close(); // effective only when set previously
       $this->viewStrategy()->view($this->model + $model);
     }
   }

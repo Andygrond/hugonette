@@ -17,12 +17,6 @@ class Route
     $this->page = new Page($sysDir);
   }
 
-  // Log shutdown needed to write to file
-  public function __destruct()
-  {
-    Log::close(); // effective only when set previously
-  }
-
   // route for single request method
   // @method - http method as a route function name
   // @args = [$pattern, $model]

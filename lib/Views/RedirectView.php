@@ -1,10 +1,12 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Views;
 
 /* MVP Redirect View strategy rendering for Hugonette
 * @author Andygrond 2020
 **/
+
+use Andygrond\Hugonette\Log;
 
 class RedirectView implements View
 {
