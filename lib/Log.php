@@ -3,14 +3,14 @@
 namespace Andygrond\Hugonette;
 
 /* Log Facade for Hugonette
-* Uses PSR-3 log levels + level 'view' which collects messages for user awareness
-* Channel 'tracy' and 'ajax' utilizes Tracy debugger
-* For channel 'ajax' use Chrome with FireLogger extension
-*
-* @author Andygrond 2019
-* Dependency: https://github.com/nette/tracy
-* Dependency: https://github.com/donatj/PhpUserAgent
-* todo: tests of mailing, output debugger, ajax channel
+ * Uses PSR-3 log levels + level 'view' which collects messages for user awareness
+ * Channel 'tracy' and 'ajax' utilizes Tracy debugger
+ * For channel 'ajax' use Chrome with FireLogger extension
+ *
+ * @author Andygrond 2019
+ * Dependency: https://github.com/nette/tracy
+ * Dependency: https://github.com/donatj/PhpUserAgent
+ * todo: tests of mailing, output debugger, ajax channel
 **/
 
 use Tracy\Debugger;
@@ -39,9 +39,9 @@ class Log
 
   public static $channel;           // active output channel
   public static $viewErrors = [];   // messages collected to be passed to view
-  public static $durations = [];    // elapsed job times
   public static $isActive = false;  // log is set and active
   public static $debugMode = false; // debug mode flag
+  public static $duration;          // Duration object
 
   /* log initialization
   @ $path = /path/to/log/filename.log or /path/to/log/folder/
@@ -52,10 +52,7 @@ class Log
   */
   public static function set(string $path, string $channel = 'plain', string $debug = null)
   {
-    // calculate init time duration
-    $runTime = microtime(true);
-    self::$durations['pre']['duration'] = $runTime - $_SERVER['REQUEST_TIME_FLOAT'];
-    self::$durations['run']['start'] = $runTime;
+    self::$duration = new Duration;
 
     // initialize variables
     if (self::$isActive) {
@@ -190,7 +187,7 @@ class Log
   // format request information for printing
   private static function renderRequest()
   {
-    $record =  ' ' .$_SERVER['REMOTE_ADDR'] .' [' .implode('; ', self::times()) .'] ';
+    $record =  ' ' .$_SERVER['REMOTE_ADDR'] .' [' .implode('; ', self::$duration->times()) .'] ';
 
     // user agent
     if (php_sapi_name() == "cli") {
@@ -221,13 +218,7 @@ class Log
   public static function job(string $name)
   {
     self::$jobStack[] = $name;
-    if (@self::$durations[$name]['start'])
-    throw new \InvalidArgumentException("Job $name double start.");
-
-    self::$durations[$name]['start'] = microtime(true);
-    if (!isset(self::$durations[$name]['duration'])) {
-      self::$durations[$name]['duration'] = 0;
-    }
+    self::$duration->start($name);
   }
 
   // quit current job
@@ -235,44 +226,10 @@ class Log
   public static function done(string $name)
   {
     $lastName = array_pop(self::$jobStack);
-    if ($name != $lastName || !isset(self::$durations[$name])) {
-      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting is allowed only.");
+    if ($name != $lastName) {
+      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting allowed only.");
     }
-    if (!@self::$durations[$name]['start']) {
-      throw new \InvalidArgumentException("Job $name done but not started.");
-    }
-
-    self::$durations[$name]['duration'] += microtime(true) - self::$durations[$name]['start'];
-    self::$durations[$name]['start'] = 0;
-  }
-
-  // get array of all durations
-  public static function times(): array
-  {
-    self::$durations['run']['duration'] = microtime(true) - self::$durations['run']['start'];
-
-    $times = [];
-    if (self::$durations) {
-      foreach (self::$durations as $name => $frame) {
-        $times[] = $name .': ' .self::easyTime($frame['duration']);
-      }
-    }
-    return $times;
-  }
-
-  // get time duration in user friendly format
-  // argument in milliseconds
-  public static function easyTime(float $duration): string
-  {
-    if ($duration < .9) {
-      return round(1000 * $duration) .' ms';
-    } elseif ($duration < 9.) {
-      return round($duration, 2) .' s';
-    } elseif ($duration < 90.) {
-      return round($duration, 1) .' s';
-    } else {
-      return round($duration/60, 1) .' min';
-    }
+    self::$duration->stop($name);
   }
 
 }
