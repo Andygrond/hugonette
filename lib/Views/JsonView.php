@@ -16,14 +16,9 @@ class JsonView implements View
   // send model data as JSON object
   public function view(array $model)
   {
-    if ($model === false)
-      return;
-
     header('Cache-Control: no-cache');
     header('Content-Type: application/json');
     echo json_encode($model, JSON_UNESCAPED_UNICODE);
-
-    exit;
   }
 
 }

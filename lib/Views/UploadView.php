@@ -71,8 +71,6 @@ class UploadView implements View
         throw new \InvalidArgumentException("Upload source not specified.");
       }
     }
-
-    exit;
   }
 
 }

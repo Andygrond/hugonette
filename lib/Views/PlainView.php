@@ -21,8 +21,6 @@ class PlainView implements View
     extract($_model);
     unset($_model);
     include($this->template);
-
-    exit;
   }
 
 }

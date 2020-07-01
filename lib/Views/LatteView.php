@@ -38,8 +38,6 @@ class LatteView implements View
     }
 
     $latte->render($this->template, $model);
-
-    exit;
   }
 
 }

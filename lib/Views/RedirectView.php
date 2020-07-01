@@ -23,8 +23,6 @@ class RedirectView implements View
     $code = (@$model['permanent'] !== false)? 301 : 302;
     Log::info($code .' Redirected to: ' .$to);
     header('Location: ' .$to, true, $code);
-
-    exit;
   }
 
 }

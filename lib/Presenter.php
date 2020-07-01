@@ -32,8 +32,9 @@ class Presenter
   public function run(string $method)
   {
     if (false !== $model = $this->$method()) {
-      Log::close(); // effective only when set previously
       $this->viewStrategy()->view($this->model + $model);
+      Log::close(); // effective only when set previously
+      exit;
     }
   }
 
