@@ -3,7 +3,8 @@
 namespace Andygrond\Hugonette;
 
 /* PSR-3 compatible logger for Hugonette
- * Extra level 'view' collects messages for user awareness
+ * Tracy debugger is utilized in channel 'tracy' and 'ajax'
+ * For channel 'ajax' use Chrome with FireLogger extension
  * @author Andygrond 2020
  * Dependency: https://github.com/donatj/PhpUserAgent
 **/
@@ -30,16 +31,17 @@ class Logger
   private $channel;         // active output channel
   private $logFile = '';    // path to log filename
 
-  public $debugMode = false; // Logger is in Tracy development mode
+  public $debugMode = false; // Logger is in Tracy development mode; used in LatteView
 
 
   /* log initialization
   @ $path = /path/to/log/filename.log or /path/to/log/folder/
-  file extension .log is obligatory - Formatter instance will be applied
-  when directory is given, native tracy log will be used
+  File with obligatory .log extension - uses Hugonette log format
+  When directory is given - uses Tracy native logger
   @ $channel - set main log channel ['plain'|'tracy'|'ajax']
   Tracy debugger will not be used in 'plain' channel
-  @ $debugMode = switch Tracy to development mode
+  Channel 'ajax' logs to the console also - use Chrome with FireLogger extension
+  @ $debugMode = switches Tracy to development mode
   */
   public function __construct(string $path, string $channel = 'plain', bool $debugMode = false)
   {
@@ -52,14 +54,12 @@ class Logger
       $logPath = rtrim($path, '/') .'/';
     }
 
-    // initialize Tracy debugger
+    $this->channel = $channel;
+
     if ($channel != 'plain') {
       $this->debugMode = $debugMode;  // for use in app
-      $mode = $debugMode? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-      Debugger::enable($mode, $logPath);
+      $this->enableTracy($logPath);
     }
-
-    $this->channel = $channel;
   }
 
   // destruction of Logger instance will write the $collection to log file
@@ -103,17 +103,26 @@ class Logger
     }
   }
 
-  // enable fireLog - log to console also
+  // short way to enable special functions
   public function enable($mode)
   {
     switch($mode) {
-      case 'fireLog':
-        $this->channel = 'ajax';
+      case 'ajax':   // log to Chrome console with FireLogger extension
+        if ($channel == 'tracy') {  // can be applied in tracy channel only
+          $this->channel = 'ajax';
+        }
         break;
-      case 'OutputDebugger':
+      case 'output': // enable OutputDebugger
         OutputDebugger::enable();
         break;
     }
+  }
+
+  // enable Tracy debugger
+  private function enableTracy($logPath)
+  {
+    $mode = $this->debugMode? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+    Debugger::enable($mode, $logPath);
   }
 
   // write $collection to file

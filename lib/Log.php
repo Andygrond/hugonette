@@ -3,10 +3,8 @@
 namespace Andygrond\Hugonette;
 
 /* Log Facade for Hugonette
- * Uses PSR-3 log levels
+ * Any PSR-3 compatible logger can be injected
  * Extra level 'view' collects messages for user awareness
- * Channel 'tracy' and 'ajax' utilizes Tracy debugger
- * For channel 'ajax' use Chrome with FireLogger extension
  *
  * @author Andygrond 2020
  * Dependency: https://github.com/nette/tracy

@@ -36,7 +36,7 @@ class LogFormatter
     // message collection
     if ($collection) {
       foreach ($collection as $item) {
-        $record .= "\n\t" .$item['level'] ' ' .$item['message'] .'  ' .$item['context'];
+        $record .= "\n\t" .$item['level'] .' ' .$item['message'] .'  ' .$item['context'];
       }
       $collection = '';
     }
