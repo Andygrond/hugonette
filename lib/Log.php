@@ -7,7 +7,6 @@ namespace Andygrond\Hugonette;
  * When working with native Logger adds extra level 'view' to collect view messages
  *
  * @author Andygrond 2020
- * Dependency: https://github.com/nette/tracy
  * todo: mailing and ajax channel test
 **/
 

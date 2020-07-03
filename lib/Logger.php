@@ -3,10 +3,11 @@
 namespace Andygrond\Hugonette;
 
 /* PSR-3 compatible logger for Hugonette
- * Tracy debugger is utilized in channel 'tracy' and 'ajax'
- * For channel 'ajax' use Chrome with FireLogger extension
+ * Tracy debugger is utilized in modes 'prod' and 'dev'
+ *
  * @author Andygrond 2020
- * Dependency: https://github.com/donatj/PhpUserAgent
+ * Optional dependency: https://github.com/nette/tracy
+ * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 use Tracy\Debugger;
@@ -28,22 +29,21 @@ class Logger
 
   private $collection = []; // messages waiting for output
   private $minLevel = 0;    // lowest level of logged messages
-  private $channel;         // active output channel
   private $logFile = '';    // path to log filename
+  private $sendFireLog = false; // switch to sending messages to Chrome console
 
-  public $debugMode = false; // Logger is in Tracy development mode; used in LatteView
-
+  public $mode;        // Tracy debugger working mode
 
   /* log initialization
   @ $path = /path/to/log/filename.log or /path/to/log/folder/
   File with obligatory .log extension - uses Hugonette log format
   When directory is given - uses Tracy native logger
-  @ $channel - set main log channel ['plain'|'tracy'|'ajax']
-  Tracy debugger will not be used in 'plain' channel
-  Channel 'ajax' logs to the console also - use Chrome with FireLogger extension
-  @ $debugMode = switches Tracy to development mode
+  @ $mode - set debugger mode ['plain'|'prod'|'dev']
+  Tracy debugger will not be used in 'plain' mode
+  In 'prod' Tracy works in production mode
+  In 'dev' Tracy works in development mode
   */
-  public function __construct(string $path, string $channel = 'plain', bool $debugMode = false)
+  public function __construct(string $path, string $mode = 'plain')
   {
     // set log dir and file
     if (strrchr($path, '.') == '.log') {
@@ -54,11 +54,13 @@ class Logger
       $logPath = rtrim($path, '/') .'/';
     }
 
-    $this->channel = $channel;
-
-    if ($channel != 'plain') {
-      $this->debugMode = $debugMode;  // for use in app
-      $this->enableTracy($logPath);
+    $this->mode = $mode;
+    if ($mode != 'plain') {
+      if ($mode != 'prod' && $mode != 'dev') {
+        throw new \UnexpectedValueException("Log mode: $mode is not valid.");
+      }
+      $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+      Debugger::enable($tracyMode, $logPath);
     }
   }
 
@@ -113,25 +115,19 @@ class Logger
   }
 
   // shortcuts to enable special functions
-  public function enable($mode)
+  // can be applied only when Tracy is active
+  public function enable($name)
   {
-    switch($mode) {
-      case 'ajax':   // log to Chrome console with FireLogger extension
-        if ($channel == 'tracy') {  // can be applied in tracy channel only
-          $this->channel = 'ajax';
-        }
-        break;
-      case 'output': // enable OutputDebugger
-        OutputDebugger::enable();
-        break;
+    if ($mode != 'plain') {
+      switch($name) {
+        case 'ajax':   // log to Chrome console with FireLogger extension
+          $this->sendFireLog = true;
+          break;
+        case 'output': // enable OutputDebugger
+          OutputDebugger::enable();
+          break;
+      }
     }
-  }
-
-  // enable Tracy debugger
-  private function enableTracy($logPath)
-  {
-    $mode = $this->debugMode? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-    Debugger::enable($mode, $logPath);
   }
 
   // write $collection to file
@@ -146,7 +142,7 @@ class Logger
       Debugger::log($message);
     }
 
-    if ($this->channel == 'ajax') {
+    if ($this->sendFireLog) {
       Debugger::fireLog($message);
     }
   }
