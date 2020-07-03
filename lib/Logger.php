@@ -103,7 +103,16 @@ class Logger
     }
   }
 
-  // short way to enable special functions
+  // add extra level $name
+  // @ $name and $weight cannot overlap with existing
+  public function addLevel($name, $weight)
+  {
+    if (!array_search($weight, $this->levels) && !isset($this->levels[$name])) {
+      $this->levels[$name] = $weight;
+    }
+  }
+
+  // shortcuts to enable special functions
   public function enable($mode)
   {
     switch($mode) {

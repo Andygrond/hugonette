@@ -4,25 +4,28 @@ namespace Andygrond\Hugonette;
 
 /* Log Facade for Hugonette
  * Any PSR-3 compatible logger can be injected
- * Extra level 'view' collects messages for user awareness
+ * When working with native Logger adds extra level 'view' to collect view messages
  *
  * @author Andygrond 2020
  * Dependency: https://github.com/nette/tracy
- * todo: tests of mailing and ajax channel
+ * todo: mailing and ajax channel test
 **/
 
 class Log
 {
-  private static $jobStack = [];    // job names stack
-  private static $duration;         // Duration object
+  private static $jobStack = []; // job names stack
+  private static $duration;      // Duration object
 
-  public static $viewErrors = [];   // messages collected to be passed to view
-  public static $logger;            // Logger object
+  public static $viewErrors = [];// messages collected to be passed to view
+  public static $logger;         // Logger object
 
   public static function set(Logger $logger)
   {
     if (self::$logger) {
       throw new \BadMethodCallException("Log cannot be set twice");
+    }
+    if (method_exists($logger, 'addLevel')) {
+      $logger->addLevel('view', 35);  // level 'view' for sending messages to view
     }
     self::$logger = $logger;
     self::$duration = new Duration;
@@ -37,7 +40,6 @@ class Log
     }
     if ($level == 'view') {  // collect view errors, which can be attached to model
       self::$viewErrors[] = $record;
-      $level == 'notice';
     }
     [$message, $context] = array_pad($args, 2, null);
     if (self::$jobStack) {
