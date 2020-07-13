@@ -15,7 +15,7 @@ class LogFormatter
   }
 
   // format date part of log message
-  public function date()
+  public function date(): string
   {
     $locinfo = localeconv();
     $date = \DateTime::createFromFormat('U' .$locinfo['decimal_point'] .'u', (string) $_SERVER["REQUEST_TIME_FLOAT"]);
@@ -23,7 +23,7 @@ class LogFormatter
   }
 
   // format message collection
-  public function message(&$collection)
+  public function message(array &$collection): string
   {
     // general info
     if (end($collection)['message'] == 'Duration') {
@@ -36,7 +36,10 @@ class LogFormatter
     // message collection
     if ($collection) {
       foreach ($collection as $item) {
-        $record .= "\n\t" .$item['level'] .' ' .$item['message'] .'  ' .$item['context'];
+        $record .= "\n\t" .$item['level'] .' ' .$item['message'];
+        if ($item['context']) {
+          $record .= ' ' .json_encode($context, JSON_UNESCAPED_UNICODE);
+        };
       }
       $collection = '';
     }
@@ -44,11 +47,11 @@ class LogFormatter
   }
 
   // format general information part
-  private function generalInfo($duration)
+  private function generalInfo(array $duration = null): string
   {
-    $record = ' ' .$_SERVER['REMOTE_ADDR'];
+    $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ';
     if ($duration) {
-      $record .= ' [' .implode('; ', $duration) .'] ';
+      $record .= '[' .implode('; ', $duration) .'] ';
     }
     $record .= (php_sapi_name() == "cli")? 'Command' : $this->userAgent();
 
@@ -56,7 +59,7 @@ class LogFormatter
   }
 
   // format user agent
-  private function userAgent()
+  private function userAgent(): string
   {
     if (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       $agent = parse_user_agent();

@@ -90,7 +90,7 @@ class Logger
       $this->collection[] = [
         'level' => strtoupper($level),
         'message' => $message,
-        'context' => isset($context)? json_encode($context, JSON_UNESCAPED_UNICODE) : '',
+        'context' => $context,
       ];
     }
   }
