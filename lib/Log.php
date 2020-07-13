@@ -52,7 +52,7 @@ class Log
   public static function close()
   {
     if (self::$logger) {
-      self::$logger->log('debug', 'Duration', self::$duration->times());
+      self::$logger->debug('Duration', (array) self::$duration->timeLen());
       self::$logger = null;
     }
   }

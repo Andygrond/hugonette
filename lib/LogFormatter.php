@@ -51,7 +51,7 @@ class LogFormatter
   {
     $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ';
     if ($duration) {
-      $record .= '[' .implode('; ', $duration) .'] ';
+      $record .= '[' .implode(' ', $duration) .'] ';
     }
     $record .= (php_sapi_name() == "cli")? 'Command' : $this->userAgent();
 
