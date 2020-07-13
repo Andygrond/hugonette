@@ -38,7 +38,7 @@ class LogFormatter
       foreach ($collection as $item) {
         $record .= "\n\t" .$item['level'] .' ' .$item['message'];
         if ($item['context']) {
-          $record .= ' ' .json_encode($context, JSON_UNESCAPED_UNICODE);
+          $record .= ' ' .json_encode($item['context'], JSON_UNESCAPED_UNICODE);
         };
       }
       $collection = '';
