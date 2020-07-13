@@ -107,7 +107,7 @@ class Logger
 
   // add extra level $name
   // @ $name and $weight cannot overlap with existing
-  public function addLevel($name, $weight)
+  public function addLevel(string $name, int $weight)
   {
     if (!array_search($weight, $this->levels) && !isset($this->levels[$name])) {
       $this->levels[$name] = $weight;
@@ -116,7 +116,7 @@ class Logger
 
   // shortcuts to enable special functions
   // can be applied only when Tracy is active
-  public function enable($name)
+  public function enable(string $name)
   {
     if ($mode != 'plain') {
       switch($name) {
