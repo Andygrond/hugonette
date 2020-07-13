@@ -42,36 +42,17 @@ class Duration
   }
 
   // get array of all duration times
-  public function timeLen()
+  public function timeLen(): array
   {
     $this->times['run']['duration'] = microtime(true) - $this->times['run']['start'];
 
+    $len = [];
     if ($this->times) {
       foreach ($this->times as $name => $frame) {
-        $len[] = $name .':' .$this->easyTime($frame['duration']);
+        $len[] = $name .':' .round(1000 * $frame['duration']);
       }
     }
     return $len;
-  }
-
-  // get time duration in user friendly format
-  // argument in milliseconds
-  private function easyTime(float $duration): string
-  {
-    return round(1000 * $duration);
-  }
-
-  private function easyTime_alt(float $duration): string
-  {
-    if ($duration < .9) {
-      return round(1000 * $duration) .' ms';
-    } elseif ($duration < 9.) {
-      return round($duration, 2) .' s';
-    } elseif ($duration < 90.) {
-      return round($duration, 1) .' s';
-    } else {
-      return round($duration/60, 1) .' min';
-    }
   }
 
 }

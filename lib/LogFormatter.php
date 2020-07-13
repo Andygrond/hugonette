@@ -50,11 +50,11 @@ class LogFormatter
   private function generalInfo(array $duration = null): string
   {
     $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ';
-    if ($duration) {
-      $record .= '[' .implode(' ', $duration) .'] ';
-    }
     $record .= (php_sapi_name() == "cli")? 'Command' : $this->userAgent();
 
+    if ($duration) {
+      $record .= ' [' .implode(',', $duration) .']';
+    }
     return $record .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$_SERVER['REQUEST_URI'];
   }
 
