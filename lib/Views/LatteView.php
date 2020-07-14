@@ -21,7 +21,6 @@ class LatteView implements View
     $this->template = $page->base['static'] .$page->base['template'] .($page->template?? '/index.html');
 
     // dump $page if Log uses native Logger and Tracy in debug mode
-//    exit(Log::$logger->mode);
     if (@Log::$logger->mode == 'dev') {
       bdump($page, 'page');
     }
