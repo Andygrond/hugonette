@@ -84,7 +84,7 @@ class Log
   public static function trigger($message)
   {
     if ($caller = @debug_backtrace()[2]) {
-     $message .= ' - in ' .$caller['function'].' called from ' .$caller['file'] .' line ' .$caller['line'];
+     $message .= ' Called in ' .$caller['function'].' from ' .$caller['file'] .':' .$caller['line'];
    }
    trigger_error($message);
   }
