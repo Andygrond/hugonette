@@ -22,23 +22,23 @@ class Duration
   public function start($name)
   {
     if (isset($this->times[$name]['start'])) {
-      throw new \InvalidArgumentException("Job $name double start.");
-    }
-
-    $this->times[$name]['start'] = microtime(true);
-    if (!isset($this->times[$name]['duration'])) {
-      $this->times[$name]['duration'] = 0;
+      trigger_error("Job $name double start.");
+    } else {
+      $this->times[$name]['start'] = microtime(true);
+      if (!isset($this->times[$name]['duration'])) {
+        $this->times[$name]['duration'] = 0;
+      }
     }
   }
 
   public function stop(string $name)
   {
     if (!isset($this->times[$name]) || !isset($this->times[$name]['start'])) {
-      throw new \InvalidArgumentException("Job $name done but not started.");
+      trigger_error("Job $name done but not started.");
+    } else {
+      $this->times[$name]['duration'] += microtime(true) - $this->times[$name]['start'];
+      $this->times[$name]['start'] = 0;
     }
-
-    $this->times[$name]['duration'] += microtime(true) - $this->times[$name]['start'];
-    $this->times[$name]['start'] = 0;
   }
 
   // get array of all duration times

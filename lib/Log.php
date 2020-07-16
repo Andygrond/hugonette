@@ -20,9 +20,6 @@ class Log
 
   public static function set(Logger $logger)
   {
-    if (self::$logger) {
-      throw new \BadMethodCallException("Log cannot be set twice");
-    }
     if (method_exists($logger, 'addLevel')) {
       $logger->addLevel('view', 35);  // level 'view' for sending messages to view
     }
@@ -69,14 +66,18 @@ class Log
   // reset old job name and save job duration
   public static function done(string $name)
   {
-    if (!self::$jobStack) {
-      throw new \BadMethodCallException("No job started to be done");
+    $lastName = self::$jobStack? array_pop(self::$jobStack) : '#';
+    if ($name == $lastName) {
+      self::$duration->stop($name);
+    } else {
+      trigger_error("Job $name false attempt to be done. Simple job nesting allowed only.");
     }
-    $lastName = array_pop(self::$jobStack);
-    if ($name != $lastName) {
-      throw new \InvalidArgumentException("Job $name interlaces with another. Nesting allowed only.");
-    }
-    self::$duration->stop($name);
+  }
+
+  // measured time lengths
+  public static function times()
+  {
+    self::$duration->timeLen();
   }
 
 }

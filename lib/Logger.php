@@ -57,7 +57,7 @@ class Logger
     $this->mode = $mode;
     if ($mode != 'plain') {
       if ($mode != 'prod' && $mode != 'dev') {
-        throw new \UnexpectedValueException("Log mode: $mode is not valid.");
+        trigger_error("Log mode: $mode is not valid. Set to prod.");
       }
       $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
       Debugger::enable($tracyMode, $logPath);
@@ -83,10 +83,8 @@ class Logger
   public function log(string $level, $message, $context = [])
   {
     if (!$levelNo = @$this->levels[$level]) {
-      throw new \BadMethodCallException('Log method not found: ' .$level);
-    }
-
-    if ($levelNo >= $this->minLevel) {  // message filtering
+      trigger_error('Log method not found: ' .$level);
+    } elseif ($levelNo >= $this->minLevel) {  // message filtering
       $this->collection[] = [
         'level' => strtoupper($level),
         'message' => $message,
@@ -101,7 +99,7 @@ class Logger
     if (isset($this->levels[$level])) {
       $this->minLevel = $this->levels[$level];
     } else {
-      throw new \UnexpectedValueException("Log level: $level is not valid. Use PSR-3 level");
+      trigger_error("Log level: $level is not valid.");
     }
   }
 
