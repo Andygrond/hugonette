@@ -70,7 +70,7 @@ class Log
     if ($name == $lastName) {
       self::$duration->stop($name);
     } else {
-      trigger_error("Job $name false attempt to be done. Simple job nesting allowed only.");
+      self::trigger("Job $name false attempt to be done. Simple job nesting allowed only.");
     }
   }
 
@@ -80,4 +80,12 @@ class Log
     self::$duration->timeLen();
   }
 
+  // trigger PHP notice with caller identification
+  public static function trigger($message)
+  {
+    if ($caller = @debug_backtrace()[2]) {
+     $message .= ' - in ' .$caller['function'].' called from ' .$caller['file'] .' line ' .$caller['line'];
+   }
+   trigger_error($message);
+  }
 }

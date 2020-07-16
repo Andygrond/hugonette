@@ -22,7 +22,7 @@ class Duration
   public function start($name)
   {
     if (isset($this->times[$name]['start'])) {
-      trigger_error("Job $name double start.");
+      Log::trigger("Job $name double start.");
     } else {
       $this->times[$name]['start'] = microtime(true);
       if (!isset($this->times[$name]['duration'])) {
@@ -34,7 +34,7 @@ class Duration
   public function stop(string $name)
   {
     if (!isset($this->times[$name]) || !isset($this->times[$name]['start'])) {
-      trigger_error("Job $name done but not started.");
+      Log::trigger("Job $name done but not started.");
     } else {
       $this->times[$name]['duration'] += microtime(true) - $this->times[$name]['start'];
       $this->times[$name]['start'] = 0;
