@@ -70,7 +70,7 @@ class Log
     if ($name == $lastName) {
       self::$duration->stop($name);
     } else {
-      self::trigger("Job $name false attempt to be done. Simple job nesting allowed only.");
+      self::trigger("Job $name cannot be done, $lastName is waiting. Simple job nesting allowed only.");
     }
   }
 
