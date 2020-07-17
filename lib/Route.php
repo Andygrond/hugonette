@@ -27,7 +27,7 @@ class Route
         $this->page->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
-      throw new \BadMethodCallException("Router method not found: $method");
+      Log::trigger("Router method not found: $method");
     }
   }
 

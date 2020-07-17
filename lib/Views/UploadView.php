@@ -68,7 +68,7 @@ class UploadView implements View
       } elseif (@$model['sourceData']) {
         echo $model['sourceData'];
       } else {
-        throw new \InvalidArgumentException("Upload source not specified.");
+        Log::trigger("Upload source not specified.");
       }
     }
   }
