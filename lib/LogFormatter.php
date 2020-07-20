@@ -17,9 +17,8 @@ class LogFormatter
   // format date part of log message
   public function date(): string
   {
-    $locinfo = localeconv();
-    $date = \DateTime::createFromFormat('U' .$locinfo['decimal_point'] .'u', (string) $_SERVER["REQUEST_TIME_FLOAT"]);
-    return $date->format('Y-m-d H:i:s.v ');
+    [$sec, $msec] = explode('.', sprintf('%.3F', $_SERVER["REQUEST_TIME_FLOAT"]));
+    return date('Y-m-d H:i:s', $sec) .".$msec ";
   }
 
   // format message collection
