@@ -34,10 +34,10 @@ class Log
     if (!self::$logger) {
       return;
     }
-    if ($level == 'view') {  // collect view errors, which can be attached to model
-      self::$viewErrors[] = $record;
-    }
     [$message, $context] = array_pad($args, 2, null);
+    if ($level == 'view') {  // collect view errors, which can be attached to model
+      self::$viewErrors[] = $message;
+    }
     if (self::$jobStack) {
       $message = end(self::$jobStack) .': ' .$message;
     }
