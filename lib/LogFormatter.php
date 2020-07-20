@@ -11,14 +11,13 @@ class LogFormatter
 {
   public function __construct()
   {
-
   }
 
   // format date part of log message
   public function date(): string
   {
     [$sec, $msec] = explode('.', sprintf('%.3F', $_SERVER["REQUEST_TIME_FLOAT"]));
-    return date('Y-m-d H:i:s', $sec) .".$msec ";
+    return date('Y-m-d H:i:s.', $sec) .$msec;
   }
 
   // format message collection
