@@ -47,23 +47,35 @@ class LogFormatter
   // format general information part
   private function generalInfo(array $duration = null): string
   {
-    $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ';
-    $record .= (php_sapi_name() == "cli")? 'Command' : $this->userAgent();
+    $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent();
 
     if ($duration) {
       $record .= ' [' .implode(',', $duration) .']';
     }
-    return $record .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$_SERVER['REQUEST_URI'];
+    return $record .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
   }
 
   // format user agent
   private function userAgent(): string
   {
     if (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
-      $agent = parse_user_agent();
-      return $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
+      if ($agent = parse_user_agent()) {
+        return $agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'];
+      } else {
+        return strtoupper(php_sapi_name());
+      }
     }
     return '';
+  }
+
+  // collect actual page address
+  private function pageURI(): string
+  {
+    $link = 'http' .(@$_SERVER['HTTPS'] == 'on'? 's' : '') .'://' .$_SERVER['HTTP_HOST'];
+    if ($_SERVER['SERVER_PORT'] != '80') {
+      $link .= ':' .$_SERVER["SERVER_PORT"];
+    }
+    return $link .$_SERVER['REQUEST_URI'];
   }
 
 }
