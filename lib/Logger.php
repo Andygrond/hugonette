@@ -126,19 +126,21 @@ class Logger
   }
 
   // write $collection to file
-  private function flush()
+  public function flush()
   {
-    $formatter = new LogFormatter;
-    $message = $formatter->message($this->collection);
+    if ($this->collection) {
+      $formatter = new LogFormatter;
+      $message = $formatter->message($this->collection);
 
-    if ($this->logFile) {
-      file_put_contents($this->logFile, $formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
-    } else {
-      Debugger::log($message);
-    }
+      if ($this->logFile) {
+        file_put_contents($this->logFile, $formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
+      } else {
+        Debugger::log($message);
+      }
 
-    if ($this->sendFireLog) {
-      Debugger::fireLog($message);
+      if ($this->sendFireLog) {
+        Debugger::fireLog($message);
+      }
     }
   }
 

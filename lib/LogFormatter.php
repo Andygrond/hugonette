@@ -72,7 +72,7 @@ class LogFormatter
   private function pageURI(): string
   {
     $link = 'http' .(@$_SERVER['HTTPS'] == 'on'? 's' : '') .'://' .$_SERVER['HTTP_HOST'];
-    if ($_SERVER['SERVER_PORT'] != '80') {
+    if ($_SERVER['SERVER_PORT'] != ($link == 'http'? '80' : '443')) {
       $link .= ':' .$_SERVER["SERVER_PORT"];
     }
     return $link .$_SERVER['REQUEST_URI'];

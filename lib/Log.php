@@ -50,7 +50,7 @@ class Log
   {
     if (self::$logger) {
       self::$logger->debug('Duration', self::$duration->timeLen());
-      self::$logger = null;
+      self::$logger->flush();
     }
   }
 
