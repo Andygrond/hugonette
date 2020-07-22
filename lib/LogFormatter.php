@@ -60,7 +60,7 @@ class LogFormatter
   {
     if (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       if ($agent = parse_user_agent()) {
-        return $agent['browser'] .' ' .strstr($agent['version'], '.', true) .' on ' .$agent['platform'];
+        return $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
       } else {
         return strtoupper(php_sapi_name());
       }
@@ -71,8 +71,9 @@ class LogFormatter
   // collect actual page address
   private function pageURI(): string
   {
-    $link = 'http' .(@$_SERVER['HTTPS'] == 'on'? 's' : '') .'://' .$_SERVER['HTTP_HOST'];
-    if ($_SERVER['SERVER_PORT'] != ($link == 'http'? '80' : '443')) {
+    $ssl = (@$_SERVER['HTTPS'] == 'on');
+    $link = ($ssl? 'https://' : 'http://') .$_SERVER['HTTP_HOST'];
+    if ($_SERVER['SERVER_PORT'] != ($ssl? '443' : '80')) {
       $link .= ':' .$_SERVER["SERVER_PORT"];
     }
     return $link .$_SERVER['REQUEST_URI'];
