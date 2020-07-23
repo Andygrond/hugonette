@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette;
 
 /* Time measurement for performance tests
- * @author Andygrond 2019
+ * @author Andygrond 2020
 **/
 
 class Duration

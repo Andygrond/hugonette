@@ -4,7 +4,6 @@ namespace Andygrond\Hugonette;
 
 /* Log formatter for Hugonette
  * @author Andygrond 2020
- * Dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 class LogFormatter
@@ -58,9 +57,16 @@ class LogFormatter
   // format user agent
   private function userAgent(): string
   {
+    return (new Browser)->name();
+  }
+
+  // format user agent
+  // dependency: https://github.com/donatj/PhpUserAgent
+  private function userAgent_alt(): string
+  {
     if (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
       if ($agent = parse_user_agent()) {
-        return $agent['browser'] .' ' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
+        return $agent['browser'] .'_' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
       } else {
         return strtoupper(php_sapi_name());
       }
