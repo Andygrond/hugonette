@@ -57,7 +57,7 @@ class LogFormatter
   // format user agent
   private function userAgent(): string
   {
-    return (new Browser)->name();
+    return (new Browser)->getName();
   }
 
   // format user agent

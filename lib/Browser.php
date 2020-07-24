@@ -2,15 +2,17 @@
 
 namespace Andygrond\Hugonette;
 
-/* Simple and configurable browser detector
+/* Simple and optimized browser detector
+ * Attention: agent name is roughly estimated and can be not always accurate
  * @author Andygrond 2020
- * inspired by August R. Garcia & Francesco R
 **/
 
 class Browser
 {
-  public $browserNames = [
+  public $browserList = [
   // Humans
+    'bot'      => 'Bot',
+    'http'     => 'Bot',
     'opera'    => 'Opera',
     'opr/'     => 'Opera',
     'edge'     => 'Edge',
@@ -19,55 +21,85 @@ class Browser
     'firefox'  => 'Firefox',
     'msie'     => 'MSIE',
     'trident/7'=> 'MSIE',
-
-  // Search Engines
-    'google'   => 'Bot-Googlebot',
-    'bing'     => 'Bot-Bingbot',
-    'slurp'    => 'Bot-Yahoo!-Slurp',
-    'duckduck' => 'Bot-DuckDuckBot',
-    'baidu'    => 'Bot-Baidu',
-    'yandex'   => 'Bot-Yandex',
-    'sogou'    => 'Bot-Sogou',
-    'exabot'   => 'Bot-Exabot',
-    'msn'      => 'Bot-MSN',
-
-  // Common Bots
-    'mj12bot'  => 'Bot-Majestic',
-    'ahrefs'   => 'Bot-Ahrefs',
-    'semrush'  => 'Bot-SEMRush',
-    'rogerbot' => 'Bot-OpenSiteExplorer',
-    'dotbot'   => 'Bot-OpenSiteExplorer',
-    'frog'     => 'Bot-Screaming-Frog',
-    'screaming'=> 'Bot-Screaming-Frog',
-    'blex'     => 'Bot-BLEXBot',
-
-  // Miscellaneous
-    'facebook' => 'Bot-Facebook',
-    'pinterest'=> 'Bot-Pinterest',
-    'crawler'  => 'Bot',
-    'api'      => 'Bot',
-    'spider'   => 'Bot',
-    'http'     => 'Bot',
-    'bot'      => 'Bot',
-    'archive'  => 'Bot',
-    'info'     => 'Bot',
-    'data'     => 'Bot',
-    'php'      => 'PHP',
   ];
 
-  public function name()
+  protected $agent;  // user agent string
+  protected $found = [];  // values found so far
+
+  public function __construct(string $agent = null)
   {
-    if (isset($_SERVER['HTTP_USER_AGENT'])) {
-      $agent = ' ' .strtolower($_SERVER['HTTP_USER_AGENT']);
-      foreach ($this->browserNames as $pattern => $name) {
-        if (strpos($agent, $pattern)) {
-          return $name;
+    $this->agent = strtolower($agent?? @$_SERVER['HTTP_USER_AGENT']);
+  }
+
+  // get array of user preferred languages
+  public function getLangs(array $siteLangs = null): array
+  {
+    return explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+  }
+
+  // @siteLangs array of 2-letter available language codes
+  public function getBestLang(array $siteLangs): string
+  {
+    foreach($this->getLangs as $lang) {
+      $lang = substr($lang, 0, 2);
+      if (in_array($lang, $siteLangs)) {
+        return $lang;
+      }
+    }
+
+  }
+
+  // get type of user: [ human | bot | unknown ]
+  public function getType(): string
+  {
+    if (!isset($this->found['type'])) {
+      $this->detect();
+    }
+    return $this->found['type'];
+  }
+
+  // get name of the browser or bot
+  public function getName(): string
+  {
+    if (!isset($this->found['name'])) {
+      $this->detect();
+    }
+    return $this->found['name'];
+  }
+
+  // detect browser type and name
+  // bot list path can be specified here
+  public function detect(string $botListPath = null)
+  {
+    if ($this->agent) {
+      if ($this->findAgent($this->browserList)) {
+        $this->found['type'] = 'human';
+      } else {
+        $botList = parse_ini_file($botListPath?? __DIR__ .'/bots.ini');
+        if ($this->findAgent($botList)) {
+          $this->found['type'] = 'bot';
+        } else {
+          $this->found['type'] = 'unknown';
+          $this->found['name'] = 'Unknown:' .$_SERVER['HTTP_USER_AGENT'];
         }
       }
-      return 'Unknown:' .$_SERVER['HTTP_USER_AGENT'];
     } else {
-      return 'API:' .strtoupper(php_sapi_name());
+      $this->found['type'] = 'api';
+      $this->found['name'] = 'API:' .strtoupper(php_sapi_name());
     }
+  }
+
+  // find pattern in the array
+  protected function findAgent(array $agentList): bool
+  {
+    $agent = ' ' .$this->agent;
+    foreach ($agentList as $pattern => $name) {
+      if (strpos($agent, $pattern)) {
+        $this->found['name'] = $name;
+        return true;
+      }
+    }
+    return false;
   }
 
 }
