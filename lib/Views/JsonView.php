@@ -3,7 +3,7 @@
 namespace Andygrond\Hugonette\Views;
 
 /* MVP JSON View strategy rendering for Hugonette
-* @author Andygrond 2020
+ * @author Andygrond 2020
 **/
 
 class JsonView implements View
