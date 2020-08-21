@@ -5,18 +5,24 @@ namespace Andygrond\Hugonette;
 /* Log Facade for Hugonette
  * Any PSR-3 compatible logger can be injected
  * When working with native Logger adds extra level 'view' to collect view messages
+ * Tracy debugger is utilized in modes 'prod' and 'dev'
  *
  * @author Andygrond 2020
  * todo: mailing and ajax channel test
 **/
 
+use Tracy\Debugger;
+use Tracy\OutputDebugger;
+
 class Log
 {
-  private static $jobStack = []; // job names stack
-  private static $duration;      // Duration object
+  private static $jobStack = [];  // job names stack
+  private static $duration;       // Duration object
+  private static $debug = 'plain';// Debugger mode
+  private static $sendFireLog;    // Chrome FireLog console enabled
 
-  public static $viewErrors = [];// messages collected to be passed to view
-  public static $logger;         // Logger object
+  public static $viewErrors = []; // messages collected to be passed to view
+  public static $logger;          // Logger object
 
   public static function set(Logger $logger)
   {
@@ -42,6 +48,9 @@ class Log
       $message = end(self::$jobStack) .': ' .$message;
     }
 
+    if (self::$sendFireLog) {
+      Debugger::fireLog($message);
+    }
     self::$logger->log($level, $message, $context);
   }
 
@@ -74,6 +83,34 @@ class Log
     }
   }
 
+  // initialize Tracy debugger in @mode ['prod'|'dev']
+  public static function tracy(string $mode)
+  {
+    if ($mode == 'plain') {
+      self::trigger("Debugger can not be put back into Plain mode.");
+    } else {
+      self::$debug = $mode;
+      $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
+      Debugger::enable($tracyMode, self::$logger->logPath);
+    }
+  }
+
+  // shortcuts to enable special debugger functions
+  // can be applied only when Tracy is active
+  public static function enable(string $name)
+  {
+    if (self::$logger && $this->debug != 'plain') {
+      switch($name) {
+        case 'ajax':   // log to Chrome console with FireLogger extension
+          self::$sendFireLog = true;
+          break;
+        case 'output': // enable OutputDebugger
+          OutputDebugger::enable();
+          break;
+      }
+    }
+  }
+
   // measured time lengths
   public static function times()
   {
@@ -85,7 +122,7 @@ class Log
   {
     if ($caller = @debug_backtrace()[2]) {
      $message .= ' Called in ' .$caller['function'].' from ' .$caller['file'] .':' .$caller['line'];
-   }
-   trigger_error($message);
+    }
+    trigger_error($message);
   }
 }

@@ -3,15 +3,12 @@
 namespace Andygrond\Hugonette;
 
 /* PSR-3 compatible logger for Hugonette
- * Tracy debugger is utilized in modes 'prod' and 'dev'
- *
  * @author Andygrond 2020
  * Optional dependency: https://github.com/nette/tracy
  * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 use Tracy\Debugger;
-use Tracy\OutputDebugger;
 
 class Logger
 {
@@ -30,34 +27,22 @@ class Logger
   private $collection = []; // messages waiting for output
   private $minLevel = 0;    // lowest level of logged messages
   private $logFile = '';    // path to log filename
-  private $sendFireLog = false; // switch to sending messages to Chrome console
 
-  public $mode;        // Tracy debugger working mode
+  public $logPath;          // path to log
 
-  /* log initialization
-  @ $path = /path/to/log/filename.log or /path/to/log/folder/
-  File with obligatory .log extension - uses Hugonette log format
-  When directory is given - uses Tracy native logger
-  @ $mode - set debugger mode ['plain'|'prod'|'dev']
-  Tracy debugger will not be used in 'plain' mode
-  In 'prod' Tracy works in production mode
-  In 'dev' Tracy works in development mode
-  */
-  public function __construct(string $path, string $mode = 'plain')
+  // log initialization
+  // @path = /path/to/log/filename.log or /path/to/log/folder/
+  // File with obligatory .log extension - uses Hugonette log format
+  // When directory is given - uses Tracy native logger
+  public function __construct(string $path)
   {
     // set log dir and file
     if (strrchr($path, '.') == '.log') {
       $this->logFile = $path;
-      $logPath = dirname($path) .'/';
+      $this->logPath = dirname($path) .'/';
       ini_set('error_log', $path);
     } else {
-      $logPath = rtrim($path, '/') .'/';
-    }
-
-    $this->mode = $mode;
-    if ($mode != 'plain') {
-      $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-      Debugger::enable($tracyMode, $logPath);
+      $this->logPath = rtrim($path, '/') .'/';
     }
   }
 
@@ -109,22 +94,6 @@ class Logger
     }
   }
 
-  // shortcuts to enable special functions
-  // can be applied only when Tracy is active
-  public function enable(string $name)
-  {
-    if ($mode != 'plain') {
-      switch($name) {
-        case 'ajax':   // log to Chrome console with FireLogger extension
-          $this->sendFireLog = true;
-          break;
-        case 'output': // enable OutputDebugger
-          OutputDebugger::enable();
-          break;
-      }
-    }
-  }
-
   // write $collection to file
   public function flush()
   {
@@ -136,10 +105,6 @@ class Logger
         file_put_contents($this->logFile, $formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
       } else {
         Debugger::log($message);
-      }
-
-      if ($this->sendFireLog) {
-        Debugger::fireLog($message);
       }
     }
   }
