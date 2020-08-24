@@ -75,6 +75,16 @@ class SoapClientLite extends SoapClient
     return $debug;
   }
 
+  // get all possible operations
+  public function getOperations() {
+    return $this->__getFunctions();
+  }
+
+  // get web service description
+  public function getDescription() {
+    return $this->__getTypes();
+  }
+
   // get fault in standard structure
   private function getFault($f)
   {
