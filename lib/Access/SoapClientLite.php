@@ -11,6 +11,7 @@ namespace Andygrond\Hugonette\Access;
 use SoapClient;
 use SoapFault;
 use Andygrond\Hugonette\Log;
+use Andygrond\Hugonette\Helpers\Beautify;
 
 class SoapClientLite extends SoapClient
 {
@@ -48,13 +49,15 @@ class SoapClientLite extends SoapClient
   // operation call on error condition
   public function __call($oper, $args)
   {
-    return [
+    $response = [
       'operation' => [
         'name' => $oper,
         'args' => $args,
       ],
       'fault' => $this->fault,
     ];
+    Log::warning('SOAP Fault', $response);
+    return $response;
   }
 
   // document the last Web service call
