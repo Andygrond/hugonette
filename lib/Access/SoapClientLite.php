@@ -4,7 +4,8 @@ namespace Andygrond\Hugonette\Access;
 
 /* SOAP client production class
  * use operation (function) names as methods of $this
- * $result = $this->$operation($params);
+ * operation call example:
+ * $result = $ws->getFault()?? $ws->Operation($params);
  * 2020 Andrzej Grondziowski
 **/
 
@@ -19,7 +20,7 @@ class SoapClientLite extends SoapClient
   private $wsdl;   // URL for documenting
   private $fault;  // fault info
   private $options = [
-    'exceptions' => true, // soap errors throw exceptions
+//    'exceptions' => true, // soap errors throw exceptions
     'trace' => true,
     'cache_wsdl' => WSDL_CACHE_MEMORY,
 //    'connection_timeout' => 60,
@@ -35,7 +36,7 @@ class SoapClientLite extends SoapClient
     try {
       parent::__construct($wsdl, $this->options);
     } catch (SoapFault $fault) {
-      $this->fault = $this->getFault($fault);
+      $this->fault = $fault;
     }
 
     if ($forceUrl) {
@@ -44,20 +45,6 @@ class SoapClientLite extends SoapClient
       }
       $this->__setLocation($forceUrl);
     }
-  }
-
-  // operation call on error condition
-  public function __call($oper, $args)
-  {
-    $response = [
-      'operation' => [
-        'name' => $oper,
-        'args' => $args,
-      ],
-      'fault' => $this->fault,
-    ];
-    Log::warning('SOAP Fault', $response);
-    return $response;
   }
 
   // document the last Web service call
@@ -89,14 +76,17 @@ class SoapClientLite extends SoapClient
   }
 
   // get fault in standard structure
-  private function getFault($f)
+  public function getFault()
   {
-    $org = $f->getTrace()[1];
-
-    return [
-      'message' => $f->getMessage(),
-      'caller' => $org['file'] .':' .$org['line'],
-    ];
+    if ($this->fault) {
+      $org = $this->fault->getTrace()[1];
+      return [
+        'fault' => [
+          'message' => $this->fault->getMessage(),
+          'caller' => $org['file'] .':' .$org['line'],
+        ],
+      ];
+    }
   }
 
 }
