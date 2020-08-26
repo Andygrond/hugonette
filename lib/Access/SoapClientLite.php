@@ -3,8 +3,9 @@
 namespace Andygrond\Hugonette\Access;
 
 /* SOAP client production class
- * use operation (function) names as methods of $this
+ * use Operation names as methods of $this object
  * operation call example:
+ * $ws = new SoapClientLite($wsdl);
  * $result = $ws->getFault()?? $ws->Operation($params);
  * 2020 Andrzej Grondziowski
 **/
