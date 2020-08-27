@@ -21,7 +21,7 @@ class Log
   private static $debug = 'plain';// Debugger mode
   private static $sendFireLog;    // Chrome FireLog console enabled
 
-  public static $viewErrors = []; // messages collected to be passed to view
+  public static $viewMessages = []; // messages collected to be passed to view
   public static $logger;          // Logger object
 
   public static function set(Logger $logger)
@@ -42,7 +42,7 @@ class Log
     }
     [$message, $context] = array_pad($args, 2, null);
     if ($level == 'view') {  // collect view errors, which can be attached to model
-      self::$viewErrors[] = $message;
+      self::$viewMessages[] = $message;
     }
     if (self::$jobStack) {
       $message = end(self::$jobStack) .': ' .$message;
