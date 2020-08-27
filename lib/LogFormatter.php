@@ -33,7 +33,7 @@ class LogFormatter
     // message collection
     if ($collection) {
       foreach ($collection as $item) {
-        $record .= "\n\t" .$item['level'] .' ' .$item['message'];
+        $record .= "\n\t[" .$item['level'] .'] ' .$item['message'];
         if ($item['context']) {
           $record .= ' ' .json_encode($item['context'], JSON_UNESCAPED_UNICODE);
         };
