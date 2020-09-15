@@ -18,9 +18,9 @@ class Log
 {
   private static $jobStack = [];  // job names stack
   private static $duration;       // Duration object
-  private static $debug = 'plain';// Debugger mode
   private static $sendFireLog;    // Chrome FireLog console enabled
 
+  public static $debug = 'plain';// Debugger mode
   public static $viewMessages = []; // messages collected to be passed to view
   public static $logger;          // Logger object
 
