@@ -12,9 +12,10 @@ class Route
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
 
   // $sysDir - path to Nette system if exists
-  public function __construct(string $sysDir = null)
+  public function __construct(string $sysDir = null, array $attrib = [])
   {
     $this->page = new Page($sysDir);
+    $this->attributes($attrib);
   }
 
   // route for single request method
