@@ -82,7 +82,7 @@ class Page
   }
 
   // set base folders
-  // $sysDir - Nette framework folder
+  // $sysDir - System or Nette framework folder
   protected function setBase(string $sysDir)
   {
     $request = dirname($_SERVER['SCRIPT_NAME']);

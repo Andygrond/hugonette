@@ -18,15 +18,13 @@ class Provider
   public function __construct(\stdClass $page)
   {
     $this->page = $page;
-    print_r($page);
   }
 
   // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
   public function run(string $method)
   {
-    $view = new JsonView($this->page);
-    $view->view($this->$method());
+    (new JsonView)->view($this->$method());
     Log::close(); // effective only when set previously
     exit;
   }
