@@ -32,15 +32,15 @@ class Provider
   // Provider default class called in Route
   protected function default()
   {
-    if ($this->validRequest()) {
-      try {
+    try {
+      if ($this->validRequest()) {
         $data = $this->getModel();
         $data? $this->setStatus(200, 'OK') : $this->setStatus(204, 'No Content');
-      } catch (\Throwable $t) {
-         $this->setStatus(500, $t->getMessage());
+      } else {
+        $this->setStatus(406, 'Unknown entity requested');
       }
-    } else {
-      $this->setStatus(406, 'Unknown content requested');
+    } catch (\Throwable $t) {
+       $this->setStatus(500, $t->getMessage());
     }
     Log::info('API status', $this->page->status);
 
