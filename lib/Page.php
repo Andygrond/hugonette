@@ -16,14 +16,12 @@ class Page
 
   private $trace = [];  // trace of matched routes
   private $requestPath; // base for pattern comparison
-  private $httpMethod;  // http method lowercase
 
   // $sysDir - Nette framework folder
   public function __construct(string $sysDir)
   {
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
     $this->requestPath = rtrim($path, '/');
-    $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
     $this->setBase($sysDir);
 
@@ -55,12 +53,6 @@ class Page
       return true;
     }
     return false;
-  }
-
-  // checking http request method
-  public function checkMethod(string $method): bool
-  {
-    return ($this->httpMethod == $method);
   }
 
   // simple pattern matching test - no variable parts

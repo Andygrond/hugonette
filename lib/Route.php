@@ -10,11 +10,13 @@ class Route
 {
   private $page;  // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
+  private $httpMethod;  // http method lowercase
 
   // $sysDir - path to Nette system if exists
   public function __construct(string $sysDir = null, array $attrib = [])
   {
     $this->page = new Page($sysDir);
+    $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
     $this->attributes($attrib);
   }
 
@@ -23,7 +25,7 @@ class Route
   // @args = [$pattern, $model]
   public function __call(string $method, array $args)
   {
-    if ($this->page->checkMethod($method)) {
+    if ($this->httpMethod == $method) {
       if ($this->page->regMatch($args[0])) {
         $this->page->run($args[1]);
       }
@@ -35,7 +37,7 @@ class Route
   // full static GET with one common presenter (runs all static pages at once)
   public function pages(string $presenter)
   {
-    if ($this->page->checkMethod('get') && $this->page->template()) {
+    if ($this->httpMethod == 'get' && $this->page->template()) {
       $this->page->run($presenter);
     }
   }
