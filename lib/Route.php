@@ -26,7 +26,7 @@ class Route
   public function __call(string $method, array $args)
   {
     if ($this->httpMethod == $method) {
-      if ($this->page->regMatch($args[0])) {
+      if ($this->regMatch($args[0])) {
         $this->page->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
@@ -55,7 +55,7 @@ class Route
   // @$permanent set to false = doesn't inform search engines about the change
   public function redirect(string $pattern, string $url, bool $permanent = true)
   {
-    if (!$pattern || $this->page->exactMatch($pattern)) {
+    if (!$pattern || $this->exactMatch($pattern)) {
       (new RedirectView())->view([
         'url' => $url,
         'permanent' => $permanent,
@@ -66,13 +66,13 @@ class Route
   // register a set of routes with shared attributes.
   public function group(string $pattern, \Closure $callback, array $attrib = [])
   {
-    if (!$pattern || $this->page->exactMatch($pattern)) {
+    if (!$pattern || $this->exactMatch($pattern)) {
       $this->page->setGroupRequest($pattern);
 
-      $parentAttrib = $this->page->attrib;  // it's the only place you can use it directly
+      $parentAttrib = $this->page->attrib;
       $this->attributes($attrib);
       call_user_func($callback, $this);
-      $this->page->attrib = $parentAttrib;  // it's the only place you can use it directly
+      $this->page->attrib = $parentAttrib;
     }
   }
 
@@ -80,6 +80,24 @@ class Route
   public function attributes($attrib)
   {
     $this->page->attrib = $attrib + $this->page->attrib;
+  }
+
+  // simple pattern matching test - no variable parts
+  public function exactMatch(string $pattern): bool
+  {
+    return (strpos($this->page->attrib['request'][0], $pattern) === 0);
+  }
+
+  // check regular expression pattern matching
+  // replace page params according to the pattern
+  public function regMatch(string $pattern): bool
+  {
+    $pattern = '@^' .$pattern .'$@';
+    if (preg_match($pattern, $this->page->attrib['request'][0], $params) === 1) {
+      $this->page->attrib['request'] = $params;
+      return true;
+    }
+    return false;
   }
 
 }

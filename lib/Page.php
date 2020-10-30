@@ -55,24 +55,6 @@ class Page
     return false;
   }
 
-  // simple pattern matching test - no variable parts
-  public function exactMatch(string $pattern): bool
-  {
-    return (strpos($this->attrib['request'][0], $pattern) === 0);
-  }
-
-  // check regular expression pattern matching
-  // replace page params according to the pattern
-  public function regMatch(string $pattern): bool
-  {
-    $pattern = '@^' .$pattern .'$@';
-    if (preg_match($pattern, $this->attrib['request'][0], $params) === 1) {
-      $this->attrib['request'] = $params;
-      return true;
-    }
-    return false;
-  }
-
   // set base folders
   // $sysDir - System or Nette framework folder
   protected function setBase(string $sysDir)
