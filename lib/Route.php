@@ -27,6 +27,7 @@ class Route
   {
     if ($this->httpMethod == $method) {
       if ($this->regMatch($args[0])) {
+//        $this->page->attrib['request'] = $params;
         $this->page->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
@@ -67,11 +68,12 @@ class Route
   public function group(string $pattern, \Closure $callback, array $attrib = [])
   {
     if (!$pattern || $this->exactMatch($pattern)) {
-      $this->page->setGroupRequest($pattern);
-
       $parentAttrib = $this->page->attrib;
+
+      $this->page->setGroupRequest($pattern);
       $this->attributes($attrib);
       call_user_func($callback, $this);
+
       $this->page->attrib = $parentAttrib;
     }
   }
@@ -83,21 +85,17 @@ class Route
   }
 
   // simple pattern matching test - no variable parts
-  public function exactMatch(string $pattern): bool
+  private function exactMatch(string $pattern): bool
   {
-    return (strpos($this->page->attrib['request'][0], $pattern) === 0);
+    return (strpos($this->page->attrib['request']['item'], $pattern) === 0);
   }
 
   // check regular expression pattern matching
   // replace page params according to the pattern
-  public function regMatch(string $pattern): bool
+  private function regMatch(string $pattern): bool
   {
     $pattern = '@^' .$pattern .'$@';
-    if (preg_match($pattern, $this->page->attrib['request'][0], $params) === 1) {
-      $this->page->attrib['request'] = $params;
-      return true;
-    }
-    return false;
+    return preg_match($pattern, $this->page->attrib['request']['item']);
   }
 
 }

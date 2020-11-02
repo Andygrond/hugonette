@@ -12,7 +12,7 @@ class PlainView implements View
 
   public function __construct(\stdClass $page)
   {
-    $this->template = $page->base['static'] .$page->base['template'] .($page->template?? '/index.html');
+    $this->template = $page->base['template'] .($page->template?? '/index.html');
   }
 
   // render model data using plain old PHP template

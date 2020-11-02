@@ -15,17 +15,28 @@ class Page
   ];
 
   private $trace = [];  // trace of matched routes
-  private $requestPath; // base for pattern comparison
 
-  // $sysDir - Nette framework folder
+  // $sysDir - framework folder (Nette)
   public function __construct(string $sysDir)
   {
+    // set base
+    $uriBase = dirname($_SERVER['SCRIPT_NAME']);
+    $this->attrib['base'] = [
+      'uri' => $uriBase,  // base path for route (subfolder of document root)
+      'system' => $sysDir,    // path to Nette framework
+      'template' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$uriBase, // base path for static template (subfolder of static base)
+    ];
+
+    // set request
     [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
-    $this->requestPath = rtrim($path, '/');
-
-    $this->setBase($sysDir);
-
-    $this->setGroupRequest();
+    $isHtml = (substr($path, -5) == '.html');
+    $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen($uriBase)) .'/';
+// zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?
+    $this->attrib['request'] = [
+      'group' => '',    // router group base
+      'item' => $path,  // request details (path in group)
+      'parts' => explode('/', trim($path, '/')),
+    ];
   }
 
   // run presenter instance and exit if truly presented
@@ -42,10 +53,10 @@ class Page
 
   // calculate template file name based on the URL
   // return = file exists
-  public function template(): bool
+  public function template(): bool  // todo!!! to nie powinno działac po ostatnich zmianach
   {
     $this->attrib['base']['template'] = '';
-    $template = $this->attrib['base']['request'] .$this->attrib['request'][0];
+    $template = $this->attrib['base']['uri'] .$this->attrib['request']['item'];
     $template .= (substr($template, -1) == '/')? 'index.html' : '.html';
 
     if (is_file($this->attrib['base']['static'] .$template)) {
@@ -55,34 +66,11 @@ class Page
     return false;
   }
 
-  // set base folders
-  // $sysDir - System or Nette framework folder
-  protected function setBase(string $sysDir)
+  // calculate request for a group
+  public function setGroupRequest(string $groupBase)
   {
-    $request = dirname($_SERVER['SCRIPT_NAME']);
-    $this->attrib['base'] = [
-      'request' => $request,  // base path for route (subfolder of document root)
-      'static' => $_SERVER['DOCUMENT_ROOT'] .'/static',  // path to rendered static site (containing template base)
-      'template' => $request, // base path for static template (subfolder of static base)
-      'system' => $sysDir,    // path to Nette framework
-    ];
-  }
-
-  // calculate requestBase for a group and request URI variables
-  public function setGroupRequest(string $groupBase = '')
-  {
-    if ($groupBase) {
-      $this->attrib['base']['request'] .= $groupBase; // base URL set for current route group
-    }
-
-    $path = substr($this->requestPath, strlen($this->attrib['base']['request']));
-    $ending = '/';
-    if (substr($this->requestPath, -5) == '.html') {
-      $path = substr($path, 0, -5);
-      $ending = '';
-    }
-    $this->attrib['request'] = explode('/', $path);
-    $this->attrib['request'][0] = $path .$ending;
+    $this->attrib['request']['group'] .= $groupBase; // base URL for current route group
+    $this->attrib['request']['item'] = substr($this->attrib['request']['item'], strlen($groupBase));
   }
 
 }

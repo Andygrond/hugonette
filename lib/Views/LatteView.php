@@ -18,7 +18,7 @@ class LatteView implements View
   public function __construct(\stdClass $page)
   {
     $this->base = $page->base;
-    $this->template = $page->base['static'] .$page->base['template'] .($page->template?? '/index.html');
+    $this->template = $page->base['template'] .($page->template?? '/index.html');
 
     // dump $page if Log uses native Logger and Tracy in debug mode
     if (@Log::$debug == 'dev') {
