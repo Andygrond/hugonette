@@ -17,7 +17,7 @@ class Route
   {
     $this->pageObj = new Page($sysDir);
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
-    $this->attributes($attrib);
+    $this->page($attrib);
   }
 
   // route for single request method
@@ -27,7 +27,6 @@ class Route
   {
     if ($this->httpMethod == $method) {
       if ($this->regMatch($args[0])) {
-//        $this->pageObj->attrib['request'] = $params;
         $this->pageObj->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
