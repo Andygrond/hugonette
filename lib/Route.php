@@ -8,14 +8,14 @@ namespace Andygrond\Hugonette;
 
 class Route
 {
-  private $page;  // page object
+  private $pageObject;  // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
   private $httpMethod;  // http method lowercase
 
   // $sysDir - path to Nette system if exists
   public function __construct(string $sysDir = null, array $attrib = [])
   {
-    $this->page = new Page($sysDir);
+    $this->pageObject = new Page($sysDir);
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
     $this->attributes($attrib);
   }
@@ -27,8 +27,8 @@ class Route
   {
     if ($this->httpMethod == $method) {
       if ($this->regMatch($args[0])) {
-//        $this->page->attrib['request'] = $params;
-        $this->page->run($args[1]);
+//        $this->pageObject->attrib['request'] = $params;
+        $this->pageObject->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
       Log::trigger("Router method not found: $method");
@@ -36,10 +36,10 @@ class Route
   }
 
   // full static GET with one common presenter (runs all static pages at once)
-  public function pages(string $presenter)
+  public function static(string $presenter)
   {
-    if ($this->httpMethod == 'get' && $this->page->template()) {
-      $this->page->run($presenter);
+    if ($this->httpMethod == 'get' && $this->pageObject->template()) {
+      $this->pageObject->run($presenter);
     }
   }
 
@@ -47,7 +47,7 @@ class Route
   // @presenter usually shows status 404 with the native navigation panels
   public function notFound(string $presenter)
   {
-    $this->page->run($presenter);
+    $this->pageObject->run($presenter);
   }
 
   // redirect @$to if URI simply starts from $pattern or $pattern is empty
@@ -68,26 +68,26 @@ class Route
   public function group(string $pattern, \Closure $callback, array $attrib = [])
   {
     if (!$pattern || $this->exactMatch($pattern)) {
-      $parentAttrib = $this->page->attrib;
+      $parentAttrib = $this->pageObject->attrib;
 
-      $this->page->setGroupRequest($pattern);
+      $this->pageObject->setGroupRequest($pattern);
       $this->attributes($attrib);
       call_user_func($callback, $this);
 
-      $this->page->attrib = $parentAttrib;
+      $this->pageObject->attrib = $parentAttrib;
     }
   }
 
   // update given page attributes
-  public function attributes($attrib)
+  public function page($attrib)
   {
-    $this->page->attrib = $attrib + $this->page->attrib;
+    $this->pageObject->attrib = $attrib + $this->pageObject->attrib;
   }
 
   // simple pattern matching test - no variable parts
   private function exactMatch(string $pattern): bool
   {
-    return (strpos($this->page->attrib['request']['item'], $pattern) === 0);
+    return (strpos($this->pageObject->attrib['request']['item'], $pattern) === 0);
   }
 
   // check regular expression pattern matching
@@ -95,7 +95,7 @@ class Route
   private function regMatch(string $pattern): bool
   {
     $pattern = '@^' .$pattern .'$@';
-    return preg_match($pattern, $this->page->attrib['request']['item']);
+    return preg_match($pattern, $this->pageObject->attrib['request']['item']);
   }
 
 }
