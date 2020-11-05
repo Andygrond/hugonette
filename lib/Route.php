@@ -70,7 +70,7 @@ class Route
       $parentAttrib = $this->pageObj->attrib;
 
       $this->pageObj->setGroupRequest($pattern);
-      $this->attributes($attrib);
+      $this->page($attrib);
       call_user_func($callback, $this);
 
       $this->pageObj->attrib = $parentAttrib;

@@ -15,7 +15,7 @@ final class PresenterFactory
     [ $class, $method ] = explode(':', $presenter .':default');
     $class = $page['presenterNamespace'] .'\\' .ucwords($class);
 
-    (new $class((object) $page))->run($method);
+    (new $class)->run($method, (object) $page);
   }
 
 }

@@ -13,15 +13,9 @@ class Presenter
   protected $page;  // page object attributes (can be altered in Presenter)
   protected $model = []; // base model data
 
-  // @page = object of page attributes
-  public function __construct(\stdClass $page)
-  {
-    $this->page = $page;
-  }
-
   // return view object according to view strategy defined in Route
   // this method can be replaced to reflect more sophisticated logic based on $page attribs
-  protected function viewStrategy()
+  final protected function viewStrategy()
   {
     $viewClass = '\\Andygrond\\Hugonette\\Views\\' .ucfirst($this->page->view) .'View';
     return new $viewClass($this->page);
@@ -29,8 +23,11 @@ class Presenter
 
   // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
-  public function run(string $method)
+  // @page = object of page attributes
+  final public function run(string $method, \stdClass $page)
   {
+    $this->page = $page;
+
     if (false !== $model = $this->$method()) {
       $this->viewStrategy()->view($this->model + $model);
       Log::close(); // effective only when set previously
