@@ -13,7 +13,7 @@ final class PresenterFactory
   public static function create(string $presenter, $page)
   {
     [ $class, $method ] = explode(':', $presenter .':default');
-    $class = $page['presenterNamespace'] .'\\' .ucwords($class);
+    $class = $page['namespace']['presenter'] .ucwords($class);
 
     (new $class)->run($method, (object) $page);
   }

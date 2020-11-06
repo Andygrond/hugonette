@@ -17,7 +17,7 @@ class Presenter
   // this method can be replaced to reflect more sophisticated logic based on $page attribs
   final protected function viewStrategy()
   {
-    $viewClass = '\\Andygrond\\Hugonette\\Views\\' .ucfirst($this->page->view) .'View';
+    $viewClass = $this->page->namespace['view'] .ucfirst($this->page->view) .'View';
     return new $viewClass($this->page);
   }
 

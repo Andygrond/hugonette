@@ -7,7 +7,7 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2020
 **/
 
-use Andygrond\Hugonette\Views\JsonView;
+// use Andygrond\Hugonette\Views\JsonView;
 
 class Provider
 {
@@ -21,7 +21,7 @@ class Provider
   {
     $this->page = $page;
 
-    (new JsonView)->view($this->$method());
+    (new $this->page->namespace['view'] .JsonView)->view($this->$method());
     Log::close(); // effective only when set previously
     exit;
   }

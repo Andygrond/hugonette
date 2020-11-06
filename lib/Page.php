@@ -11,7 +11,10 @@ class Page
   // page attributes
   public $attrib = [
     'view' => 'plain',  // view mode [ plain | latte | json | upload | redirect ]
-    'presenterNamespace' => 'App\Presenters',
+    'namespace' => [
+      'presenter' => 'App\\Presenters\\',
+      'view' => 'Andygrond\\Hugonette\\Views\\',
+    ],
   ];
 
   private $trace = [];  // trace of matched routes
