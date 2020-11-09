@@ -14,12 +14,17 @@ class Provider
 
   protected $page;  // page object attributes
 
+  public function __construct(array $page)
+  {
+    $this->page = (object) $page;
+  }
+
   // view model data calculated by presenter class@method declared in router
   // @method = presenter method name determined in route definition
   // @page = object of page attributes
-  final public function run(string $method, \stdClass $page)
+  final public function run(string $method)
   {
-    $this->page = $page;
+    $this->page = (object) $page;
 
     (new $this->page->namespace['view'] .JsonView)->view($this->$method());
     Log::close(); // effective only when set previously

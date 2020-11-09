@@ -9,13 +9,13 @@ namespace Andygrond\Hugonette;
 final class PresenterFactory
 {
 
-  // return instantiated presenter object
+  // return instantiated presenter or provider object
   public static function create(string $presenter, $page)
   {
     [ $class, $method ] = explode(':', $presenter .':default');
     $class = $page['namespace']['presenter'] .ucwords($class);
 
-    (new $class)->run($method, (object) $page);
+    (new $class($page))->run($method);
   }
 
 }
