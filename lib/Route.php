@@ -80,7 +80,7 @@ class Route
   // update given page attributes
   public function page($attrib)
   {
-    $this->pageObj->attrib = $attrib + $this->pageObj->attrib;
+    $this->pageObj->attrib = array_replace_recursive($this->pageObj->attrib, $attrib);
   }
 
   // simple pattern matching test - no variable parts

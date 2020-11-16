@@ -24,9 +24,8 @@ class Provider
   // @page = object of page attributes
   final public function run(string $method)
   {
-    $this->page = (object) $page;
-
-    (new $this->page->namespace['view'] .JsonView)->view($this->$method());
+    $viewClass = $this->page->namespace['view'] .'JsonView';
+    (new $viewClass)->view($this->$method());
     Log::close(); // effective only when set previously
     exit;
   }
