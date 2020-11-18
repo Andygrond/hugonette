@@ -34,7 +34,7 @@ class Validate {
   * @return array of named values on success, false on failure
   * array values: false if filter fails or null when not set
   */
-  public static function values(array $values, array $definition): mixed
+  public static function values(array $values, array $definition)
   {
     $n = 0;
     foreach ($definition as $key => &$def) {
@@ -45,7 +45,8 @@ class Validate {
   }
 
   // translate single variable definition
-  private static function getSingleDef($def) {
+  private static function getSingleDef($def)
+  {
     if (is_string($def)) {
       $def = self::getFilterType($def);
     } else {
@@ -55,13 +56,15 @@ class Validate {
   }
 
   // return constant value or false
-  private static function getConstant($name) {
+  private static function getConstant(string $name)
+  {
     $name = '\\' .strtoupper($name);
     return defined($name)? constant($name) : false;
   }
 
   // translate short filter type to constant value
-  private static function getFilterType($type) {
+  private static function getFilterType(string $type)
+  {
     if ($type === null) {
       return FILTER_DEFAULT;
     }
@@ -75,7 +78,7 @@ class Validate {
       $type = substr($type, 2);
     }
 
-    return getConstant($prefix .$type);
+    return self::getConstant($prefix .$type);
   }
 
 }
