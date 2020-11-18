@@ -56,22 +56,26 @@ class Validate {
   }
 
   // return constant value or false
-  private static function getConstant(string $name)
+  private static function getConstant(string $nameRaw)
   {
-    $name = '\\' .strtoupper($name);
-    return defined($name)? constant($name) : false;
+    $name = '\\' .strtoupper($nameRaw);
+    if (defined($name)) {
+      return constant($name);
+    } else {
+      throw new \Exception('Undefined constant: ' .$nameRaw);
+    }
   }
 
   // translate short filter type to constant value
   private static function getFilterType(string $type)
   {
-    if ($type === null) {
+    if (!$type) {
       return FILTER_DEFAULT;
     }
     $type = strtoupper($type);
     $prefix = 'FILTER_VALIDATE_';
 
-    if ($type[1] = ':') {
+    if ($type[1] == ':') {
       if ($type[0] == 'S') {
         $prefix = ($type == 'INT' || $type == 'FLOAT')? 'FILTER_SANITIZE_NUMBER' : 'FILTER_SANITIZE_';
       }
