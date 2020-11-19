@@ -23,12 +23,14 @@ class Browser
     'trident/7'=> 'MSIE',
   ];
 
-  protected $agent;  // user agent string
+  protected $agent;       // user agent string lowercase
+  protected $botsDefFile; // optional bots definitions filename
   protected $found = [];  // values found so far
 
-  public function __construct(string $agent = null)
+  public function __construct(string $botsDefFile = null)
   {
-    $this->agent = strtolower($agent?? @$_SERVER['HTTP_USER_AGENT']);
+    $this->botsDefFile = $botsDefFile?? __DIR__ .'/bots.ini';
+    $this->agent = strtolower(@$_SERVER['HTTP_USER_AGENT']);
   }
 
   // get array of user preferred languages
@@ -69,13 +71,13 @@ class Browser
 
   // detect browser type and name
   // bot list path can be specified here
-  public function detect(string $botListPath = null)
+  public function detect()
   {
     if ($this->agent) {
       if ($this->findAgent($this->browserList)) {
         $this->found['type'] = 'human';
       } else {
-        $botList = parse_ini_file($botListPath?? __DIR__ .'/bots.ini');
+        $botList = parse_ini_file($this->botsDefFile);
         if ($this->findAgent($botList)) {
           $this->found['type'] = 'bot';
         } else {

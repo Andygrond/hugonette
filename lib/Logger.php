@@ -27,15 +27,19 @@ class Logger
   private $collection = []; // messages waiting for output
   private $minLevel = 0;    // lowest level of logged messages
   private $logFile = '';    // path to log filename
+  private $formatter;       // Formatter object
 
   public $logPath;          // path to log
 
-  // log initialization
-  // @path = /path/to/log/filename.log or /path/to/log/folder/
-  // File with obligatory .log extension - uses Hugonette log format
-  // When directory is given - uses Tracy native logger
-  public function __construct(string $path)
+  /** log initialization
+  * @param path = /path/to/log/filename.log or /path/to/log/folder/
+  * @param botsDefFile optional bots definition filename (see bots.ini)
+  * File with obligatory .log extension - uses Hugonette log format
+  * When directory is given - uses Tracy native logger
+  */
+  public function __construct(string $path, string $botsDefFile = null)
   {
+    $this->formatter = new LogFormatter($botsDefFile);
     // set log dir and file
     if (strrchr($path, '.') == '.log') {
       $this->logFile = $path;
@@ -52,9 +56,11 @@ class Logger
     $this->flush();
   }
 
-  // all log level messages goes here
-  // @level - PSR-3 level
-  // @args = [$message, $context]
+  /**
+  * all log level messages goes here
+  * @param level - PSR-3 level
+  * @param args = [$message, $context]
+  */
   public function __call(string $level, array $args)
   {
     [$message, $context] = array_pad($args, 2, []);
@@ -98,11 +104,10 @@ class Logger
   public function flush()
   {
     if ($this->collection) {
-      $formatter = new LogFormatter;
-      $message = $formatter->message($this->collection);
+      $message = $this->formatter->message($this->collection);
 
       if ($this->logFile) {
-        file_put_contents($this->logFile, $formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
+        file_put_contents($this->logFile, $this->formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
       } else {
         Debugger::log($message);
       }

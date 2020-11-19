@@ -8,8 +8,11 @@ namespace Andygrond\Hugonette;
 
 class LogFormatter
 {
-  public function __construct()
+  protected $botsDefFile; // Opional bots definitions
+
+  public function __construct($botsDefFile = null)
   {
+    $this->botsDefFile = $botsDefFile;
   }
 
   // format date part of log message
@@ -47,7 +50,7 @@ class LogFormatter
   private function generalInfo(array $duration = null): string
   {
     if (php_sapi_name() == 'cli') {
-      $record = ' CLI ' .isset($_SERVER['TERM'])? 'from Shell' : 'by Cron';
+      $record = isset($_SERVER['TERM'])? 'Shell CLI' : 'Cron CLI';
     } else {
       $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
     }
@@ -60,21 +63,7 @@ class LogFormatter
   // format user agent
   private function userAgent(): string
   {
-    return (new Browser)->getName();
-  }
-
-  // format user agent
-  // dependency: https://github.com/donatj/PhpUserAgent
-  private function userAgent_alt(): string
-  {
-    if (is_callable('parse_user_agent') && isset($_SERVER['HTTP_USER_AGENT'])) {
-      if ($agent = parse_user_agent()) {
-        return $agent['browser'] .'_' .strstr($agent['version'], '.', true); // .' on ' .$agent['platform'];
-      } else {
-        return strtoupper(php_sapi_name());
-      }
-    }
-    return '';
+    return (new Browser($this->botsDefFile))->getName();
   }
 
   // collect actual page address
