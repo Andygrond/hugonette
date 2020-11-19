@@ -46,12 +46,15 @@ class LogFormatter
   // format general information part
   private function generalInfo(array $duration = null): string
   {
-    $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent();
-
+    if (php_sapi_name() == 'cli') {
+      $record = ' CLI ' .isset($_SERVER['TERM'])? 'from Shell' : 'by Cron';
+    } else {
+      $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
+    }
     if ($duration) {
       $record .= ' [' .implode(',', $duration) .']';
     }
-    return $record .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
+    return $record;
   }
 
   // format user agent
