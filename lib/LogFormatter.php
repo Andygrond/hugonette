@@ -19,7 +19,7 @@ class LogFormatter
   public function date(): string
   {
     [$sec, $msec] = explode('.', sprintf('%.3F', $_SERVER["REQUEST_TIME_FLOAT"]));
-    return date('Y-m-d H:i:s.', $sec) .$msec;
+    return date('Y-m-d H:i:s.', $sec) .$msec .' ';
   }
 
   // format message collection
@@ -50,9 +50,13 @@ class LogFormatter
   private function generalInfo(array $duration = null): string
   {
     if (php_sapi_name() == 'cli') {
-      $record = isset($_SERVER['TERM'])? 'Shell CLI' : 'Cron CLI';
+      if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        $record = 'Windows CLI';  // $_SERVER['TERM'] is not defined on Win
+      } else {
+        $record = isset($_SERVER['TERM'])? 'Shell CLI' : 'Cron CLI';
+      }
     } else {
-      $record = ' ' .$_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
+      $record = $_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
     }
     if ($duration) {
       $record .= ' [' .implode(',', $duration) .']';
