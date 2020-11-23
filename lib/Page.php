@@ -31,7 +31,7 @@ class Page
     ];
 
     // set request
-    [ $path ] = explode('?', $_SERVER['REQUEST_URI']);
+    [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
     $isHtml = (substr($path, -5) == '.html');
     $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen($uriBase)) .'/';
 // zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?

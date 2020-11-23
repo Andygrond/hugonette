@@ -38,7 +38,7 @@ class Validate {
   {
     $n = 0;
     foreach ($definition as $key => &$def) {
-      $response[$key] = $values[$n++];
+      $response[$key] = @$values[$n++];
       $def = self::getSingleDef($def);
     }
     return filter_var_array($response, $definition);
