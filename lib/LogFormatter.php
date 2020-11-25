@@ -67,7 +67,7 @@ class LogFormatter
   // format user agent
   private function userAgent(): string
   {
-    return (new Browser($this->botsDefFile))->getName();
+    return Browser::name();
   }
 
   // collect actual page address
