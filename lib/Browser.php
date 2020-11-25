@@ -9,27 +9,13 @@ namespace Andygrond\Hugonette;
 
 class Browser
 {
-  public $browserList = [
-  // Humans
-    'bot'      => 'Bot',
-    'http'     => 'Bot',
-    'opera'    => 'Opera',
-    'opr/'     => 'Opera',
-    'edge'     => 'Edge',
-    'chrome'   => 'Chrome',
-    'safari'   => 'Safari',
-    'firefox'  => 'Firefox',
-    'msie'     => 'MSIE',
-    'trident/7'=> 'MSIE',
-  ];
-
   protected $agent;       // user agent string lowercase
   protected $botsDefFile; // optional bots definitions filename
-  protected $found = [];  // values found so far
+  protected $found = [];  // type and name found
 
   public function __construct(string $botsDefFile = null)
   {
-    $this->botsDefFile = $botsDefFile?? __DIR__ .'/bots.ini';
+    $this->botsDefFile = $botsDefFile?? __DIR__ .'/Data/bots.ini';
     $this->agent = strtolower(@$_SERVER['HTTP_USER_AGENT']);
   }
 
@@ -48,10 +34,9 @@ class Browser
         return $lang;
       }
     }
-
   }
 
-  // get type of user: [ human | bot | unknown ]
+  // get type of user
   public function getType(): string
   {
     if (!isset($this->found['type'])) {
@@ -70,35 +55,37 @@ class Browser
   }
 
   // detect browser type and name
-  // bot list path can be specified here
-  public function detect()
+  protected function detect()
   {
     if ($this->agent) {
-      if ($this->findAgent($this->browserList)) {
-        $this->found['type'] = 'human';
-      } else {
-        $botList = parse_ini_file($this->botsDefFile);
-        if ($this->findAgent($botList)) {
-          $this->found['type'] = 'bot';
-        } else {
-          $this->found['type'] = 'unknown';
-          $this->found['name'] = 'Unknown:' .$_SERVER['HTTP_USER_AGENT'];
-        }
+      if (!$this->findAgent()) {
+        $this->found = [
+          'type' => 'Unknown',
+          'name' => $_SERVER['HTTP_USER_AGENT'],
+        ];
       }
     } else {
-      $this->found['type'] = 'api';
-      $this->found['name'] = 'API:' .strtoupper(php_sapi_name());
+      $this->found = [
+        'type' => 'API',
+        'name' => strtoupper(php_sapi_name()),
+      ];
     }
   }
 
   // find pattern in the array
-  protected function findAgent(array $agentList): bool
+  protected function findAgent(): bool
   {
-    $agent = ' ' .$this->agent;
-    foreach ($agentList as $pattern => $name) {
-      if (strpos($agent, $pattern)) {
-        $this->found['name'] = $name;
-        return true;
+    $agentList = parse_ini_file($this->botsDefFile, true);
+
+    foreach ($agentList as $type => $alist) {
+      foreach ($alist as $pattern => $name) {
+        if (strpos($this->agent, $pattern) !== false) {
+          $this->found = [
+            'type' => $type,
+            'name' => $name,
+          ];
+          return true;
+        }
       }
     }
     return false;
