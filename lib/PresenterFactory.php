@@ -9,7 +9,9 @@ namespace Andygrond\Hugonette;
 final class PresenterFactory
 {
 
-  // return instantiated presenter or provider object
+  /**
+  * @return - instantiated presenter or provider object
+  */
   public static function create(string $presenter)
   {
     [ $class, $method ] = explode(':', $presenter .':default');

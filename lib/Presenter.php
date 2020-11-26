@@ -18,17 +18,18 @@ class Presenter
     $this->page = (object) Env::get();
   }
 
-  // return view object according to view strategy defined in Route
-  // this method can be replaced to reflect more sophisticated logic based on $page attribs
+  /**
+  * @return: view object according to view strategy defined in Route
+  */
   final protected function viewStrategy()
   {
-    $viewClass = $this->page->namespace['view'] .ucfirst($this->page->view) .'View';
+    $viewClass = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
     return new $viewClass($this->page);
   }
 
-  // view model data calculated by presenter class@method declared in router
-  // @method = presenter method name determined in route definition
-  // @page = object of page attributes
+  /** view model data calculated by presenter class:method declared in router
+  * @param method = presenter method name determined in route definition
+  */
   final public function run(string $method)
   {
     if (false !== $model = $this->$method()) {

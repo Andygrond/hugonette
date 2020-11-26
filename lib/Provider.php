@@ -7,8 +7,6 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2020
 **/
 
-// use Andygrond\Hugonette\Views\JsonView;
-
 class Provider
 {
 
@@ -19,12 +17,12 @@ class Provider
     $this->page = (object) Env::get();
   }
 
-  // view model data calculated by presenter class@method declared in router
-  // @method = presenter method name determined in route definition
-  // @page = object of page attributes
+  /** view model data calculated by presenter class:method declared in router
+  * @param method = presenter method name determined in route definition
+  */
   final public function run(string $method)
   {
-    $viewClass = $this->page->namespace['view'] .'JsonView';
+    $viewClass = Env::get('namespace.view') .'JsonView';
     (new $viewClass)->view($this->$method());
     Log::close(); // effective only when set previously
     exit;

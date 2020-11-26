@@ -9,7 +9,7 @@ namespace Andygrond\Hugonette\Views;
 class JsonView implements View
 {
 
-  public function __construct(\stdClass $page = null)
+  public function __construct()
   {
   }
 

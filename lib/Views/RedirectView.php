@@ -10,7 +10,7 @@ use Andygrond\Hugonette\Log;
 
 class RedirectView implements View
 {
-  public function __construct(\stdClass $page = null)
+  public function __construct()
   {
   }
 

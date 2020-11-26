@@ -15,14 +15,14 @@ class LatteView implements View
   private $template;
   private $debug;
 
-  public function __construct(\stdClass $page)
+  public function __construct()
   {
-    $this->base = $page->base;
-    $this->template = $page->base['template'] .($page->template?? '/index.html');
+    $this->base = Env::get('base');
+    $this->template = $this->base['template'] .(Env::get('template')?? '/index.html');
 
-    // dump $page if Log uses native Logger and Tracy in debug mode
-    if (@Log::$debug == 'dev') {
-      bdump($page, 'page');
+    // dump Env if Log uses native Logger and Tracy in debug mode
+    if (@Log::$debug == 'dev') {  // TODO modernize
+      bdump(Env::get(), 'page');
     }
   }
 

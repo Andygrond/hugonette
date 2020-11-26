@@ -34,7 +34,7 @@ class UploadView implements View
     'webm' => 'video/webm',
   ];
 
-  public function __construct(\stdClass $page = null)
+  public function __construct()
   {
   }
 

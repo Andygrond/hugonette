@@ -10,9 +10,9 @@ class PlainView implements View
 {
   private $template;
 
-  public function __construct(\stdClass $page)
+  public function __construct()
   {
-    $this->template = $page->base['template'] .($page->template?? '/index.html');
+    $this->template = Env::get('base.template') .(Env::get('template')?? '/index.html');
   }
 
   // render model data using plain old PHP template
