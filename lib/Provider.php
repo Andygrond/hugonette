@@ -14,9 +14,9 @@ class Provider
 
   protected $page;  // page object attributes
 
-  public function __construct(array $page)
+  public function __construct()
   {
-    $this->page = (object) $page;
+    $this->page = (object) Env::get();
   }
 
   // view model data calculated by presenter class@method declared in router

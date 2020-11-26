@@ -13,9 +13,9 @@ class Presenter
   protected $page;  // page object attributes (can be altered in Presenter)
   protected $model = []; // base model data
 
-  public function __construct(array $page)
+  public function __construct()
   {
-    $this->page = (object) $page;
+    $this->page = (object) Env::get();
   }
 
   // return view object according to view strategy defined in Route

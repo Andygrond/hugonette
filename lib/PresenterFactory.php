@@ -10,12 +10,12 @@ final class PresenterFactory
 {
 
   // return instantiated presenter or provider object
-  public static function create(string $presenter, $page)
+  public static function create(string $presenter)
   {
     [ $class, $method ] = explode(':', $presenter .':default');
-    $class = $page['namespace']['presenter'] .ucwords($class);
+    $class = Env::get('namespace.presenter') .ucwords($class);
 
-    (new $class($page))->run($method);
+    (new $class)->run($method);
   }
 
 }

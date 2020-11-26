@@ -132,9 +132,9 @@ class Route
   private function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    Env::append('trace', $presenter .' - line ' .debug_backtrace()[1]['line']);
+    Env::append('trace', debug_backtrace()[1]['line'] .': ' .$presenter);
     // call Presenter
-    PresenterFactory::create($presenter, Env::get());
+    PresenterFactory::create($presenter);
   }
 
   /** calculate template file name based on the URL
