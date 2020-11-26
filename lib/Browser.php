@@ -2,7 +2,7 @@
 
 namespace Andygrond\Hugonette;
 
-/* Simple and optimized browser detector
+/* Simple and optimized browser detector for Hugonette
  * Attention: agent name is roughly estimated and can be not always accurate
  * @author Andygrond 2020
 **/
@@ -68,9 +68,7 @@ class Browser
   private static function findAgent($agent): bool
   {
     $agent = strtolower($agent);
-//    $botsDef = Page::env('bots'); TODO
-    $botsDef = __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'bots.ini';
-    $agentList = parse_ini_file($botsDef, true);
+    $agentList = parse_ini_file(Env::get('bots'), true);
 
     foreach ($agentList as $type => $alist) {
       foreach ($alist as $pattern => $name) {

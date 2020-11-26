@@ -88,7 +88,7 @@ class Log
   {
     if ($mode == 'plain') {
       self::trigger("Debugger can not be put back into Plain mode.");
-    } else {
+    } elseif (self::$logger) {
       self::$debug = $mode;
       $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
       Debugger::enable($tracyMode, self::$logger->logPath);
@@ -99,15 +99,15 @@ class Log
   // can be applied only when Tracy is active
   public static function enable(string $name)
   {
-    if (self::$logger && $this->debug != 'plain') {
-      switch($name) {
-        case 'ajax':   // log to Chrome console with FireLogger extension
+    switch($name) {
+      case 'ajax':   // log to Chrome console with FireLogger extension
+        if (self::$logger && self::$debug != 'plain') {
           self::$sendFireLog = true;
-          break;
-        case 'output': // enable OutputDebugger
-          OutputDebugger::enable();
-          break;
-      }
+        }
+        break;
+      case 'output': // enable OutputDebugger
+        OutputDebugger::enable();
+        break;
     }
   }
 
