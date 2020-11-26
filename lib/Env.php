@@ -42,15 +42,17 @@ class Env
     $attr = $attrValue;
   }
 
-  /** set attribute value
+  /** append value to an array or concatenate to a string
   * @param attrName variable name - array cells.dotted
   * @param append value to be appended
   */
-  public static function append(string $attrName, string $append)
+  public static function append(string $attrName, $append)
   {
     $attr =& self::findAttr($attrName);
-    if (is_string($attr)) {
+    if (is_string($attr) && is_string($append)) {
       $attr .= $append;
+    } elseif (is_array($attr)) {
+      $attr[] = $append;
     }
   }
 

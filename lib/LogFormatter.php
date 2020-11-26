@@ -56,18 +56,12 @@ class LogFormatter
         $record = isset($_SERVER['TERM'])? 'Shell CLI' : 'Cron CLI';
       }
     } else {
-      $record = $_SERVER['REMOTE_ADDR'] .' ' .$this->userAgent() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
+      $record = $_SERVER['REMOTE_ADDR'] .' ' .Browser::name() .' ' .$_SERVER['REQUEST_METHOD'] .' ' .$this->pageURI();
     }
     if ($duration) {
       $record .= ' [' .implode(',', $duration) .']';
     }
     return $record;
-  }
-
-  // format user agent
-  private function userAgent(): string
-  {
-    return Browser::name();
   }
 
   // collect actual page address

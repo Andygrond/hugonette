@@ -8,50 +8,77 @@ namespace Andygrond\Hugonette;
 
 class Route
 {
-  private $page;    // page object
   private $allowedMethods = ['get', 'post', 'put', 'delete'];
   private $httpMethod; // http method lowercase
 
-  // $sysDir - path to Nette system if exists
+  /**
+  * @param sysDir - path to framework (i.e. Nette system)
+  */
   public function __construct(string $sysDir = null)
   {
-    $this->page = new Page($sysDir);
+    // set Env base
+    $uriBase = dirname($_SERVER['SCRIPT_NAME']);
+    Env::set('base', [
+      'uri' => $uriBase,  // base path for route (subfolder of document root)
+      'system' => $sysDir,    // path to Nette framework
+      'template' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$uriBase, // base path for static template (subfolder of static base)
+    ]);
+
+    // set Env request
+    [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
+    $isHtml = (substr($path, -5) == '.html');
+    $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen($uriBase)) .'/';
+// zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?
+    Env::set('request', [
+      'group' => '',    // router group base
+      'item' => $path,  // request details (path in group)
+      'parts' => explode('/', trim($path, '/')),
+    ]);
+
+    Env::set('trace', []);  // trace must be an array
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
   }
 
-  // route for single request method
-  // @method - http method as a route function name
-  // @args = [$pattern, $model]
+  /** route for single request method
+  * @param method - http method as a route function name
+  * @param args = [$pattern, $model]
+  */
   public function __call(string $method, array $args)
   {
     if ($this->httpMethod == $method) {
       if ($this->regMatch($args[0])) {
-        $this->page->run($args[1]);
+        $this->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
       Log::trigger("Router method not found: $method");
     }
   }
 
-  // full static GET with one common presenter (runs all static pages at once)
+  /** full static GET with one common presenter (runs all static pages at once)
+  * @param presenter name as declared in route
+  */
   public function static(string $presenter)
   {
-    if ($this->httpMethod == 'get' && $this->page->template()) {
-      $this->page->run($presenter);
+    if ($this->httpMethod == 'get' && $this->template()) {
+      $this->run($presenter);
     }
   }
 
-  // if applicable, should be placed as the last routing directive in a group - for not routed URI
-  // @presenter usually shows status 404 with the native navigation panels
+  /** if applicable, should be placed as the last routing directive in a group - for not routed URI
+  * @param presenter usually shows status 404 with the native navigation panels
+  */
   public function notFound(string $presenter)
   {
-    $this->page->run($presenter);
+    $this->run($presenter);
   }
 
-  // redirect @$to if URI simply starts from $pattern or $pattern is empty
-  // this can be used as the last routing directive in group or freely
-  // @$permanent in Route defaults to http code 301 Moved Permanently
-  // @$permanent set to false = doesn't inform search engines about the change
+  /** redirect if URI simply starts from $pattern or $pattern is empty
+  * this can be used freely, but typically as the last routing directive in group
+  * @param pattern string to match
+  * @param url addres to redirect to
+  * @param permanent in Route defaults to http code 301 Moved Permanently
+  * $permanent set to false = doesn't inform search engines about the change
+  */
   public function redirect(string $pattern, string $url, bool $permanent = true)
   {
     if (!$pattern || $this->exactMatch($pattern)) {
@@ -62,31 +89,68 @@ class Route
     }
   }
 
-  // register a set of routes with shared attributes.
+  /** run a set of routes with shared attributes
+  * @param pattern string to match
+  * @param callback function to run when matched
+  */
   public function group(string $pattern, \Closure $callback)
   {
     if (!$pattern || $this->exactMatch($pattern)) {
       $parentAttrib = Env::get();
 
-      $this->page->setGroupRequest($pattern);
+      // calculate request for a group
+      Env::append('request.group', $pattern); // base URL for current route group
+      Env::set('request.item', substr(Env::get('request.item'), strlen($pattern)));
+      // run the closure
       call_user_func($callback, $this);
 
       Env::restore($parentAttrib);
     }
   }
 
-  // simple pattern matching test - no variable parts
+  /** simple pattern matching test - no variable parts
+  * @param pattern string to match
+  * @return = matched
+  */
   private function exactMatch(string $pattern): bool
   {
     return (strpos(Env::get('request.item'), $pattern) === 0);
   }
 
-  // check regular expression pattern matching
-  // replace page params according to the pattern
+  /** check regular expression pattern matching
+  * @param pattern string to match
+  * @return = matched
+  */
   private function regMatch(string $pattern): bool
   {
-    $pattern = '@^' .$pattern .'$@';
-    return preg_match($pattern, Env::get('request.item'));
+    return preg_match('@^' .$pattern .'$@', Env::get('request.item'));
+  }
+
+  /** run presenter instance and exit if truly presented
+  * @param presenter name as declared in route
+  */
+  private function run(string $presenter)
+  {
+    // keep trace of matched routes for the request
+    Env::append('trace', $presenter .' - line ' .debug_backtrace()[1]['line']);
+    // call Presenter
+    PresenterFactory::create($presenter, Env::get());
+  }
+
+  /** calculate template file name based on the URL
+  * @return = file exists
+  */
+  public function template(): bool  // TODO!!! to nie powinno działac po ostatnich zmianach
+  {
+//    Env::set('base.template', '');
+    $template = Env::get('base.uri') .Env::get('request.item');
+    $template .= (substr($template, -1) == '/')? 'index.html' : '.html';
+
+    if (is_file(Env::get('base.static') .$template)) {
+      Env::set('template', $template);
+      return true;
+    }
+    return false;
   }
 
 }
