@@ -20,9 +20,17 @@ class Provider
   final public function run(string $method)
   {
     $viewClass = Env::get('namespace.view') .'JsonView';
-    (new $viewClass)->view($this->$method());
-    Log::close(); // effective only when set previously
-    exit;
+    $model = $this->$method();
+    
+    if (false !== $model) {
+      if (is_array($model)) {
+        (new $viewClass)->view($model);
+        Log::close(); // effective only when set previously
+        exit;
+      } else {
+        throw new \TypeError("Please return array or false in " .get_class($this) ."->$method()");
+      }
+    }
   }
 
   // Provider default class called in Route

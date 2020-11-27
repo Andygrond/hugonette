@@ -30,10 +30,15 @@ class Presenter
   */
   final public function run(string $method)
   {
-    if (false !== $model = $this->$method()) {
-      $this->viewStrategy()->view($this->model + $model);
-      Log::close(); // effective only when set previously
-      exit;
+    $model = $this->$method();
+    if (false !== $model) {
+      if (is_array($model)) {
+        $this->viewStrategy()->view($this->model + $model);
+        Log::close(); // effective only when set previously
+        exit;
+      } else {
+        throw new \TypeError("Please return array or false in " .get_class($this) ."->$method()");
+      }
     }
   }
 
