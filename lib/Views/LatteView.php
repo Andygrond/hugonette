@@ -8,6 +8,7 @@ namespace Andygrond\Hugonette\Views;
 
 use Latte\Engine;
 use Andygrond\Hugonette\Log;
+use Andygrond\Hugonette\Env;
 
 class LatteView implements View
 {

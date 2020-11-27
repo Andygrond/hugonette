@@ -6,6 +6,8 @@ namespace Andygrond\Hugonette\Views;
 * @author Andygrond 2020
 **/
 
+use Andygrond\Hugonette\Env;
+
 class PlainView implements View
 {
   private $template;

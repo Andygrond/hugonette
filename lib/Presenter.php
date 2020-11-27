@@ -10,12 +10,10 @@ namespace Andygrond\Hugonette;
 
 class Presenter
 {
-  protected $page;  // page object attributes (can be altered in Presenter)
   protected $model = []; // base model data
 
   public function __construct()
   {
-    $this->page = (object) Env::get();
   }
 
   /**
@@ -24,7 +22,7 @@ class Presenter
   final protected function viewStrategy()
   {
     $viewClass = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
-    return new $viewClass($this->page);
+    return new $viewClass();
   }
 
   /** view model data calculated by presenter class:method declared in router

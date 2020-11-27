@@ -10,11 +10,8 @@ namespace Andygrond\Hugonette;
 class Provider
 {
 
-  protected $page;  // page object attributes
-
   public function __construct()
   {
-    $this->page = (object) Env::get();
   }
 
   /** view model data calculated by presenter class:method declared in router
@@ -41,10 +38,10 @@ class Provider
     } catch (\Throwable $t) {
        $this->setStatus(500, $t->getMessage());
     }
-    Log::info('API status', $this->page->status);
+    Log::info('API status', Env::get('status'));
 
     return [
-      'status' => $this->page->status,
+      'status' => Env::get('status'),
       'data' => @$data,
     ];
   }
@@ -54,9 +51,9 @@ class Provider
     if ($code >= 400) {
       http_response_code($code);
     }
-    $this->page->status = [
+    Env::set('status', [
       'code' => $code,
       'message' => $message,
-    ];
+    ]);
   }
 }
