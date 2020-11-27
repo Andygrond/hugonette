@@ -32,7 +32,7 @@ class Route
     Env::set('request', [
       'group' => '',    // router group base
       'item' => $path,  // request details (path in group)
-      'parts' => explode('/', trim($path, '/')),
+      'segments' => explode('/', trim($path, '/')),
     ]);
 
     Env::set('trace', []);  // trace must be an array
@@ -108,7 +108,7 @@ class Route
     }
   }
 
-  /** simple pattern matching test - no variable parts
+  /** simple pattern matching test - no variable segments
   * @param pattern string to match
   * @return = matched
   */
