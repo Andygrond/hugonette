@@ -3,7 +3,6 @@
 namespace Andygrond\Hugonette;
 
 /* Central store of environment attributes for Hugonette
- * Attention: agent name is roughly estimated and can be not always accurate
  * @author Andygrond 2020
 **/
 
@@ -11,6 +10,7 @@ class Env
 {
   // initial environment attributes
   private static $attrib = [
+    'mode' => 'production', // [ development | production | maintenance ]
     'view' => 'plain',  // view mode [ plain | latte | json | upload | redirect ]
     'namespace' => [
       'presenter' => 'App\\Presenters\\',

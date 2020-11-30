@@ -16,12 +16,13 @@ class LatteView implements ViewInterface
   // render model data using Latte templating engine
   public function __construct(array $model)
   {
-    // dump Env if Log uses native Logger and Tracy in debug mode
-    if (@Log::$debug == 'dev') {  // TODO modernize
+    // dump Env and Model if Tracy is in development mode
+    if (@Log::$debug == 'development') {
       bdump(Env::get(), 'Env');
       bdump($model, 'Model');
     }
 
+    // render in Latte
     $latte = new Engine;
     $latte->setTempDirectory(Env::get('base.system') .'/temp/latte');
     $template = Env::get('base.template') .(Env::get('template')?? '/index.html');

@@ -10,9 +10,9 @@ namespace Andygrond\Hugonette;
 
 abstract class Presenter
 {
-  protected $model = []; // base model data
+  protected $model = []; // base model data - can be set separately
 
-  /** calculate Model data using Presenter class:method declared in router and pass it to View
+  /** calculate Model data using Presenter class:method and pass it to View
   * @param method = presenter method name determined in route definition
   */
   final public function run(string $method)
@@ -25,8 +25,9 @@ abstract class Presenter
         new $view($this->model + $model);
         Log::close(); // effective only when set previously
         exit;
+
       } else {
-        throw new \TypeError(get_class($this) ."::$method returned " .gettype($model) .". Please return array or false.");
+        throw new \TypeError(get_class($this) ."::$method has returned " .gettype($model) .". Allowed: array or false.");
       }
     }
   }

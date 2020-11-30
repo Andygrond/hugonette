@@ -5,10 +5,10 @@ namespace Andygrond\Hugonette;
 /* Log Facade for Hugonette
  * Any PSR-3 compatible logger can be injected
  * When working with native Logger adds extra level 'view' to collect view messages
- * Tracy debugger is utilized in modes 'prod' and 'dev'
+ * Tracy debugger is utilized in 'production' or 'development' mode
  *
  * @author Andygrond 2020
- * todo: mailing and ajax channel test
+ * todo: ajax channel test
 **/
 
 use Tracy\Debugger;
@@ -20,21 +20,26 @@ class Log
   private static $duration;       // Duration object
   private static $sendFireLog;    // Chrome FireLog console enabled
 
-  public static $debug = 'plain';// Debugger mode
+  public static $debug = 'plain';   // Debugger mode
   public static $viewMessages = []; // messages collected to be passed to view
-  public static $logger;          // Logger object
+  public static $logger;            // Logger object
 
+  /**
+  * @param logger - PSR-3 compatible logger object
+  */
   public static function set(Logger $logger)
   {
+    // create level 'view' for sending messages to view
     if (method_exists($logger, 'addLevel')) {
-      $logger->addLevel('view', 35);  // level 'view' for sending messages to view
+      $logger->addLevel('view', 35);
     }
     self::$logger = $logger;
     self::$duration = new Duration;
   }
 
-  // output the message - Log must be set prior to calling this
-  // $args = [record, data]
+  /** output the message - Log must be set prior to calling this function
+  * @param args = [record, data]
+  */
   public static function __callStatic(string $level, array $args)
   {
     if (!self::$logger) {
@@ -63,48 +68,58 @@ class Log
     }
   }
 
-  // set job name
-  // names reserved: [pre] for preprocessing and [run] for runtime
+  /** start job
+  * @param name - name of the job
+  * reserved names: [pre] for preprocessing and [run] for runtime
+  */
   public static function job(string $name)
   {
     self::$jobStack[] = $name;
     self::$duration->start($name);
   }
 
-  // quit current job
-  // reset old job name and save job duration
+  /** quit current job, reset old job name and save job duration
+  * @param name - name of the job
+  */
   public static function done(string $name)
   {
     $lastName = self::$jobStack? array_pop(self::$jobStack) : '#';
     if ($name == $lastName) {
       self::$duration->stop($name);
     } else {
-      self::trigger("Job $name cannot be done, $lastName is waiting. Simple job nesting allowed only.");
+      self::trigger("Job $name cannot be done, $lastName is waiting. Job interlacing is not allowed.");
     }
   }
 
-  // initialize Tracy debugger in @mode ['prod'|'dev']
+  /** initialize Tracy debugger
+  * @param mode ['prod'|'dev']
+  */
   public static function tracy(string $mode)
   {
-    if ($mode == 'plain') {
-      self::trigger("Debugger can not be put back into Plain mode.");
-    } elseif (self::$logger) {
-      self::$debug = $mode;
-      $tracyMode = ($mode == 'dev')? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
-      Debugger::enable($tracyMode, self::$logger->logPath);
-    }
   }
 
-  // shortcuts to enable special debugger functions
-  // can be applied only when Tracy is active
+  /** shortcuts to enable special debugger functions
+  * once enabled function can not be disabled
+  *
+  * @param name - name of the functionality
+  */
   public static function enable(string $name)
   {
     switch($name) {
-      case 'ajax':   // log to Chrome console with FireLogger extension
+      case 'tracy':  // enable Tracy in given mode
+        if (self::$logger) {
+          self::$debug = Env::get('mode');
+          $tracyMode = (self::$debug == 'production')? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+          Debugger::enable($tracyMode, self::$logger->logPath);
+        }
+        break;
+
+      case 'ajax':   // log to Chrome console with FireLogger extension - Tracy must be active
         if (self::$logger && self::$debug != 'plain') {
           self::$sendFireLog = true;
         }
         break;
+
       case 'output': // enable OutputDebugger
         OutputDebugger::enable();
         break;
@@ -117,7 +132,9 @@ class Log
     self::$duration->timeLen();
   }
 
-  // trigger PHP notice with caller identification
+  /** trigger PHP notice with caller identification
+  * @param message - output error message
+  */
   public static function trigger($message)
   {
     if ($caller = @debug_backtrace()[2]) {

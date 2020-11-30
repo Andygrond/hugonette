@@ -5,7 +5,6 @@ namespace Andygrond\Hugonette;
 /* PSR-3 compatible logger for Hugonette
  * @author Andygrond 2020
  * Optional dependency: https://github.com/nette/tracy
- * Optional dependency: https://github.com/donatj/PhpUserAgent
 **/
 
 use Tracy\Debugger;
