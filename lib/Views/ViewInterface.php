@@ -6,11 +6,9 @@ namespace Andygrond\Hugonette\Views;
 * @author Andygrond 2020
 **/
 
-interface View
+interface ViewInterface
 {
 
-  public function __construct();
-
-  public function view(array $model);
+  public function __construct(array $model);
 
 }

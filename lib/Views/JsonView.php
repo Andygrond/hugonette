@@ -6,15 +6,11 @@ namespace Andygrond\Hugonette\Views;
  * @author Andygrond 2020
 **/
 
-class JsonView implements View
+class JsonView implements ViewInterface
 {
 
-  public function __construct()
-  {
-  }
-
-  // send model data as JSON object
-  public function view(array $model)
+  // echo model data as JSON object
+  public function __construct(array $model)
   {
     header('Cache-Control: no-cache');
     header('Content-Type: application/json');

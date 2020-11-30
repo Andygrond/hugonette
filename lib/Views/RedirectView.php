@@ -8,16 +8,13 @@ namespace Andygrond\Hugonette\Views;
 
 use Andygrond\Hugonette\Log;
 
-class RedirectView implements View
+class RedirectView implements ViewInterface
 {
-  public function __construct()
-  {
-  }
 
   // redirect to another URL
   // @$model['url']
   // @$model['permanent'] true = default = 301 Moved Permanently; false = 302 Found
-  public function view(array $model)
+  public function __construct(array $model)
   {
     $to = $model['url'];
     $code = (@$model['permanent'] !== false)? 301 : 302;

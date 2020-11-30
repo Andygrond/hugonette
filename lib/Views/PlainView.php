@@ -8,21 +8,15 @@ namespace Andygrond\Hugonette\Views;
 
 use Andygrond\Hugonette\Env;
 
-class PlainView implements View
+class PlainView implements ViewInterface
 {
-  private $template;
-
-  public function __construct()
-  {
-    $this->template = Env::get('base.template') .(Env::get('template')?? '/index.html');
-  }
 
   // render model data using plain old PHP template
-  public function view(array $_model)
+  public function __construct(array $_model)
   {
     extract($_model);
     unset($_model);
-    include($this->template);
+    include(Env::get('base.template') .(Env::get('template')?? '/index.html'));
   }
 
 }

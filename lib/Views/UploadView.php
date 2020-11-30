@@ -8,7 +8,7 @@ namespace Andygrond\Hugonette\Views;
 
 use Andygrond\Hugonette\Log;
 
-class UploadView implements View
+class UploadView implements ViewInterface
 {
   // default MIME types for uploading
   private $mimeTypes = [
@@ -34,15 +34,11 @@ class UploadView implements View
     'webm' => 'video/webm',
   ];
 
-  public function __construct()
-  {
-  }
-
 // upload file
 // $model['destinationFile'] suggested 'filename.ext' of received file or '.ext' when saving file is not intended
 // $model['inline'] true: try to display the content, false: try save the file
 // $model['sourceFile'] uploaded file name or $model['data'] uploaded content
-  public function view(array $model)
+  public function __construct(array $model)
   {
     $disposition = @$model['inline']? 'inline' : 'attachment';
     $file = $model['destinationFile'];
