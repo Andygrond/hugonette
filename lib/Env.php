@@ -9,6 +9,14 @@ namespace Andygrond\Hugonette;
 class Env
 {
   // initial environment attributes
+  private static $hidden = [
+    'file' => [
+      'bots' => __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'bots.ini',
+      'key' => DIRECTORY_SEPARATOR .'..' .DIRECTORY_SEPARATOR .'cache' .DIRECTORY_SEPARATOR,
+      'access' => DIRECTORY_SEPARATOR .'app' .DIRECTORY_SEPARATOR .'config' .DIRECTORY_SEPARATOR .'access.data',
+    ],
+    'access' => [],
+  ];
   private static $attrib = [
     'mode' => 'production', // [ development | production | maintenance ]
     'view' => 'plain',  // view mode [ plain | latte | json | upload | redirect ]
@@ -16,7 +24,8 @@ class Env
       'presenter' => 'App\\Presenters\\',
       'view' => 'Andygrond\\Hugonette\\Views\\',
     ],
-    'bots' => __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'bots.ini',
+    'file' => [
+    ],
   ];
 
   /** get attribute value
@@ -71,8 +80,14 @@ class Env
   */
   private static function &findAttr(string $attrName)
   {
-    $attr =& self::$attrib;
-    foreach (explode('.', $attrName) as $name) {
+    $attrParts = explode('.', $attrName);
+    if ($attrParts[0] == 'hidden') {
+      $attr =& self::$hidden;
+    } else {
+      $attr =& self::$attrib;
+    }
+
+    foreach ($attrParts as $name) {
       if (!array_key_exists($name, $attr)) {
         $attr[$name] = null;
       }
