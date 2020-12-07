@@ -15,26 +15,27 @@ class Decrypt
   private static $secret; // secret data once read
   private static $nonce;  // nonce once read
 
-  // read secret data file
-  public function __construct()
+  /** read secret data file
+  * @param filename encrypted file name
+  */
+  public function __construct($filename)
   {
     if (!self::$secret) {
-      $encryptedFile = Env::get('base.system') .Env::get('hidden.file.access');
-      self::$secret = unserialize(file_get_contents($encryptedFile));
+      self::$secret = unserialize(file_get_contents($filename));
       self::$nonce = array_shift(self::$secret);
     }
   }
 
   /**
-  * @param sysname secret data key
-  * @return - secret data for $sysname
+  * @param key secret data key
+  * @return - secret data for key $key
   */
-  public function get(string $sysname): ?object
+  public function get(string $key): ?object
   {
-    $hash = md5($sysname);
+    $hash = md5($key);
 
     if (!isset(self::$secret[$hash])) {
-      $error = 'Data not found for ' .$sysname;
+      $error = 'Data not found for ' .$key;
     } else {
       $keyFile = Env::get('hidden.file.key');
       if (!is_file($keyFile)) {
@@ -42,11 +43,11 @@ class Decrypt
       } else {
         $json = sodium_crypto_secretbox_open(self::$secret[$hash], self::$nonce, include($keyFile));
         if ($json === false) {
-          $error = $sysname .' decryption error';
+          $error = $key .' decryption error';
         } else {
           $data = json_decode($json);
           if ($data === null) {
-            $error = $sysname .' JSON error: ' .$this->jsonError();
+            $error = $key .' JSON error: ' .$this->jsonError();
           } else {
             return $data;
           }
@@ -54,7 +55,7 @@ class Decrypt
       }
     }
 
-    trigger_error($error .' while decoding credentials');
+    trigger_error($error .' while decoding credentials for ' .$key);
   }
 
 }
