@@ -1,6 +1,6 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Helpers;
 
 /* Time measurement for performance tests
  * @author Andygrond 2020

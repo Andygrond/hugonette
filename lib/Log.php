@@ -13,6 +13,7 @@ namespace Andygrond\Hugonette;
 
 use Tracy\Debugger;
 use Tracy\OutputDebugger;
+use Andygrond\Hugonette\Helpers\Duration;
 
 class Log
 {
