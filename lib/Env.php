@@ -18,6 +18,7 @@ class Env
     'namespace' => [
       'presenter' => 'App\\Presenters\\',
       'view' => 'Andygrond\\Hugonette\\Views\\',
+      'db' => 'App\\Library\\Db\\',
     ],
   ];
 

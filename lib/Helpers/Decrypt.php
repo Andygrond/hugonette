@@ -12,36 +12,36 @@ class Decrypt
 {
   use JsonError;
 
-  private static $secret; // secret data once read
-  private static $nonce;  // nonce once read
+  private $secret = []; // secret data once read
+  private $nonce;  // nonce once read
 
   /** read secret data file
   * @param filename encrypted file name
   */
-  public function __construct($filename)
+  public function __construct(string $filename)
   {
-    if (!self::$secret) {
-      self::$secret = unserialize(file_get_contents($filename));
-      self::$nonce = array_shift(self::$secret);
+    if (!$this->secret) {
+      $this->secret = unserialize(file_get_contents(Env::get('base.system') .$filename));
+      $this->nonce = array_shift($this->secret);
     }
   }
 
   /**
   * @param key secret data key
-  * @return - secret data for key $key
+  * @return - secret data for the $key
   */
   public function get(string $key): ?object
   {
     $hash = md5($key);
 
-    if (!isset(self::$secret[$hash])) {
+    if (!isset($this->secret[$hash])) {
       $error = 'Data not found for ' .$key;
     } else {
       $keyFile = Env::get('hidden.file.key');
       if (!is_file($keyFile)) {
         $error = 'Key file not found';
       } else {
-        $json = sodium_crypto_secretbox_open(self::$secret[$hash], self::$nonce, include($keyFile));
+        $json = sodium_crypto_secretbox_open($this->secret[$hash], $this->nonce, include($keyFile));
         if ($json === false) {
           $error = $key .' decryption error';
         } else {
