@@ -1,11 +1,13 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Helpers;
 
 /* Simple and optimized browser detector for Hugonette
  * Attention: agent name is roughly estimated and can be not always accurate
  * @author Andygrond 2020
 **/
+
+use Andygrond\Hugonette\Env;
 
 class Browser
 {

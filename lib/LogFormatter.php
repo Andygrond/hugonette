@@ -6,6 +6,8 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2020
 **/
 
+use Andygrond\Hugonette\Helpers\Browser;
+
 class LogFormatter
 {
   protected $botsDefFile; // Opional bots definitions
@@ -72,7 +74,7 @@ class LogFormatter
     if ($_SERVER['SERVER_PORT'] != ($ssl? '443' : '80')) {
       $link .= ':' .$_SERVER["SERVER_PORT"];
     }
-    return $link .$_SERVER['REQUEST_URI'];
+    return $link .urldecode($_SERVER['REQUEST_URI']);
   }
 
 }
