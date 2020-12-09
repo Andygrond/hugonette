@@ -12,7 +12,7 @@ class Decrypt
 {
   use JsonError;
 
-  private $secret = []; // secret data once read
+  private $secret; // secret data once read
   private $nonce;  // nonce once read
 
   /** read secret data file
@@ -27,15 +27,15 @@ class Decrypt
   }
 
   /**
-  * @param key secret data key
-  * @return - secret data for the $key
+  * @param dataKey secret data key
+  * @return - secret data for the $dataKey
   */
-  public function get(string $key): ?object
+  public function get(string $dataKey): ?object
   {
-    $hash = md5($key);
+    $hash = md5($dataKey);
 
     if (!isset($this->secret[$hash])) {
-      $error = 'Data not found for ' .$key;
+      $error = 'Data not found for ' .$dataKey;
     } else {
       $keyFile = Env::get('hidden.file.key');
       if (!is_file($keyFile)) {
@@ -43,11 +43,11 @@ class Decrypt
       } else {
         $json = sodium_crypto_secretbox_open($this->secret[$hash], $this->nonce, include($keyFile));
         if ($json === false) {
-          $error = $key .' decryption error';
+          $error = $dataKey .' decryption error';
         } else {
           $data = json_decode($json);
           if ($data === null) {
-            $error = $key .' JSON error: ' .$this->jsonError();
+            $error = $dataKey .' JSON error: ' .$this->jsonError();
           } else {
             return $data;
           }
@@ -55,7 +55,7 @@ class Decrypt
       }
     }
 
-    trigger_error($error .' while decoding credentials for ' .$key);
+    trigger_error($error .' while decoding secret data for ' .$dataKey);
   }
 
 }

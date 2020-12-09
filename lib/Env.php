@@ -13,8 +13,11 @@ class Env
   * attrib value set from inside of Route group will be valid for that group only
   */
   private static $attrib = [
-    'mode' => 'production', // [ development | production | maintenance ]
-    'view' => 'plain',  // view mode [ plain | latte | json | upload | redirect ]
+    // App mode: [ development | production | maintenance ]
+    'mode' => 'production',
+    // Intended view manner [ plain | latte | json | upload | redirect ]
+    'view' => 'plain',
+    // Namespaces of functionalities
     'namespace' => [
       'presenter' => 'App\\Presenters\\',
       'view' => 'Andygrond\\Hugonette\\Views\\',
@@ -28,9 +31,13 @@ class Env
   * once set hidden value persists - even if set from inside of Route group
   */
   private static $hidden = [
+    // File locations
     'file' => [
+      // Browser identification table
       'bots' => __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'bots.ini',
+      // Encryption key should be prepended by it's directory before use
       'key' => DIRECTORY_SEPARATOR .'.secure' .DIRECTORY_SEPARATOR .'key.php',
+      // DbFacory credentials data path relative to system dir
       'access' => DIRECTORY_SEPARATOR .'app' .DIRECTORY_SEPARATOR .'config' .DIRECTORY_SEPARATOR .'access.data',
     ],
   ];
