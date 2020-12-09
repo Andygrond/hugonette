@@ -12,8 +12,8 @@ class Decrypt
 {
   use JsonError;
 
-  private $secret; // secret data once read
-  private $nonce;  // nonce once read
+  private $secret; // secret data
+  private $nonce;  // nonce
 
   /** read secret data file
   * @param filename encrypted file name
