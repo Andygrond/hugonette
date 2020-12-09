@@ -31,15 +31,15 @@ class Logger
   public $logPath;          // path to log
 
   /** log initialization
-  * @param path = /path/to/log/filename.log or /path/to/log/folder/
-  * @param botsDefFile optional bots definition filename (see bots.ini)
+  * @param filename path to log file or folder relative to system log folder
   * File with obligatory .log extension - uses Hugonette log format
   * When directory is given - uses Tracy native logger
   */
-  public function __construct(string $path, string $botsDefFile = null)
+  public function __construct(string $filename)
   {
-    $this->formatter = new LogFormatter($botsDefFile);
+    $this->formatter = new LogFormatter;
     // set log dir and file
+    $path = Env::get('base.system') .'/log/' .$path;
     if (strrchr($path, '.') == '.log') {
       $this->logFile = $path;
       $this->logPath = dirname($path) .'/';

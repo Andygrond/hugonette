@@ -10,13 +10,6 @@ use Andygrond\Hugonette\Helpers\Browser;
 
 class LogFormatter
 {
-  protected $botsDefFile; // Opional bots definitions
-
-  public function __construct($botsDefFile = null)
-  {
-    $this->botsDefFile = $botsDefFile;
-  }
-
   // format date part of log message
   public function date(): string
   {
@@ -49,7 +42,7 @@ class LogFormatter
   }
 
   // format general information part
-  private function generalInfo(array $duration = null): string
+  protected function generalInfo(array $duration = null): string
   {
     if (php_sapi_name() == 'cli') {
       if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -67,7 +60,7 @@ class LogFormatter
   }
 
   // collect actual page address
-  private function pageURI(): string
+  protected function pageURI(): string
   {
     $ssl = (@$_SERVER['HTTPS'] == 'on');
     $link = ($ssl? 'https://' : 'http://') .$_SERVER['HTTP_HOST'];

@@ -14,20 +14,12 @@ class Route
   /**
   * @param sysDir - path to framework (i.e. Nette system)
   */
-  public function __construct(string $sysDir = null)
+  public function __construct()
   {
-    // set Env base
-    $uriBase = dirname($_SERVER['SCRIPT_NAME']);
-    Env::set('base', [
-      'uri' => $uriBase,  // base path for route (subfolder of document root)
-      'system' => $sysDir,    // path to Nette framework
-      'template' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$uriBase, // base path for static template (subfolder of static base)
-    ]);
-
     // set Env request
     [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
     $isHtml = (substr($path, -5) == '.html');
-    $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen($uriBase)) .'/';
+    $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
 // zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?
     Env::set('request', [
       'group' => '',    // router group base

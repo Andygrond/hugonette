@@ -1,8 +1,10 @@
 <?php
 
-/** Initial environment attributes for Hugonette
+/** Standard initial environment attributes for Hugonette
  * @author Andygrond 2020
  */
+
+$uriBase = dirname($_SERVER['SCRIPT_NAME']);
 
 return [
   // App mode: [ development | production | maintenance ]
@@ -15,6 +17,15 @@ return [
     'view' => 'Andygrond\\Hugonette\\Views\\',
     'db' => 'App\\Library\\Db\\',
   ],
+
+  // Base paths
+  'base' => [
+    // base path for route (subfolder of document root)
+    'uri' => $uriBase,
+    // base path for static templates (subfolder of static base)
+    'template' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$uriBase,
+  ],
+
   // hidden environment attributes
   'hidden' => [
     // File locations

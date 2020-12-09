@@ -20,13 +20,15 @@ class Env
   /** set initial values of attributes - can be set only once
   * @param filename initial attributes file path; if not set standard values are provided
   */
-  public static function init(string $filename = null)
+  public static function init(string $sysDir, string $filename = null)
   {
     if (!self::$attrib) {
       self::$attrib = require($filename?? __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'env.php');
       self::$hidden = self::$attrib['hidden'];
       unset(self::$attrib['hidden']);
     }
+    // path to framework
+    self::$attrib['base']['system'] = $sysDir;
   }
 
   /** get attribute value
