@@ -39,7 +39,7 @@ class Logger
   {
     $this->formatter = new LogFormatter;
     // set log dir and file
-    $path = Env::get('base.system') .'/log/' .$path;
+    $path = Env::get('base.system') .'/log/' .$filename;
     if (strrchr($path, '.') == '.log') {
       $this->logFile = $path;
       $this->logPath = dirname($path) .'/';
