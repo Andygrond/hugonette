@@ -2,8 +2,10 @@
 
 namespace Andygrond\Hugonette\Helpers;
 
-// Secret data decrypter for Hugonette
-// Andy Grondziowski 2020
+/** Secret data encrypter for Hugonette
+ * Designed for independent use, not as a part of the system
+ * @author Andy Grondziowski 2020
+ */
 
 use Andygrond\Hugonette\Env;
 use Andygrond\Hugonette\Traits\JsonError;

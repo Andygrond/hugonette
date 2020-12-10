@@ -2,30 +2,35 @@
 
 namespace Andygrond\Hugonette;
 
-/* Database Factory for Hugonette
+/* Database Factory Multiton for Hugonette
  * @author Andygrond 2020
 **/
 
 use Andygrond\Hugonette\Helpers\Decrypt;
 
-final class DbFactory
+class DbFactory
 {
-  private static $dblink;  // otwarte połączenia do baz
-  private static $decrypt; // Decrypt object
+  private static $dblink = [];  // opened database connections
 
-  // return instantiated database object
+  // return instantiated database object, existing or new
   public static function create(string $target)
   {
     if (!@self::$dblink[$target]) {
-      if (!self::$decrypt) {
-        self::$decrypt = new Decrypt(Env::get('hidden.file.access'));
-      }
-      $dbaccess = self::$decrypt->get($target);
+      $dbaccess = Decrypt::data(Env::get('hidden.file.access'))->get($target);
       $type = Env::get('namespace.db') .$dbaccess->type;
       self::$dblink[$target] = new $type($dbaccess);
     }
 
     return self::$dblink[$target];
   }
+
+  // prevented instantiating
+  private function __construct(){}
+
+  // prevented cloning
+  private function __clone(){}
+
+  // prevented unserialization
+  private function __wakeup(){}
 
 }
