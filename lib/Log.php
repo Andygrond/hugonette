@@ -143,4 +143,14 @@ class Log
     }
     trigger_error($message);
   }
+
+  // prevented instantiating
+  private function __construct(){}
+
+  // prevented cloning
+  private function __clone(){}
+
+  // prevented unserialization
+  private function __wakeup(){}
+
 }

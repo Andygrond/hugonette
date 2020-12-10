@@ -18,7 +18,8 @@ class Env
   private static $hidden = [];
 
   /** set initial values of attributes - can be set only once
-  * @param filename initial attributes file path; if not set standard values are provided
+  * @param sysDir framework base directory
+  * @param filename initial attributes file path; standard values are provided if not set
   */
   public static function init(string $sysDir, string $filename = null)
   {
@@ -106,5 +107,14 @@ class Env
     }
     return $attr;
   }
+
+  // prevented instantiating
+  private function __construct(){}
+
+  // prevented cloning
+  private function __clone(){}
+
+  // prevented unserialization
+  private function __wakeup(){}
 
 }
