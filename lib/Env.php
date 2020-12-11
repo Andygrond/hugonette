@@ -52,10 +52,10 @@ class Env
   }
 
   /** concatenate string argument with an attribute
-  * @param attrName attribute name
   * @param prepend value to be prepended
+  * @param attrName attribute name
   */
-  public static function prepend(string $attrName, string $prepend)
+  public static function prepend(string $prepend, string $attrName)
   {
     $attr =& self::findAttr($attrName);
     if (is_string($attr)) {
