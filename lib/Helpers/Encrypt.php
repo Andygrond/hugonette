@@ -15,95 +15,155 @@ class Encrypt
   use JsonError;
 
   private $secret = []; // secret data
-  private $key;    // key
+  private $messages = []; // success messages
+  private $newKey = false; // new key flag
 
-  /** read secret data file
-  * @param filename encrypted file name
-  */
-  public function __construct(string $filename)
+  public function __construct()
   {
-    function_exists('sodium_crypto_secretbox') or exit('Lack of Sodium');
+    function_exists('sodium_crypto_secretbox') or $this->quit('Lack of Sodium');
+  }
 
-    if (!$this->secret) {
-      $this->secret = unserialize(file_get_contents(Env::get('base.system') .$filename));
-      $this->nonce = array_shift($this->secret);
+  public function __destruct()
+  {
+    echo '<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>Encode</title>
+</head><body>
+<h3>Actions performed:</h3>
+' .implode("<br>\n", $this->messages) .'
+</body></html>';
+  }
+
+  /** Initialize secret data with a new set
+  * @param orgFile ini formatted file name of original data
+  */
+  public function source(string $orgFile)
+  {
+    $this->newSecret();
+    $file = Env::get('base.system') .$orgFile;
+    $data = parse_ini_file($file, true);
+
+    foreach ($data as $dataKey => $value) {
+      $this->set($dataKey, $value);
     }
+
+    $cnt = count($this->secret) -1;
+    $this->messages[] = "Initialized with $cnt data chunks";
+    $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from public place';
+  }
+
+  /** Initialize secret data from file
+  * @param secretFile encrypted file name
+  */
+  public function read(string $secretFile)
+  {
+    !$this->newKey or $this->quit('New key was generated - old data lost!');
+
+    $file = Env::get('base.system') .$secretFile;
+    is_file($file) or $this->quit('Unable to read file ' .$secretFile);
+    $this->secret = unserialize(file_get_contents($file));
+    $this->messages[] = (count($this->secret) -1) .' data chunks in file: ' .$secretFile;
+  }
+
+  /** append or replace a data chunk
+  * @param dataKey key for data chunk
+  * @param value data chunk itself
+  */
+  public function set($dataKey, $value)
+  {
+    static $key;
+    $key or $key = $this->readKey();
+    $this->secret or $this->newSecret();
+
+    (strlen($dataKey) >= 7) or $this->quit("System name $dataKey length must be at least 7");
+    $this->secret[md5($dataKey)] = sodium_crypto_secretbox(json_encode($value), $this->secret[0], $key);
   }
 
   /**
-  * @param orgFile file name of original JSON encoded data
   * @param secretFile encrypted file name
   */
-  public function copy(string $orgFile, string $secretFile)
+  public function save(string $secretFile)
   {
-    $this->readKey();
-    if (is_file($secretFile)) {
-      unlink($secretFile) or exit('Can not delete file: ' .$secretFile);
+    $file = Env::get('base.system') .$secretFile;
+    if (is_file($file)) {
+      unlink($file) or $this->quit('Can not delete file: ' .$file);
     }
 
-    $data = $this->getJson($orgFile);
-    $this->secret[0] = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-    foreach ($data as $dataKey => $value) {
-      $this->setData($dataKey, $value);
-    }
-
-    file_put_contents($secretFile, serialize($this->secret)) or exit('File can not be written: ' .$secretFile);
-    echo "Data file $secretFile is ready. ";
-    unlink($orgFile) or exit('Can not delete file: ' .$orgFile .' - please do it yourself');
+    file_put_contents($file, serialize($this->secret)) or $this->quit('File can not be written: ' .$file);
+    $this->messages[] = "Data file $secretFile is ready. ";
   }
 
   /** Encryption key generator
   * File name must be defined in Env hidden variable
   */
-  public function generateKey()
+  public function newKey()
   {
+    !$this->secret or $this->quit('Key generation attempt on non-empty data set');
+
     $keyFile = Env::get('hidden.file.key');
     $dirName = pathinfo($keyFile)['dirname'];
 
     if (is_dir($dirName)) {
       if (is_file($keyFile)) {
-        unlink($keyFile) or exit('Can not delete file: ' .$keyFile);
+        unlink($keyFile) or $this->quit('Can not delete file: ' .$keyFile);
       }
     } else {
-      mkdir($dirName) or exit('Directory not created: ' .$dirName);
-      chmod($dirName, 0700) or exit('Directory not secured: ' .$dirName);
+      mkdir($dirName) or $this->quit('Directory not created: ' .$dirName);
+      chmod($dirName, 0700) or $this->quit('Directory not secured: ' .$dirName);
     }
 
-    touch($keyFile) or exit('Can not touch key file: ' .$keyFile);
-    chmod($keyFile, 0600) or exit('Can not secure key file: ' .$keyFile);
+    touch($keyFile) or $this->quit('Can not touch key file: ' .$keyFile);
+    chmod($keyFile, 0600) or $this->quit('Can not secure key file: ' .$keyFile);
 
     $key = base64_encode(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES));
     file_put_contents($keyFile, "<?php return base64_decode('$key');");
-    echo "New encryption key $keyFile created. ";
+    $this->newKey = true;
+
+    // test it
+    (base64_encode($this->readKey()) == $key) or $this->quit('Uups... Incorrect key retrieved');
+
+    $this->messages[] = "New encryption key $keyFile created.";
   }
 
+  // Read encryption key
   private function readKey()
   {
-    if ($this->key) return;
     $keyFile = Env::get('hidden.file.key');
-    is_file($keyFile) or exit ('No key file ' .$keyFile);
+    is_file($keyFile) or $this->quit('No key file ' .$keyFile);
     $key = include $keyFile;
-    $key or exit('No key available');
-    (strlen($key) == SODIUM_CRYPTO_SECRETBOX_KEYBYTES) or exit ('Invalid key size');
-    $this->key = $key;
+    $key or $this->quit('No key available');
+    (strlen($key) == SODIUM_CRYPTO_SECRETBOX_KEYBYTES) or $this->quit('Invalid key size');
+    return $key;
   }
 
-  private function getJson(string $filename)
+  // Initialize secret data with new nonce
+  private function newSecret()
   {
-    is_file($orgFile) or exit('File not found: ' .$orgFile);
+    $this->secret = [];
+    $this->secret[0] = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+  }
+
+  // Read JSON encoded data
+  private function getJson(string $orgFile)
+  {
+    is_file($orgFile) or $this->quit('File not found: ' .$orgFile);
     $json = file_get_contents($orgFile);
-    $json or exit('Can not read file: ' .$orgFile);
+    $json or $this->quit('Can not read file: ' .$orgFile);
     $data = json_decode($json);
-    $data or exit(jsonError() .' in ' .$orgFile);
+    $data or $this->quit(jsonError() .' in ' .$orgFile);
     return $data;
   }
 
-  private function setData($dataKey, $value)
+  /** $this->quit PHP notice with caller identification
+  * @param message - output error message
+  */
+  public function quit($message)
   {
-  	(strlen($dataKey) >2) or exit ("System name $dataKey length must be at least 3 (preferebly 8 or more)");
-  	$hash = md5($dataKey);
-  	!isset($this->secret[$hash]) or exit ("System name $dataKey is doubled or too similar to another");
-    $this->secret[$hash] = sodium_crypto_secretbox(json_encode($value), $this->secret[0], $this->key);
+    $caller = @debug_backtrace()[2];
+    $this->messages[] = "<b>$message</b> ...called in " .$caller['function'] .'() from ' .$caller['file'] .':' .$caller['line'];
+
+    exit();
   }
 
 }
