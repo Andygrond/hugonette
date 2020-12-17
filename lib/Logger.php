@@ -2,12 +2,9 @@
 
 namespace Andygrond\Hugonette;
 
-/* PSR-3 compatible logger for Hugonette
+/** PSR-3 compatible logger for Hugonette
  * @author Andygrond 2020
- * Optional dependency: https://github.com/nette/tracy
 **/
-
-use Tracy\Debugger;
 
 class Logger
 {
@@ -17,7 +14,7 @@ class Logger
     'info'      => 20, // Interesting events
     'notice'    => 30, // Normal but significant events
     'warning'   => 40, // Exceptional occurrences that are not errors
-    'error'     => 50, // Runtime errors that do not require immediate action but should typically be logged and monitored
+    'error'     => 50, // Runtime errors that do not require immediate action but should be monitored
     'critical'  => 60, // Critical conditions
     'alert'     => 70, // Action must be taken immediately - this should trigger the SMS alerts
     'emergency' => 80, // System is unusable
@@ -41,9 +38,15 @@ class Logger
     // set log dir and file
     $path = Env::get('base.system') .'/log/' .$filename;
     if (strrchr($path, '.') == '.log') {
+      if (!file_exists($path)) {
+        if (!@touch($path)) {
+          throw new \RuntimeException('Log file is unavailable: ' .$path);
+        }
+        chmod($path, 0666); // for cron and CLI obviously
+      }
+      ini_set('error_log', $path);
       $this->logFile = $path;
       $this->logPath = dirname($path) .'/';
-      ini_set('error_log', $path);
     } else {
       $this->logPath = rtrim($path, '/') .'/';
     }
@@ -70,7 +73,7 @@ class Logger
   public function log(string $level, $message, $context = [])
   {
     if (!$levelNo = @$this->levels[$level]) {
-      Log::trigger('Log method not found: ' .$level);
+      throw new \UnexpectedValueException('Log method not found: ' .$level);
     } elseif ($levelNo >= $this->minLevel) {  // message filtering
       $this->collection[] = [
         'level' => strtoupper($level),
@@ -86,7 +89,7 @@ class Logger
     if (isset($this->levels[$level])) {
       $this->minLevel = $this->levels[$level];
     } else {
-      Log::trigger("Log level: $level is not valid.");
+      throw new \UnexpectedValueException("Log level: $level is not valid.");
     }
   }
 
@@ -102,14 +105,9 @@ class Logger
   // write $collection to file
   public function flush()
   {
-    if ($this->collection) {
-      $message = $this->formatter->message($this->collection);
-
-      if ($this->logFile) {
-        file_put_contents($this->logFile, $this->formatter->date() .$message ."\n", FILE_APPEND | LOCK_EX);
-      } else {
-        Debugger::log($message);
-      }
+    if ($this->collection && $this->logFile) {
+      $message = $this->formatter->date() .$this->formatter->message($this->collection) ."\n";
+      file_put_contents($this->logFile, $message, FILE_APPEND | LOCK_EX);
     }
   }
 

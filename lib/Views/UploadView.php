@@ -64,7 +64,7 @@ class UploadView implements ViewInterface
       } elseif (@$model['sourceData']) {
         echo $model['sourceData'];
       } else {
-        Log::trigger("Upload source not specified.");
+        throw new \RuntimeException("Upload source not specified.");
       }
     }
   }

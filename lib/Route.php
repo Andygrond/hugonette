@@ -42,7 +42,7 @@ class Route
         $this->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
-      Log::trigger("Router method not found: $method");
+      throw new \UnexpectedValueException("Router method not found: $method");
     }
   }
 
