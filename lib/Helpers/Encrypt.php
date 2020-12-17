@@ -8,12 +8,9 @@ namespace Andygrond\Hugonette\Helpers;
  */
 
 use Andygrond\Hugonette\Env;
-use Andygrond\Hugonette\Traits\JsonError;
 
 class Encrypt
 {
-  use JsonError;
-
   private $secret = []; // secret data
   private $messages = []; // success messages
   private $newKeyFlag = false; // new key flag
@@ -51,6 +48,8 @@ class Encrypt
     $cnt = count($this->secret) -1;
     $this->messages[] = "Initialized with $cnt data chunks.";
     $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from public space.';
+
+    return $this;
   }
 
   /** Initialize secret data from file
@@ -64,6 +63,8 @@ class Encrypt
     is_file($file) or $this->quit('Unable to read file ' .$secretFile);
     $this->secret = unserialize(file_get_contents($file));
     $this->messages[] = (count($this->secret) -1) .' data chunks in file: ' .$secretFile;
+
+    return $this;
   }
 
   /** append or replace a data chunk
@@ -78,6 +79,8 @@ class Encrypt
 
     (strlen($dataKey) >= 7) or $this->quit($dataKey .' - system name length must be at least 7');
     $this->secret[md5($dataKey)] = sodium_crypto_secretbox(json_encode($value), $this->secret[0], $key);
+
+    return $this;
   }
 
   /**
@@ -93,6 +96,8 @@ class Encrypt
     file_put_contents($file, serialize($this->secret)) or $this->quit('File can not be written: ' .$file);
     $this->newKeyFlag = false;
     $this->messages[] = "Data file $secretFile is ready. ";
+
+    return $this;
   }
 
   /** Delete encryption key file
@@ -111,6 +116,8 @@ class Encrypt
     if ($deleteDir && is_dir($dirName)) {
       rmdir($dirName) or $this->quit('Can not delete directory: ' .$dirName);
     }
+
+    return $this;
   }
 
   /** Encryption key generator
@@ -137,8 +144,9 @@ class Encrypt
 
     // test it
     (base64_encode($this->readKey()) == $key) or $this->quit('Uups... Incorrect key retrieved');
-
     $this->messages[] = "New encryption key $keyFile created.";
+
+    return $this;
   }
 
   // =====
@@ -167,17 +175,6 @@ class Encrypt
       $filename = '/' .$filename;
     }
     return Env::get('base.system') .$filename;
-  }
-
-  // Read JSON encoded data
-  private function getJson(string $orgFile)
-  {
-    is_file($orgFile) or $this->quit('File not found: ' .$orgFile);
-    $json = file_get_contents($orgFile);
-    $json or $this->quit('Can not read file: ' .$orgFile);
-    $data = json_decode($json);
-    $data or $this->quit(jsonError() .' in ' .$orgFile);
-    return $data;
   }
 
   /** $this->quit PHP notice with caller identification
