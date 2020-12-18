@@ -34,8 +34,6 @@ return [
       'bots' => __DIR__ .DIRECTORY_SEPARATOR .'bots.ini',
       // Encryption key should be prepended by it's directory before use
       'key' => DIRECTORY_SEPARATOR .'.secure' .DIRECTORY_SEPARATOR .'key.php',
-      // DbFacory credentials data path relative to system dir
-      'access' => DIRECTORY_SEPARATOR .'app' .DIRECTORY_SEPARATOR .'config' .DIRECTORY_SEPARATOR .'access.data',
     ],
   ],
 ];
