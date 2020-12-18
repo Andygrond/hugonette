@@ -38,7 +38,7 @@ class Env
   */
   public static function get(string $attrName = null)
   {
-    return $attrName? self::findAttr($attrName) : self::$attrib;
+    return $attrName? self::getAttrValue($attrName) : self::$attrib;
   }
 
   /** set attribute value
@@ -86,7 +86,7 @@ class Env
     }
   }
 
-  /** find attribute element
+  /** find attribute element by reference
   * @param attrName attribute name
   */
   private static function &findAttr(string $attrName)
@@ -104,6 +104,28 @@ class Env
         $attr[$name] = [];
       }
       $attr =& $attr[$name];
+    }
+    return $attr;
+  }
+
+  /** get attribute value
+  * @param attrName attribute name
+  */
+  private static function getAttrValue(string $attrName)
+  {
+    $attrParts = explode('.', $attrName);
+    if ($attrParts[0] == 'hidden') {
+      $attr = self::$hidden;
+      array_shift($attrParts);
+    } else {
+      $attr = self::$attrib;
+    }
+
+    foreach ($attrParts as $name) {
+      if (!array_key_exists($name, $attr)) {
+        return null;
+      }
+      $attr = $attr[$name];
     }
     return $attr;
   }

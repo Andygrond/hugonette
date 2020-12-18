@@ -16,7 +16,8 @@ class DbFactory
   public static function create(string $target)
   {
     if (!@self::$dblink[$target]) {
-      $dbaccess = Decrypt::data('/app/config/db.data')->get($target);
+      $file = Env::get('hidden.file.db')?? '/app/config/db.data';
+      $dbaccess = Decrypt::data($file)->get($target);
       $type = Env::get('namespace.db') .$dbaccess->type;
       self::$dblink[$target] = new $type($dbaccess);
     }
