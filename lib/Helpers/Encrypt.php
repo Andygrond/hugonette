@@ -39,14 +39,17 @@ class Encrypt
   {
     $this->newSecret();
     $file = $this->systemFile($orgFile);
+    is_file($file) or $this->quit('Unable to read file ' .$orgFile);
     $data = parse_ini_file($file, true);
+    is_array($data) or $this->quit('Unable to parse file ' .$orgFile);
 
     foreach ($data as $dataKey => $value) {
       $this->set($dataKey, $value);
     }
 
     $cnt = count($this->secret) -1;
-    $this->messages[] = "Initialized with $cnt data chunks.";
+    $s = ($cnt > 1)? 's' : '';
+    $this->messages[] = "Initialized with $cnt data chunk$s.";
     $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from public space.';
 
     return $this;
