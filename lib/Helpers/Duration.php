@@ -6,6 +6,8 @@ namespace Andygrond\Hugonette\Helpers;
  * @author Andygrond 2020
 **/
 
+use Andygrond\Hugonette\Log;
+
 class Duration
 {
   public $times = []; // table of durations
@@ -22,7 +24,7 @@ class Duration
   public function start($name)
   {
     if (@$this->times[$name]['start']) {
-      throw new \ValueError("Job $name double start.");
+      Log::warning("Job $name double start. Duration values will be wrong.", debug_backtrace());
     } else {
       $this->times[$name]['start'] = microtime(true);
       if (!isset($this->times[$name]['duration'])) {
@@ -34,7 +36,7 @@ class Duration
   public function stop(string $name)
   {
     if (!isset($this->times[$name]) || !$this->times[$name]['start']) {
-      throw new \ValueError("Job $name done but not started.");
+      Log::warning("Job $name done but not started. Duration values will be wrong.", debug_backtrace());
     } else {
       $this->times[$name]['duration'] += microtime(true) - $this->times[$name]['start'];
       $this->times[$name]['start'] = 0;
