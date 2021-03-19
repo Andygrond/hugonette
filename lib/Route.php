@@ -97,6 +97,7 @@ class Route
       // calculate request for a group
       Env::append('request.group', $pattern); // base URL for current route group
       Env::set('request.item', substr(Env::get('request.item'), strlen($pattern)));
+
       // run the closure
       call_user_func($callback, $this);
 
@@ -136,13 +137,12 @@ class Route
   /** calculate template file name based on the URL
   * @return = file exists
   */
-  public function template(): bool  // TODO!!! to nie powinno działac po ostatnich zmianach
+  private function template(): bool
   {
-//    Env::set('base.template', '');
-    $template = Env::get('base.uri') .Env::get('request.item');
+    $template = Env::get('request.group') .Env::get('request.item');
     $template .= (substr($template, -1) == '/')? 'index.html' : '.html';
 
-    if (is_file(Env::get('base.static') .$template)) {
+    if (is_file(Env::get('base.template') .$template)) {
       Env::set('template', $template);
       return true;
     }

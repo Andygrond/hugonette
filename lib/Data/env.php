@@ -24,7 +24,7 @@ return [
     // base path for route (subfolder of document root)
     'uri' => $uriBase,
     // base path for static templates (subfolder of static base)
-    'template' => $_SERVER['DOCUMENT_ROOT'] .DIRECTORY_SEPARATOR .'static' .$uriBase,
+    'template' => $_SERVER['DOCUMENT_ROOT'] .'/static' .$uriBase,
   ],
 
   // hidden environment attributes
