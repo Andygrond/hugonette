@@ -5,6 +5,7 @@
  */
 
 $uriBase = dirname($_SERVER['SCRIPT_NAME']);
+$keyDir = defined('KEY_DIR')? rtrim(KEY_DIR, '/') : '';
 
 return [
   // App mode: [ development | production | maintenance ]
@@ -32,8 +33,8 @@ return [
     'file' => [
       // Browser identification table
       'bots' => __DIR__ .DIRECTORY_SEPARATOR .'bots.ini',
-      // Encryption key should be prepended by it's directory before use
-      'key' => DIRECTORY_SEPARATOR .'.secure' .DIRECTORY_SEPARATOR .'key.php',
+      // Encryption key
+      'key' => $keyDir .'/.secure/key.php',
     ],
   ],
 ];
