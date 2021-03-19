@@ -18,8 +18,12 @@ class Route
   {
     // set Env request
     [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
-    $isHtml = (substr($path, -5) == '.html');
-    $path = $isHtml? substr($path, strlen($uriBase), -5) : substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
+    if (substr($path, -5) == '.html') {
+      $path = substr($path, strlen(Env::get('base.uri')), -5);
+    } else {
+      $path = substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
+    }
+
 // zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?
     Env::set('request', [
       'group' => '',    // router group base
