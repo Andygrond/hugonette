@@ -22,7 +22,7 @@ abstract class Presenter
     if (false !== $model) {
       if (is_array($model)) {
         $view = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
-        new $view($this->model + $model);
+        new $view($model + $this->model);
         Log::close(); // effective only when set previously
         exit;
 
