@@ -20,15 +20,25 @@ abstract class Presenter
     $model = $this->$method();
 
     if (false !== $model) {
-      if (is_array($model)) {
-        $view = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
-        new $view($model + $this->model);
-        Log::close(); // effective only when set previously
-        exit;
-
-      } else {
+      if (!is_array($model)) {
         throw new \TypeError(get_class($this) ."::$method has returned " .gettype($model) .". Allowed: array or false.");
       }
+
+      if ($callback = Env::get('afterLifeCallback')) {
+        $finish = new FinishResponse;
+      }
+
+      $view = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
+      new $view($model + $this->model);
+
+      if ($callback) {
+        $finish->finish();
+        Env::set('afterLife', true);
+        $callback($model);
+      }
+
+      Log::close(); // effective only when set previously
+      exit;
     }
   }
 
