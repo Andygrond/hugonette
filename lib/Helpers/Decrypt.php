@@ -47,14 +47,14 @@ class Decrypt
   * @param dataKey secret data key
   * @return - secret data for the $dataKey
   */
-  public function get(string $dataKey): ?object
+  public function get(string $dataKey, string $keyCode = null): ?object
   {
     $hash = md5($dataKey);
 
     if (!isset($this->secret[$hash])) {
       $error = 'Data not found for ' .$dataKey;
     } else {
-      $keyFile = Env::get('hidden.file.key');
+      $keyFile = Env::get($keyCode?? 'hidden.file.key');
       if (!is_file($keyFile)) {
         $error = 'Key file not found';
       } else {

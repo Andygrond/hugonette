@@ -20,7 +20,7 @@ class Encrypt
     function_exists('sodium_crypto_secretbox') or $this->quit('Lack of Sodium');
   }
 
-  public function __destruct()
+  public function finalInfo()
   {
     echo '<!DOCTYPE html>
 <html><head>
@@ -107,10 +107,10 @@ class Encrypt
   * Proceed with "do" variable defined
   * @param deleteDir delete directory also?
   */
-  public function destroyKey(bool $deleteDir = null)
+  public function destroyKey(string $keyCode = null, bool $deleteDir = null)
   {
     isset($_GET['do']) or $this->quit('Trying to delete key. Really know what you are doing?');
-    $keyFile = Env::get('hidden.file.key');
+    $keyFile = Env::get($keyCode?? 'hidden.file.key');
     if (is_file($keyFile)) {
       unlink($keyFile) or $this->quit('Can not delete file: ' .$keyFile);
     }
@@ -126,11 +126,11 @@ class Encrypt
   /** Encryption key generator
   * File name must be defined in Env hidden variable
   */
-  public function newKey()
+  public function newKey(string $keyCode = null)
   {
     !$this->secret or $this->quit('Key generation attempt on non-empty data set');
 
-    $keyFile = Env::get('hidden.file.key');
+    $keyFile = Env::get($keyCode?? 'hidden.file.key');
     $dirName = pathinfo($keyFile)['dirname'];
 
     !is_file($keyFile) or $this->quit('Key replacement attempt! Not allowed.');
@@ -154,9 +154,9 @@ class Encrypt
 
   // =====
   // Read encryption key
-  private function readKey()
+  private function readKey(string $keyCode = null)
   {
-    $keyFile = Env::get('hidden.file.key');
+    $keyFile = Env::get($keyCode?? 'hidden.file.key');
     is_file($keyFile) or $this->quit('No key file ' .$keyFile);
     $key = include $keyFile;
     $key or $this->quit('No key available');
