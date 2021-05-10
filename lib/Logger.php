@@ -7,6 +7,7 @@ namespace Andygrond\Hugonette;
 **/
 
 use Andygrond\Hugonette\Helpers\LogFormatter;
+use Andygrond\Hugonette\Helpers\LogArchiver;
 
 class Logger
 {
@@ -31,10 +32,11 @@ class Logger
 
   /** log initialization
   * @param filename path to log file or folder relative to system log folder
+  * @param filesize max size in megabytes
   * File with obligatory .log extension - uses Hugonette log format
   * When directory is given - uses Tracy native logger
   */
-  public function __construct(string $filename)
+  public function __construct(string $filename, float $filesize = 1)
   {
     $this->formatter = new LogFormatter;
     // set log dir and file
@@ -45,7 +47,10 @@ class Logger
           throw new \RuntimeException('Log file is unavailable: ' .$path);
         }
         chmod($path, 0666); // for cron and CLI obviously
+      } elseif (filesize($path)/1024 > 1024*$filesize) {
+        (new LogArchiver($path))->shift();
       }
+
       ini_set('error_log', $path);
       $this->logFile = $path;
       $this->logPath = dirname($path) .'/';
