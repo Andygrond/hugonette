@@ -1,6 +1,6 @@
 <?php
 
-namespace Andygrond\Hugonette;
+namespace Andygrond\Hugonette\Helpers;
 
 /* Log formatter for Hugonette
  * @author Andygrond 2020

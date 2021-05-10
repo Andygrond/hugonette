@@ -6,6 +6,8 @@ namespace Andygrond\Hugonette;
  * @author Andygrond 2020
 **/
 
+use Andygrond\Hugonette\Helpers\LogFormatter;
+
 class Logger
 {
   // message level hierachy
