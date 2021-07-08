@@ -6,7 +6,9 @@ namespace Andygrond\Hugonette\Views;
 * @author Andygrond 2020
 **/
 
+use Latte\Engine;
 use Andygrond\Hugonette\Log;
+use Andygrond\Hugonette\Env;
 
 class UploadView implements ViewInterface
 {
@@ -37,7 +39,8 @@ class UploadView implements ViewInterface
 // upload file
 // $model['destinationFile'] suggested 'filename.ext' of received file or '.ext' when saving file is not intended
 // $model['inline'] true: try to display the content, false: try save the file
-// $model['sourceFile'] uploaded file name or $model['data'] uploaded content
+// $model['sourceFile'] uploaded file name or $model['sourceData'] uploaded content
+// $model['data'] with latte template
   public function __construct(array $model)
   {
     $disposition = @$model['inline']? 'inline' : 'attachment';
@@ -61,8 +64,16 @@ class UploadView implements ViewInterface
 
       if ($file) {
         readfile($file);
-      } elseif (@$model['sourceData']) {
+
+      } elseif (@$model['sourceData']) { //
         echo $model['sourceData'];
+
+      } elseif (@$model['data']) { // render in Latte
+        $latte = new Engine;
+        $latte->setTempDirectory(Env::get('base.system') .'/temp/latte');
+        $template = Env::get('base.template') .(Env::get('template')?? '/index.html');
+        $latte->render($template, $model['data']);
+
       } else {
         throw new \RuntimeException("Upload source not specified.");
       }
