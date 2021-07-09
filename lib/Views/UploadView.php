@@ -36,47 +36,55 @@ class UploadView implements ViewInterface
     'webm' => 'video/webm',
   ];
 
-// upload file
-// $model['destinationFile'] suggested 'filename.ext' of received file or '.ext' when saving file is not intended
-// $model['inline'] true: try to display the content, false: try save the file
-// $model['sourceFile'] uploaded file name or $model['sourceData'] uploaded content
-// $model['data'] with latte template
+/** upload file based on Env $upload array
+  * @param upload.inline true: try to display the content, default: try save the file
+  * @param upload.destinationFile - suggest 'filename.ext' of file or '.ext' to send Content-Type header
+  * @param upload.sourceFile uploaded file name or upload.sourceData'] uploaded content
+  * @param upload.data with latte template
+  */
   public function __construct(array $model)
   {
-    $disposition = @$model['inline']? 'inline' : 'attachment';
-    $file = $model['destinationFile'];
+    $upload = Env::get('upload');
+    $mimeType = 'application/octet-stream';
+    $disposition = @$upload['inline']? 'inline' : 'attachment';
 
-    if ($pos = strrpos($file, '.')) {
-      $disposition .= '; filename=' .$file;
+    // problem detection first
+    if (@$upload['sourceFile']) {
+      if (!is_file($upload['sourceFile'])) {
+        http_response_code(404);
+        Log::warning('Uploaded file not found: ' .$upload['sourceFile']);
+        return false;
+      }
     }
-    $extension = substr($file, $pos+1);
-    $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
 
-    $file = @$model['sourceFile'];
-    if ($file && !is_file($file)) {
-      http_response_code(404);
-      Log::warning('Uploaded file not found: ' .$file);
+    // headers
+    if ($file = @$upload['destinationFile']) {
+      $pos = strrpos($file, '.');
+      if ($pos !== false) {
+        $disposition .= '; filename=' .$file;
+        $extension = substr($file, $pos+1);
+        $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
+      }
+    }
+    header('Cache-Control: no-cache');
+    header('Content-Type: ' .$mimeType);
+    header('Content-Disposition: ' .$disposition);
+
+    // content
+    if (@$upload['sourceFile']) {
+      readfile($upload['sourceFile']);
+
+    } elseif (@$upload['sourceData']) {
+      echo $model['sourceData'];
+
+    } elseif (@$upload['template']) { // render in Latte
+      $latte = new Engine;
+      $latte->setTempDirectory(Env::get('base.system') .'/temp/latte');
+      $template = Env::get('base.template') .$upload['template'];
+      $latte->render($template, $model);
 
     } else {
-      header('Cache-Control: no-cache');
-      header('Content-Type: ' .$mimeType);
-      header('Content-Disposition: ' .$disposition);
-
-      if ($file) {
-        readfile($file);
-
-      } elseif (@$model['sourceData']) { //
-        echo $model['sourceData'];
-
-      } elseif (@$model['data']) { // render in Latte
-        $latte = new Engine;
-        $latte->setTempDirectory(Env::get('base.system') .'/temp/latte');
-        $template = Env::get('base.template') .(Env::get('template')?? '/index.html');
-        $latte->render($template, $model['data']);
-
-      } else {
-        throw new \RuntimeException("Upload source not specified.");
-      }
+      throw new \RuntimeException("Upload source not specified.");
     }
   }
 
