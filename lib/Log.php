@@ -15,6 +15,7 @@ namespace Andygrond\Hugonette;
 use Tracy\Debugger;
 use Tracy\OutputDebugger;
 use Andygrond\Hugonette\Helpers\Duration;
+use Andygrond\Hugonette\Views\JsonView;
 
 class Log
 {
@@ -119,6 +120,15 @@ class Log
         OutputDebugger::enable();
         break;
     }
+  }
+
+  /** dump data to screen and die
+  * @param data debugged data structure
+  */
+  public static function dump($data)
+  {
+    new JsonView($data);
+    exit;
   }
 
   // measured time lengths
