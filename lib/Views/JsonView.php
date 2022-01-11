@@ -10,7 +10,7 @@ class JsonView implements ViewInterface
 {
 
   // echo model data as JSON object
-  public function __construct(array $model)
+  public function __construct($model)
   {
     header('Cache-Control: no-cache');
     header('Content-Type: application/json');
