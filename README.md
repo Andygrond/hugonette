@@ -4,11 +4,13 @@ This is a PHP micro-framework to easily enliven your static site.
 
 You can manage with some easy tasks as a contact mailbox, using external service, or hosting your static files on Netlify. But if you want to host your static pages independently, try Hugonette.
 
-Hugonette also works well in more challenging scenarios. If the increase in requirements means that your site can no longer be pure static, here is the solution! On the other hand, if you prefer to use a static site generator for more sofisticated purposes, you can build now all your UX work with a graphical design, JS functionality and PHP microservices without leaving [Hugo](https://gohugo.io).
+Hugonette works well in more challenging scenarios also. If the increase in requirements means that your site can no longer be pure static, here is the solution! On the other hand, if you prefer to use a static site generator for more sophisticated purposes, you can build now all your UX work with a graphical design, JS functionality and PHP microservices without leaving [Hugo](https://gohugo.io).
 
-You can easily use Hugonette standalone, with plain old PHP templating made on Notepad, or you can steam up Hugonette with [Nette Framework](https://nette.org/en/) utilizing a templating engine and awesome debugging tool.
+You can easily use Hugonette standalone, with plain old PHP templating made on Notepad, or you can steam it up with [Nette Framework](https://nette.org/en/) utilizing a powerful templating engine and awesome debugging tool.
 
-Hugonette micro-framework is designed on [Model-View-Presenter](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter) pattern. By passing attributes to Route object or directly determining in Presenter, you can set several modes of operation: from simple static pages as-is, to a routed web application with JSON microservices.
+Hugonette is flexible to meet your needs, also when you are going to develop an existing project. The recommended solution is to build new functionality on Hugonette, allowing to run old code in parallel, and consecutively transfering all that mess to the new technology.   
+
+Whatever your needs, start adventure with Hugonette to bring simplicity and order to your project. Now you can build a real app on your page, utilizing the most popular hosting service -- LAMP stack without any special needs.
 
 
 ## Warnings
@@ -29,11 +31,21 @@ PHP version 7.1 or higher
 
 ## Installation
 
-You must have [Composer](https://getcomposer.org/) installed on your local machine. Then create a new folder for your project. From a command tool go into the folder and run:
+You must have [Composer](https://getcomposer.org/) installed on your local machine. Then create a new folder for your project. From a command tool go into the project folder and run:
 
 ```
 composer require andygrond/hugonette
 ```
 
 If you plan to use Nette in your project, install it similarly: `composer require nette/nette`. Thats it.
-aa
+
+
+## Usage
+
+Hugonette micro-framework is designed on [Model-View-Presenter](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter) pattern. By passing attributes to Route object you can set several modes of operation: from simple static pages as-is, to a routed web application with JSON microservices.
+
+
+#### Simple static pages
+
+You will find example files soon in the doc section of this project.
+To be continued.
