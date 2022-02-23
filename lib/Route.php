@@ -53,7 +53,7 @@ class Route
   /** full static GET with one common presenter (runs all static pages at once)
   * @param presenter name as declared in route
   */
-  public function static(string $presenter)
+  public function staticPages(string $presenter)
   {
     if ($this->httpMethod == 'get' && $this->template()) {
       $this->run($presenter);
