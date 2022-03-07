@@ -2,7 +2,7 @@
 
 namespace Andygrond\Hugonette;
 
-/* CSRF Token Session Management
+/** CSRF Session Token Management
  * @author Andygrond 2019
  * inspired by https://github.com/paragonie/anti-csrf
 **/
@@ -17,16 +17,24 @@ class Token
     'tokenKey' => 'csrf_token';
   ];
 
+  /**
+  * @param debug - enable logging
+  * @param cfg - non standard config options
+  */
   public function __construct($debug = false, $cfg = [])
   {
     $this->debug = $debug;
     $this->cfg = $cfg + $this->cfg;
   }
 
-  // place token and index inside the form
+  /**
+  * Generate hidden inputs for token and index to use inside the form
+  * @param lock must be set to URI, from which token will be validated
+  * or current URI will be assumed
+  */
   public function hiddenInput($lock = false)
   {
-    self::log('Hidden input generation');
+    $this->log('Hidden input generation');
     $token_array = $this->getToken($lock);
     return implode(
       array_map(
@@ -38,8 +46,10 @@ class Token
     );
   }
 
-  // new token generator
-  // lock can be given in case of AJAX
+  /**
+  * New token generator
+  * @param lock can be given in case of AJAX - see hiddenInput method
+  */
   public function getToken($lock = false): array
   {
     $lock = $this->getLock($lock);
@@ -55,7 +65,7 @@ class Token
 
     while (count($session) > $this->cfg['recycleAfter']) {	// recycle if too much tokens
       array_shift($session);
-      self::log('First token recycled');
+      $this->log('First token recycled');
     }
 
     return [
@@ -64,41 +74,41 @@ class Token
     ];
   }
 
-  // validate a request token with session token
-  public function validateRequest($post = false): int
+  /**
+  * Validate a request token with session token
+  * @param data index and token to be validated, or will be taken from $_POST
+  */
+  public function validateRequest($data = false): int
   {
-    if (!$post) {
-      $post =& $_POST;
-    }
+    $post = $data? (array) $data : $_POST;
     $index = @$post[$this->cfg['indexKey']];
     $token = @$post[$this->cfg['tokenKey']];
+
     if (!$index || !$token) {
       return 1;
     }
     if (!is_string($index) || !is_string($token)) {
       return 2;
     }
-
     if (!$stored = $this->getStoredToken($index)) {
-      self::log('Token not found');
+      $this->log('Token not found');
       return 3;
     }
     if ($this->tokenExpired($stored)) {
-      self::log('Token expired');
+      $this->log('Token expired');
       return 4;
     }
-
     $lock = $this->getLock();
     if (!hash_equals($lock, (string) $stored['lock'])) {
-      self::log("$lock origin does not match lock {$stored['lock']}");
+      $this->log("$lock origin does not match lock {$stored['lock']}");
       return 5;
     }
     if (!hash_equals($token, $stored['token'])) {
-      self::log('Wrong token');
+      $this->log('Wrong token');
       return 6;
     }
 
-    self::log('Token validated');
+    $this->log('Token validated');
     return 0;
   }
 
@@ -109,12 +119,12 @@ class Token
     }
     $session =& $_SESSION['CSRF'];
 
-    if (!isset($session[$index])) {	// token not found
+    if (!isset($session[$index])) { // token not found
       return false;
     }
     $stored = $session[$index];
-    unset($session[$index]);	// delete used token
-    self::log('Token deleted after use');
+    unset($session[$index]); // delete used token
+    $this->log('Token deleted after use');
 
     return $stored;
   }
@@ -128,28 +138,35 @@ class Token
     return $time < time();
   }
 
-  // ignore trailing slashes
+  /**
+  * Ignore trailing slashes
+  */
   public function getLock($lock = false): string
   {
     $lock = '@' .($lock? $lock : $_SERVER['REQUEST_URI']);
     if (preg_match('#/$#', $lock)) {
       $lock = substr($lock, 0, -1);
     }
-    self::log("Lock taken: $lock");
+    $this->log("Lock taken: $lock");
 
     return $lock;
   }
 
-  // set configuration values
+  /**
+  * Set configuration values
+  */
   protected static function noHTML(string $untrusted): string
   {
     return htmlentities($untrusted, ENT_QUOTES, 'UTF-8');
   }
 
-  protected static function log(string $message)
+  /**
+  * Log only in debug mode
+  */
+  protected function log(string $message)
   {
     if ($this->debug) {
-      Log::info($message);
+      Log::debug($message);
     }
   }
 
