@@ -8,6 +8,7 @@ namespace Andygrond\Hugonette\Helpers;
  */
 
 use Andygrond\Hugonette\Env;
+use Andygrond\Hugonette\Log;
 
 class Encrypt
 {
@@ -22,13 +23,14 @@ class Encrypt
 
   public function finalInfo()
   {
+    $message = $this->messages? '<h3>Actions performed:</h3>' .implode("<br>\n", $this->messages) : '<h3>No action</h3>';
+
     echo '<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
 <title>Encode</title>
 </head><body>
-<h3>Actions performed:</h3>
-' .implode("<br>\n", $this->messages) .'
+' .$message .'
 </body></html>';
   }
 
@@ -49,7 +51,7 @@ class Encrypt
 
     $cnt = count($this->secret) -1;
     $s = ($cnt > 1)? 's' : '';
-    $this->messages[] = "Initialized with $cnt data chunk$s.";
+    $this->messages[] = "Found $cnt data chunk$s.";
     $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from public space.';
 
     return $this;
@@ -99,19 +101,20 @@ class Encrypt
     file_put_contents($file, serialize($this->secret)) or $this->quit('File can not be written: ' .$file);
     $this->newKeyFlag = false;
     $this->messages[] = "Data file $secretFile is ready. ";
+    Log::warning('Access data updated', $this->messages);
 
     return $this;
   }
 
   /** Delete encryption key file
-  * Proceed with "do" variable defined
+  * Proceed with "do" variable defined in URL
   * @param deleteDir delete directory also?
   */
   public function destroyKey(string $keyCode = null, bool $deleteDir = null)
   {
-    isset($_GET['do']) or $this->quit('Trying to delete key. Really know what you are doing?');
     $keyFile = Env::get($keyCode?? 'hidden.file.key');
     if (is_file($keyFile)) {
+      isset($_GET['do']) or $this->quit('Trying to delete key. Really know what you are doing?');
       unlink($keyFile) or $this->quit('Can not delete file: ' .$keyFile);
     }
 
@@ -189,6 +192,7 @@ class Encrypt
     $caller = array_pop($debug);
     $this->messages[] = "<b>$message</b> ...called in " .$caller['function'] .'() from ' .$caller['file'] .':' .$caller['line'];
 
+    Log::warning('Unsuccessful attempt to update access data', $this->messages);
     exit();
   }
 
