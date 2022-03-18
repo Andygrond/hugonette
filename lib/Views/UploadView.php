@@ -45,7 +45,6 @@ class UploadView implements ViewInterface
   public function __construct(array $model)
   {
     $upload = Env::get('upload');
-    $mimeType = 'application/octet-stream';
     $disposition = @$upload['inline']? 'inline' : 'attachment';
 
     // problem detection first
@@ -59,12 +58,20 @@ class UploadView implements ViewInterface
 
     // headers
     if ($file = @$upload['destinationFile']) {
+      $disposition .= '; filename=' .$file;
       $pos = strrpos($file, '.');
       if ($pos !== false) {
-        $disposition .= '; filename=' .$file;
-        $extension = substr($file, $pos+1);
-        $mimeType = $this->mimeTypes[$extension]?? 'application/octet-stream';
+        $mime = substr($file, $pos+1);
       }
+    }
+    if (@$upload['mimeType']) {
+      $mime = $upload['mimeType'];
+    }
+
+    if (isset($mime) && isset($this->mimeTypes[$mime])) {
+      $mimeType = $this->mimeTypes[$mime];
+    } else {
+      $mimeType = 'application/octet-stream';
     }
     header('Cache-Control: no-cache');
     header('Content-Type: ' .$mimeType);
@@ -75,7 +82,7 @@ class UploadView implements ViewInterface
       readfile($upload['sourceFile']);
 
     } elseif (@$upload['sourceData']) {
-      echo $model['sourceData'];
+      echo $model[$upload['sourceData']];
 
     } elseif (@$upload['template']) { // render in Latte
       $latte = new Engine;
@@ -84,7 +91,7 @@ class UploadView implements ViewInterface
       $latte->render($template, $model);
 
     } else {
-      throw new \RuntimeException("Upload source not specified.");
+      echo 'Upload source not specified.';
     }
   }
 

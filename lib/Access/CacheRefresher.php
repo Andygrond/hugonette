@@ -2,12 +2,9 @@
 
 namespace Andygrond\Hugonette\Access;
 
-/* JSON cached data transport
- * Struktura danych źródłowych JSON przez URL:
- * mtime = czas ostatniej modyfikacji danych
- * data = dane zasadnicze
- * fault = opis błędu widzianego od strony serwera
-**/
+/** Hugonette JSON cached data management
+* @author Andygrond 2020
+*/
 
 use Andygrond\Hugonette\Traits\JsonError;
 
@@ -15,10 +12,10 @@ class CacheRefresher
 {
   use JsonError;
 
-  private $cacheName; // nazwa pliku cache
+  private $cacheName; // cache file name
   private $serialize; // format of saved data: serialization vs. JSON
-  private $mtimeSrc;  // czas modyfikacji danych źródłowych
-  public $mtimeLoc;   // czas modyfikacji pliku cache
+  private $mtimeSrc;  // source modification time
+  public $mtimeLoc;   // cache file modification time
 
   // $cacheName = nazwa wynikowego pliku cache
   public function __construct($cacheName, $serialize = false)
@@ -32,8 +29,8 @@ class CacheRefresher
   public function refresh($data, $mtimeSrc = null): bool
   {
     if (!is_file($this->cacheName)) {
-      @touch($this->cacheName); // jesli nie ma pliku, załóż go
-      chmod($this->cacheName, 0666); // nadaj uprawnienia dla cron i httpd
+      @touch($this->cacheName);
+      chmod($this->cacheName, 0666);
     }
     $dataString = $this->serialize? serialize($data) : json_encode($data, JSON_UNESCAPED_UNICODE);
 
