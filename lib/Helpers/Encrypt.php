@@ -52,7 +52,7 @@ class Encrypt
     $cnt = count($this->secret) -1;
     $s = ($cnt > 1)? 's' : '';
     $this->messages[] = "Found $cnt data chunk$s.";
-    $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from public space.';
+    $this->messages[] = 'Please secure file: <b>' .$orgFile .'</b> and delete it from server.';
 
     return $this;
   }
@@ -82,7 +82,7 @@ class Encrypt
     $key or $key = $this->readKey();
     $this->secret or $this->newSecret();
 
-    (strlen($dataKey) >= 7) or $this->quit($dataKey .' - system name length must be at least 7');
+    (strlen($dataKey) >= 6) or $this->quit($dataKey .' - system name length must be at least 6');
     $this->secret[md5($dataKey)] = sodium_crypto_secretbox(json_encode($value), $this->secret[0], $key);
 
     return $this;
@@ -192,6 +192,7 @@ class Encrypt
     $caller = array_pop($debug);
     $this->messages[] = "<b>$message</b> ...called in " .$caller['function'] .'() from ' .$caller['file'] .':' .$caller['line'];
 
+    $this->finalInfo();
     Log::warning('Unsuccessful attempt to update access data', $this->messages);
     exit();
   }
