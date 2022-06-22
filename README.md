@@ -49,7 +49,7 @@ If you are working on Linux or macOS, make `log` and `temp` folders writable.
 
 ## Basic usage
 
-Hugonette micro-framework is designed on [Model-View-Presenter](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter) pattern. Using Route object you can set several modes of operation: from simple static pages, to a routed web application with JSON microservices.
+Hugonette micro-framework is designed on [Model-View-Presenter](https://en.wikipedia.org/wiki/Model-view-presenter) pattern. Using Route object you can set several modes of operation: from simple static pages, to a routed web application with JSON microservices.
 
 
 #### Simple static pages
@@ -60,10 +60,10 @@ You will find example files in the `Docs` folder of this project. Put those file
 
 * `routes.php` with route definitions
 
-Go to the DocumentRoot folder. Create two folders there: `static` folder, where you will put the static pages and the folder where your starting page will be placed (let it be `homepage`). Put there this two files, but you will want to check/edit their contents.
+Create two folders inside the DocumentRoot: `static` folder, where you will put the static pages and the folder where your starting page will be placed (let it be `homepage`), with two files inside. You will want to check/edit their contents.
 
-* `gate.php` file: edit the relative path to your `.env.php` file in `Require ../.env.php` line
+* `gate.php` file: check the relative path to `.env.php` file in `Require ../.env.php` line
 
-* `.htaccess` file: check the path to the static pages in the last line: `RewriteRule ^(.*)$ /static/homepage/$1`
+* `.htaccess` file: check the path to your static pages in the last line: `RewriteRule ^(.*)$ /static/homepage/$1`
 
 TO BE CONTINUED...
