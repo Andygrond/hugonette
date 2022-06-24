@@ -30,15 +30,10 @@ class Mailer
 
 /**
  * @param from - array [mail => name] or string mail
+ * @param smtp - credentials array [server, user, pass]
  */
-  public function __construct($from)
+  public function __construct($from, $smtp)
   {
-    $smtp = [
-      'server' => 'smtpauth.tpe.corp',
-      'user' => 'tpe\td-exu-omsogl',
-      'pass' => 'IWYN43benQQPBYr3Z8wFD5',
-    ];
-
     $transport = (new Swift_SmtpTransport($smtp['server'], 25))
       ->setUsername($smtp['user'])
       ->setPassword($smtp['pass']);
