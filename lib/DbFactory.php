@@ -13,16 +13,16 @@ class DbFactory
   private static $dblink = [];  // opened database connections
 
   // return instantiated database object, existing or new
-  public static function create(string $target)
+  public static function create(string $profile)
   {
-    if (!@self::$dblink[$target]) {
-      $file = Env::get('hidden.file.db')?? '/app/config/db.data';
-      $dbaccess = Decrypt::data($file)->get($target);
+    if (!@self::$dblink[$profile]) {
+      $file = Env::get('hidden.file.db');
+      $dbaccess = Decrypt::data($file)->get($profile);
       $type = Env::get('namespace.db') .$dbaccess->type;
-      self::$dblink[$target] = new $type($dbaccess);
+      self::$dblink[$profile] = new $type($dbaccess);
     }
 
-    return self::$dblink[$target];
+    return self::$dblink[$profile];
   }
 
   // prevented instantiating

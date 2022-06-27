@@ -10,7 +10,9 @@ namespace Andygrond\Hugonette\Helpers;
 
 use Andygrond\Hugonette\Log;
 use Andygrond\Hugonette\Env;
+use Andygrond\Hugonette\Helpers\Decrypt;
 use Latte\Engine;
+
 use Swift_SmtpTransport;
 use Swift_Mailer;
 use Swift_Message;
@@ -32,11 +34,17 @@ class Mailer
  * @param from - array [mail => name] or string mail
  * @param smtp - credentials array [server, user, pass]
  */
-  public function __construct($from, $smtp)
+  public function __construct($from, $profile)
   {
-    $transport = (new Swift_SmtpTransport($smtp['server'], 25))
-      ->setUsername($smtp['user'])
-      ->setPassword($smtp['pass']);
+    $file = Env::get('hidden.file.smtp');
+    $access = Decrypt::data($file)->get($profile);
+
+    $user = $access->domain? $access->domain .'\\' : '';
+    $user .= $access->user;
+
+    $transport = (new Swift_SmtpTransport($access->smtpServer, 25))
+      ->setUsername($user)
+      ->setPassword($access->pass);
 
     $this->mailer = new Swift_Mailer($transport);
     $this->from = $from;

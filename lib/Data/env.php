@@ -35,6 +35,12 @@ return [
       'bots' => __DIR__ .DIRECTORY_SEPARATOR .'bots.ini',
       // Encryption key
       'key' => $keyDir .'/.secure/key.php',
+      // DB credentials
+      'db' => '/app/config/db.data',
+      // SMB credentials
+      'smb' => '/app/config/ad.data',
+      // SMTP credentials
+      'smtp' => '/app/config/ad.data',
     ],
   ],
 ];
