@@ -1,0 +1,164 @@
+<?php
+
+namespace Andygrond\Hugonette\Access;
+
+/* SMB protocol remote disk access driver
+* Author: Andygrond 2020-2022
+**/
+
+use Andygrond\Hugonette\Log;
+use Andygrond\Hugonette\Env;
+use Andygrond\Hugonette\Helpers\Decrypt;
+
+class Smb
+{
+  private $state;       // state of smb object
+  private $mtimes = []; // mtimes collected by mtime method
+
+  private $errorCode = [
+    0 => 'Reason outside SMB',
+    1 => 'Operation not permitted',
+    2 => 'No such file or directory',
+    9 => 'Bad file or directory resource',
+    12 => 'Out of memory',
+    13 => 'Permission denied',
+    16 => 'Device or resource busy',
+    17 => 'Resource exists',
+    20 => 'Not a directory',
+    21 => 'Is a directory',
+    22 => 'Invalid argument',
+    28 => 'No space left on device',
+    39 => 'Directory not empty',
+    111 => 'Connection refused (Samba not running?)',
+  ];
+
+/** Initialize and log in
+ * smbclient_state_init returns true on bad login, nothing to check!
+ * @param profile - profile name of credentials
+ */
+  public function __construct(string $profile)
+  {
+    $this->state = smbclient_state_new();
+    $file = Env::get('hidden.file.smb');
+    $access = (array) Decrypt::data($file)->get($profile);
+    if (extract($access) < 3) {
+      throw new \InvalidArgumentException("Missing credentials");
+    }
+    smbclient_state_init($this->state, $domain, $user, $pass);
+  }
+
+/** get last error in common format
+ * @param message - text to be included in error message
+ */
+  public function lastError($message = ''): array
+  {
+    if ($message) {
+      $message .= ' - ';
+    }
+    $errno = smbclient_state_errno($this->state);
+    return [
+      'code' => $errno,
+      'message' => $message .@$this->errorCode[$errno],
+    ];
+  }
+
+/** get remote file last modification time
+ * @param file - file name
+ * @return timestamp
+ */
+  public function mtime(string $file)
+  {
+    return $this->mtimes[$file] = (int) smbclient_getxattr($this->state, $file, 'system.dos_attr.write_time');
+  }
+
+/** get list of files in folder
+ * @param folderName - folder name
+ * @return array of filenames
+ */
+  public function folderFiles(string $folderName): array
+  {
+    $files = [];
+
+    foreach ($this->folder($folderName) as $item) {
+      if ($item['type'] == 'file') {
+        $files[] = $item['name'];
+      }
+    }
+    return $files;
+  }
+
+/** get full dir list
+ * @param folderName - folder name
+ * @return array of ['name'] ['type']
+ */
+  public function folder(string $folderName): array
+  {
+    $list = [];
+
+    if ($dir = smbclient_opendir($this->state, $folderName)) {
+      while (($entry = smbclient_readdir($this->state, $dir)) !== false) {
+        $list[] = $entry;
+      }
+      smbclient_closedir($this->state, $dir);
+    }
+    return $list;
+  }
+
+/** copy remote file to local destination
+ * @param orgFile - remote file name
+ * @param localFile - local copy file name
+ */
+  public function download(string $orgFile, string $localFile): bool
+  {
+    $file = smbclient_open($this->state, $orgFile, 'r');
+    $sent = false;
+
+    if ($fp = fopen ($localFile, 'w')) {
+      while (true) {
+        $data = smbclient_read($this->state, $file, 100000);
+        if ($data === false || strlen($data) === 0) {
+          break;
+        }
+        if (fwrite($fp, $data)) {
+          $sent = true;
+        }
+      }
+
+      fclose($fp);
+      if ($mtime = @$this->mtimes[$orgFile]) {	// original mtime will be set only when $this->mtime() for source file was called first
+        touch($localFile, $mtime);
+      }
+    } else {
+      Log::warning($localFile .' local file cannot be open');
+    }
+
+    smbclient_close($this->state, $file);
+    return $sent;
+  }
+
+/** return remote file content
+ * @param orgFile - remote file name
+ */
+  public function read(string $orgFile): string
+  {
+    $file = smbclient_open($this->state, $orgFile, 'r');
+    $content = '';
+
+    while (true) {
+      $data = smbclient_read($this->state, $file, 100000);
+      if ($data === false || strlen($data) === 0) {
+        break;
+      }
+      $content .= $data;
+    }
+
+    smbclient_close($this->state, $file);
+    return $content;
+  }
+
+  // destroy SMB resource
+  public function close()
+  {
+    smbclient_state_free($this->state);
+  }
+}
