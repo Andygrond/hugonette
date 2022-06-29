@@ -48,18 +48,12 @@ class Smb
   }
 
 /** get last error in common format
- * @param message - text to be included in error message
+ * @return - text message or SMB code
  */
-  public function lastError($message = ''): array
+  public function lastError(): string
   {
-    if ($message) {
-      $message .= ' - ';
-    }
     $errno = smbclient_state_errno($this->state);
-    return [
-      'code' => $errno,
-      'message' => $message .@$this->errorCode[$errno],
-    ];
+    return 'SMB: ' .$this->errorCode[$errno]?? "error code $errno";
   }
 
 /** get remote file last modification time
@@ -73,15 +67,18 @@ class Smb
 
 /** get list of files in folder
  * @param folderName - folder name
+ * @param mark - distinguishing string which must be found in file name (usually extension)
  * @return array of filenames
  */
-  public function folderFiles(string $folderName): array
+  public function folderFiles(string $folderName, string $mark = ''): array
   {
     $files = [];
 
     foreach ($this->folder($folderName) as $item) {
       if ($item['type'] == 'file') {
-        $files[] = $item['name'];
+        if (!$mark || strpos($item['name'], $mark)) {
+          $files[] = $item['name'];
+        }
       }
     }
     return $files;
