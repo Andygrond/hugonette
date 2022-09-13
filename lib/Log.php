@@ -127,7 +127,7 @@ class Log
   */
   public static function dump($data)
   {
-    new JsonView($data);
+    dump($data);
     exit;
   }
 
