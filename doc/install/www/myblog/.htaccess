@@ -1,0 +1,18 @@
+php_flag  log_errors on
+php_value error_reporting -1
+php_value error_log ./../../log/php-compile-error.log
+
+RewriteEngine On
+
+# https
+RewriteCond %{HTTPS} on
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L]
+
+# process all existing directories by gate
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*)$ gate.php [END]
+
+# all existing files are valid, take the rest from static
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !\.html$
+RewriteRule ^(.*)$ /static/myblog/$1 [L]
