@@ -1,23 +1,29 @@
-# Hugonette
+# Hugonette PHP micro-framework
 
-This is a PHP micro-framework to easily enliven your static site.
+Lightweight, fast and easy to use. Provides everything you need to build not only your blog, but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as you project grows.
 
-You can manage with some easy tasks, such as a contact mailbox, using an external service, or hosting your static files on Netlify. But if you want to host your static pages independently, try Hugonette.
+You can use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX. Then use Hugonette to mix it together with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast, pleasant and well done.
 
-Hugonette works well in more challenging scenarios also. If the increase in requirements means that your site can no longer be pure static, here is the solution! On the other hand, if you prefer to use a static site generator for more sophisticated purposes, you can build now all your UX with a graphical design, JS functionality, and PHP microservices without leaving [Hugo](https://gohugo.io).
+You can prepare your templates any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest engine in the world to help you with templates. You can build now all your UX with a graphical design, JS functionality, AJAX and PHP microservices without leaving Hugo.
 
-You can easily use Hugonette almost standalone, with plain old PHP templating made on Notepad, or you can steam it up with [Nette](https://nette.org/en/) utilizing a powerful templating engine and/or awesome debugging tool.
+#### Hugonette as an engine for your static site
 
-Hugonette is flexible to meet your needs, also when you are going to develop an existing project. The recommended solution is to build new functionality on Hugonette, allowing to run old code in parallel, and consecutively transferring all that mess to the new technology.   
+If you have already a static site, you probably manage with some easy tasks, such as a contact mailbox, using an external service. Few are hosting their static files on Netlify. But if you want to host your static pages independently, try Hugonette. Hugonette works well in more challenging scenarios also. If the increase of requirements means that your site can no longer be pure static, here is the solution!
 
-Whatever your needs, start an adventure with Hugonette to bring simplicity and order to your project. Now you can build a real app on your page, utilizing the most popular hosting service -- LAMP stack without any special needs.
+#### Hugonette customization to existing projects
+
+Hugonette is flexible to meet your needs, also when you are going to develop an existing project. The recommended solution is to build new functionality on Hugonette, allowing to run old code in parallel, and consecutively transferring all that mess to the new technology.
+
+If you have a website on Wordpress and you can't find any Wordpress plugin to meet your needs, don't try to write next Wordpress plugin! Hugonette will perfectly fit to patch up the hole, giving you seamless integration and ease of use.
+
+Whatever your needs, start an adventure with Hugonette to bring simplicity and order to your project. With its help you can build a real app on your page, utilizing the most popular hosting service -- LAMP stack without any special needs.
 
 
 ## Cautions
 
 * This tutorial is in the process of being written.
 
-* The usage of static site generators other than Hugo with this project was not tested yet. You can try.
+* Hugonette perfectly fits Hugo. Usage of static site generators other than Hugo is not tested yet.
 
 
 ## Technologies
@@ -26,7 +32,7 @@ Hugonette runs on PHP version 7.1 or higher.
 
 [Hugo static site generator](https://gohugo.io) is one of the favorite tools for preparing page design and functionality. Its advantage is a really fast response to change during development. Simply set your browser to localhost:1313 and when you save changes to any file in your project, you see results immediately on your browser. After debugging, Hugo generates a static site, where all files are ready exactly as you see them while browsing.
 
-[Nette Web Framework](https://nette.org/en/) is a flexible, feature-rich, modular PHP framework. Hugonette is a little and lighter friend of Nette, sharing its project structure and using several Nette awesome components. Thanks to Nette guys, our work on Hugonette projects will be much nicer & faster.
+[Nette Web Framework](https://nette.org/en/) is a flexible, feature-rich, modular PHP framework. Hugonette is a little friend of Nette, sharing its project structure and using several Nette awesome components. Thanks to Nette guys, our work on Hugonette projects will be much nicer & faster.
 
 
 ## Installation
@@ -46,7 +52,7 @@ composer require andygrond/hugonette
 
 #### Adaptations for Hugonette
 
-After that take a look into your project folder. If you are working on Linux or macOS, make `log` and `temp` folders writable. Now find some example files in the `vendor/Andygrond/hugonette/doc/install` folder of Hugonette project. Replace entire `app` folder with `install/app` folder of Hugonette and entire `www` with `install/www`. The second one will be your DocumentRoot. Here you will find 2 subfolders:
+After that take a look at your project folder. If you are working on Linux or macOS, make `log` and `temp` folders writable. Now find some example files in the `vendor/Andygrond/hugonette/doc/install` folder of the Hugonette project. Replace the entire `app` folder with `install/app` folder of Hugonette and the entire `www` with `install/www`. The second one will be your DocumentRoot. Here you will find 2 subfolders:
 
 * `myblog` will be your entry point. Modifying 2 files there: `.htaccess` and `gate.php` you can change the project name, path and do whatever pops into your head to adapt Hugonette to your existing project. It's very flexible, so if you have a question like "will it be possible" the answer is probably: YES!
 
@@ -54,22 +60,44 @@ After that take a look into your project folder. If you are working on Linux or 
 
 #### Hugo project
 
-You will also need the Hugo environment in order to prepare some static pages for your project. If you wish, you can take advantage of another tool or even use existing template, making some necessary changes in a text editor. Your choice.
+You will also need the Hugo environment to prepare some static pages for your project. If you wish, you can take advantage of another tool or even use an existing template, making some necessary changes in a text editor. Your choice.
 
-If you decide to give Hugo a chance, please head over to the [Hugo documentation](https://gohugo.io/documentation/) for details. It is a little more difficult then doing it by text editor, but when your project is bigger than blog I recommend you to go this way. At the end of the design process you will issue `hugo` command, and all needed files will be ready in the `public` folder of your Hugo project. Place this folder inside `static` folder and rename it to `myblog`. That's it.
+If you decide to give Hugo a chance, please head over to the [Hugo documentation](https://gohugo.io/documentation/) for details. It is a little more difficult than doing it with a text editor, but when your project is bigger than a blog I recommend you to go this way. At the end of the design process, you will issue `hugo` command, and all needed files will be ready in the `public` folder of your Hugo project. Place this folder inside the `static` folder and rename it to `myblog`. That's it.
 
 
 ## Basic usage
 
-Hugonette micro-framework is designed on the [Model-View-Presenter](https://en.wikipedia.org/wiki/Model-view-presenter) pattern. Using Route object you can set several modes of operation: from simple static pages to a routed web application with JSON microservices.
+Hugonette micro-framework is designed on the [Model-View-Presenter](https://en.wikipedia.org/wiki/Model-view-presenter) pattern. Your task is to determine the view, calculate model (that is the array of data), and pass it to the presenter.
 
-You will work inside the `app` folder of your project. Some useful files:
+You can set several view types: JSON microservices, upload or redirect are helpful. But the main view type will be [Latte](https://latte.nette.org/), which is a template engine from Nette framework. Be sure to review their documentation to see what you can do with this powerful tool.
 
-* `.env.php` -- basic configuration server aware
+To see famous 'hello world', we will use Latte view. First prepare a basic template. You don't need Hugo to do this. Edit any `index.html` file or make a fresh one, placing inside `{$hello}` code. This is the command to print the value of variable `$hello`. Put the file in `www/static/myblog` folder.
 
-* `routes.php` -- here you will need to define some routes
+Preparing your application you will work inside the `app` folder of your project. Some useful files are already there:
+
+* `.env.php` -- server aware basic configuration (separate for development and production)
+
+* `routes.php` -- you will need to define some routes here, but now you have what you need:
+
+```
+Env::set('view', 'latte');  // Latte view
+$route->get('/', 'Examples'); // route to Examples presenter
+```
+
+Go to `app/presenters` folder and see `Examples.php` class. The `default` method of this class is expected to return a model. Each key of this array will be seen as a template variable. In this example we return `'hello'` key to have it inside the template as `$hello` variable.
+
+```
+protected function default()
+{
+  return [
+    'hello' => 'Hello world',
+  ];
+}
+```
+
+Now type the address into your browser: `http://localhost/myblog` -- and you will see `Hello world`. But if you made any mistake, Tracy debugging tool would show you what to fix. So... make a mistake now to see Tracy in action.
 
 
-#### Simple static pages
+## To be continued...
 
-TO BE CONTINUED...
+Hugonette is tested and ready to production. The framework is light and provides all basic needs to build great apps. I will continue writing this tutorial. But if you don't have time to wait, examine the code to see all the possibilities.

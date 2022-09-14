@@ -6,20 +6,20 @@ namespace Andygrond\Hugonette;
   * @Author: Andygrond 2022
   */
 
-// Log::enable('output');	// Tracy Output Debugger
-
 $route = new Route();
 
-Log::enable('tracy');
+Log::enable('tracy'); // enable debugging tool
+// Log::enable('output');	// Tracy Output Debugger
+
 new Session();
 
-Env::set('view', 'json');
-// here place your JSON API - for use with AJAX
+Env::set('view', 'json'); // JSON view
+// your JSON API here - for use with AJAX
 
-Env::set('view', 'latte');
-// here place your html requests
-$route->get('/', 'Homepage');
+Env::set('view', 'latte');  // Latte view
+// your html requests here
+$route->get('/', 'Examples'); // route to Examples presenter
 $route->get('/(\w+)/.*', 'MyBlog');
 
-// catch all
-$route->notFound('Error:404');
+
+$route->notFound('Error:404'); // catch all
