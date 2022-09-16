@@ -1,20 +1,20 @@
 # Hugonette PHP micro-framework
 
-Lightweight, fast and easy to use. Provides everything you need to build not only your blog, but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as you project grows.
+Lightweight, fast, and easy to use. Provides everything you need to build not only your blog but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
 
-You can use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX. Then use Hugonette to mix it together with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast, pleasant and well done.
+You can use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX. Then use Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast, pleasant, and well done.
 
-You can prepare your templates any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest engine in the world to help you with templates. You can build now all your UX with a graphical design, JS functionality, AJAX and PHP microservices without leaving Hugo.
+You can prepare your templates in any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest engine in the world to help you with templates. You can build now all your UX with a graphical design, JS functionality, and AJAX with PHP microservices without leaving Hugo.
 
 #### Hugonette as an engine for your static site
 
-If you have already a static site, you probably manage with some easy tasks, such as a contact mailbox, using an external service. Few are hosting their static files on Netlify. But if you want to host your static pages independently, try Hugonette. Hugonette works well in more challenging scenarios also. If the increase of requirements means that your site can no longer be pure static, here is the solution!
+If you have already a static site, you probably manage with some easy tasks, such as a contact mailbox, using an external service. Few are hosting their static files on Netlify. But if you want to host your static pages independently, try Hugonette. Hugonette works well in more challenging scenarios also. If the increase in requirements means that your site can no longer be pure static, here is the solution!
 
 #### Hugonette customization to existing projects
 
 Hugonette is flexible to meet your needs, also when you are going to develop an existing project. The recommended solution is to build new functionality on Hugonette, allowing to run old code in parallel, and consecutively transferring all that mess to the new technology.
 
-If you have a website on Wordpress and you can't find any Wordpress plugin to meet your needs, don't try to write next Wordpress plugin! Hugonette will perfectly fit to patch up the hole, giving you seamless integration and ease of use.
+If you have a website on WordPress and you can't find any WordPress plugin to meet your needs, don't try to write the next WordPress plugin! Hugonette will perfectly fit to patch up the hole, giving you seamless integration and ease of use.
 
 Whatever your needs, start an adventure with Hugonette to bring simplicity and order to your project. With its help you can build a real app on your page, utilizing the most popular hosting service -- LAMP stack without any special needs.
 

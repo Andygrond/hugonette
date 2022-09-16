@@ -3,23 +3,24 @@
 namespace Andygrond\Hugonette;
 
 /** Application Routes for Hugonette
-  * @Author: Andygrond 2022
-  */
+* @author: Andygrond 2022
+*/
 
-$route = new Route();
-
+Log::set(new Logger('myblog.log', 3));
 Log::enable('tracy'); // enable debugging tool
 // Log::enable('output');	// Tracy Output Debugger
 
+$route = new Route();
 new Session();
 
-Env::set('view', 'json'); // JSON view
-// your JSON API here - for use with AJAX
+// REST services
+Env::set('view', 'json');
+$route->get('/api/(\w+)/.*', 'Error:200');
 
-Env::set('view', 'latte');  // Latte view
-// your html requests here
+// Latte pages
+Env::set('view', 'latte');
 $route->get('/', 'Examples'); // route to Examples presenter
 $route->get('/(\w+)/.*', 'MyBlog');
 
-
-$route->notFound('Error:404'); // catch all
+// Catch all
+$route->notFound('Error:404');

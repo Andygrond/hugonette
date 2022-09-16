@@ -2,9 +2,9 @@
 
 namespace App\Presenters;
 
-/* Lumen design examples
-* @author Andygrond 2020
-**/
+/** Hugonette design examples
+* @author Andygrond 2022
+*/
 
 use Andygrond\Hugonette\Presenter;
 

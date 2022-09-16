@@ -2,13 +2,14 @@
 
 namespace App\Presenters;
 
-/* Lumen homepage model
-* @author Andygrond 2020
-**/
+/** Hugonette error model
+* @author Andygrond 2022
+*/
 
+use Andygrond\Hugonette\Presenter;
 use App\Library\Status;
 
-class Error extends LumenPresenter
+class Error extends Presenter
 {
   public function __call($code, $args)
   {
@@ -22,7 +23,7 @@ class Error extends LumenPresenter
         'code' => $code,
         'message' => $message,
       ],
-      'warnings' => [],
+      'args' => $args,
     ];
   }
 

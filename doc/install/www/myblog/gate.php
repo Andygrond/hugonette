@@ -2,16 +2,15 @@
 
 namespace Andygrond\Hugonette;
 
-// Hugonette single access point
-// Author: Andygrond 2022
+/** Hugonette single access point
+* @author: Andygrond 2022
+*/
 
-require '../../app/.env.php';
-require SYS_DIR .'/vendor/autoload.php';
+// Start autoloader
+require '../../myblog/vendor/autoload.php';
 
-Env::init(SYS_DIR);
-Env::set('mode', OP_MODE);
-Log::set(new Logger('myblog.log', 10));
-
+// Configurator
 \App\Bootstrap::boot();
 
+// Router
 require SYS_DIR .'/app/routes.php';
