@@ -62,7 +62,22 @@ After that take a look at your project folder. If you are working on Linux or ma
 
 You will also need the Hugo environment to prepare some static pages for your project. If you wish, you can take advantage of another tool or even use an existing template, making some necessary changes in a text editor. Your choice.
 
-If you decide to give Hugo a chance, please head over to the [Hugo documentation](https://gohugo.io/documentation/) for details. It is a little more difficult than doing it with a text editor, but when your project is bigger than a blog I recommend you to go this way. At the end of the design process, you will issue `hugo` command, and all needed files will be ready in the `public` folder of your Hugo project. Place this folder inside the `static` folder and rename it to `myblog`. That's it.
+If you decide to give Hugo a chance, please head over to the [Hugo documentation](https://gohugo.io/documentation/) for details. The first step after installation:
+
+```
+hugo new site myblog
+```
+
+You will probably want to build your own theme. Use any html template for a good start.
+
+```
+cd myblog
+hugo new theme ...
+```
+
+Hugo is a powerful tool, with some difficulties on start, but when your project is bigger than a blog I recommend you to go this way. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
+
+Start a Web Server: `hugo server` and watch your changes at `http://localhost:1313/`. At the end of the design process, you will issue `hugo` command, and static site will be ready to publish in the `public` folder. Place it inside the `static` folder and rename it to `myblog`. That's all.
 
 
 ## Basic usage
@@ -75,13 +90,14 @@ To see famous 'hello world', we will use Latte view. First prepare a basic templ
 
 Preparing your application you will work inside the `app` folder of your project. Some useful files are already there:
 
-* `.env.php` -- server aware basic configuration (separate for development and production)
+* `Bootstrap.php` -- initial configuration of the environment
 
 * `routes.php` -- you will need to define some routes here, but now you have what you need:
 
 ```
 Env::set('view', 'latte');  // Latte view
-$route->get('/', 'Examples'); // route to Examples presenter
+$route->get('/', 'Examples'); // route to 'default' method of 'Examples' presenter class
+$route->get('/login/.*', 'Examples:login'); // route to 'login' method of 'Examples' presenter class
 ```
 
 Go to `app/presenters` folder and see `Examples.php` class. The `default` method of this class is expected to return a model. Each key of this array will be seen as a template variable. In this example we return `'hello'` key to have it inside the template as `$hello` variable.
@@ -100,4 +116,4 @@ Now type the address into your browser: `http://localhost/myblog` -- and you wil
 
 ## To be continued...
 
-Hugonette is tested and ready to production. The framework is light and provides all basic needs to build great apps. I will continue writing this tutorial. But if you don't have time to wait, examine the code to see all the possibilities.
+I will continue writing this tutorial. But if you don't have time to wait, please look at the code to see all possibilities.

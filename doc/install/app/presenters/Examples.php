@@ -2,11 +2,12 @@
 
 namespace App\Presenters;
 
-/** Hugonette design examples
+/** Hugonette presenter example
 * @author Andygrond 2022
 */
 
 use Andygrond\Hugonette\Presenter;
+use Andygrond\Hugonette\Env;
 
 class Examples extends Presenter
 {
@@ -18,4 +19,17 @@ class Examples extends Presenter
     ];
   }
 
+  protected function login()
+  {
+    if (isset($_SESSION['user'])) {
+      Env::set('view', 'redirect');
+      return [
+        'url' => Env::get('base.uri') .'/';
+      ]
+    }
+
+    return [
+      'title' => 'Please log in or register',
+    ];
+  }
 }

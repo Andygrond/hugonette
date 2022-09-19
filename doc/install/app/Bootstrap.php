@@ -21,13 +21,13 @@ class Bootstrap
 //  $configurator->setDebugMode('secret@10.36.51.98'); // enable for my remote IP
 
     $configurator->enableTracy(SYS_DIR .'/log');
-    $configurator->setTimeZone('Europe/Prague');
+    $configurator->setTimeZone('Europe/Warsaw');
     $configurator->setTempDirectory(SYS_DIR .'/temp');
 
     // autoload local app classes
     $configurator->createRobotLoader()
       ->addDirectory(__DIR__)
-      ->setAutoRefresh(true)  // when set to false, remember to delete cache after update
+      ->setAutoRefresh(true)  // when set to false, remember to delete Latte cache after update
       ->register();
 
   }
