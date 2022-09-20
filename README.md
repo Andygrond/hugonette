@@ -52,7 +52,7 @@ composer require andygrond/hugonette
 
 #### Adaptations for Hugonette
 
-After that take a look at your project folder. If you are working on Linux or macOS, make `log` and `temp` folders writable. Now find some example files in the `vendor/Andygrond/hugonette/doc/install` folder of the Hugonette project. Replace the entire `app` folder with `install/app` folder of Hugonette and the entire `www` with `install/www`. The second one will be your DocumentRoot. Here you will find 2 subfolders:
+Take a look at your project folder. If you are working on Linux or macOS, make `log` and `temp` folders writable. Now find some example files in the `vendor/Andygrond/hugonette/doc/install` folder of the Hugonette project. Replace the entire `app` folder with `install/app` folder of Hugonette and the entire `www` with `install/www`. The second one will be your DocumentRoot. Here you will find 2 subfolders:
 
 * `myblog` will be your entry point. Modifying 2 files there: `.htaccess` and `gate.php` you can change the project name, path and do whatever pops into your head to adapt Hugonette to your existing project. It's very flexible, so if you have a question like "will it be possible" the answer is probably: YES!
 
@@ -66,18 +66,18 @@ If you decide to give Hugo a chance, please head over to the [Hugo documentation
 
 ```
 hugo new site myblog
+cd myblog
 ```
 
 You will probably want to build your own theme. Use any html template for a good start.
 
 ```
-cd myblog
 hugo new theme ...
 ```
 
 Hugo is a powerful tool, with some difficulties on start, but when your project is bigger than a blog I recommend you to go this way. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
 
-Start a Web Server: `hugo server` and watch your changes at `http://localhost:1313/`. At the end of the design process, you will issue `hugo` command, and static site will be ready to publish in the `public` folder. Place it inside the `static` folder and rename it to `myblog`. That's all.
+Start a Web Server: `hugo server` and watch your changes at `http://localhost:1313/`. At the end of the design process, you will issue `hugo` command. After a while your static site will be ready to publish in the `public` folder. Place it inside the `static` folder and rename it to `myblog`. That's all.
 
 
 ## Basic usage
