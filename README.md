@@ -55,38 +55,7 @@ hugo new theme your-theme-name
 Hugo is a powerful tool, but you don't need to use all its power with Hugonette. Please check [Hugonette tutorial](https://andygrond.gitbook.io/hugonette/) to easily make Hugo your friend. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
 
 
-## Basic usage
-
-Hugonette micro-framework is designed on the [Model-View-Presenter](https://en.wikipedia.org/wiki/Model-view-presenter) pattern. Your task is to determine the view, calculate model (that is the array of data), and pass it to the presenter.
-
-You can set several view types: JSON microservices, upload or redirect are helpful. But the main view type will be [Latte](https://latte.nette.org/), which is a template engine from Nette framework. Be sure to review their documentation to see what you can do with this powerful tool.
-
-To see famous 'hello world', we will use Latte view. First prepare a basic template. You don't need Hugo to do this. Edit any `index.html` file or make a fresh one, placing inside `{$hello}` code. This is the command to print the value of variable `$hello`. Put the file in `www/static/myblog` folder.
-
-Preparing your application you will work inside the `app` folder of your project. Some useful files are already there:
-
-* `Bootstrap.php` -- initial configuration of the environment
-
-* `routes.php` -- you will need to define some routes here, but now you have what you need:
-
-```
-Env::set('view', 'latte');  // Latte view
-$route->get('/', 'Examples'); // route to 'default' method of 'Examples' presenter class
-$route->get('/login/.*', 'Examples:login'); // route to 'login' method of 'Examples' presenter class
-```
-
-Go to `app/presenters` folder and see `Examples.php` class. The `default` method of this class is expected to return a model. Each key of this array will be seen as a template variable. In this example we return `'hello'` key to have it inside the template as `$hello` variable.
-
-```
-protected function default()
-{
-  return [
-    'hello' => 'Hello world',
-  ];
-}
-```
-
-Now type the address into your browser: `http://localhost/myblog` -- and you will see `Hello world`. But if you made any mistake, Tracy debugging tool would show you what to fix. So... make a mistake now to see Tracy in action.
+## Next steps
 
 Head to [Hugonette GitBook Documentation](https://andygrond.gitbook.io/hugonette/) for useful advices. Set the star if you like Hugonette.
 
