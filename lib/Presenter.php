@@ -5,8 +5,11 @@ namespace Andygrond\Hugonette;
 /* MVP Presenter class for Hugonette
  * methods of Presenter extension class will return an array of model data
  * when Presenter method returns false (means: route not relevant), next route will be checked
- * @author Andygrond 2020
+ * @author Andygrond 2022
 **/
+
+use Andygrond\Hugonette\Log;
+use Andygrond\Hugonette\Env;
 
 abstract class Presenter
 {
@@ -22,6 +25,11 @@ abstract class Presenter
     if (false !== $model) {
       if (!is_array($model)) {
         throw new \TypeError(get_class($this) ."::$method has returned " .gettype($model) .". Allowed: array or false.");
+      }
+
+      // dump Env if Tracy and development mode
+      if (Env::get('mode') == 'development' && Log::debug == 'tracy') {
+        bdump(Env::get(), 'Env');
       }
 
       if ($callback = Env::get('afterLifeCallback')) {
