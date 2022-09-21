@@ -2,37 +2,14 @@
 
 Lightweight, fast, and easy to use. Provides everything you need to build not only your blog but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
 
-You can use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX. Then use Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast, pleasant, and well done.
+I like to use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX for my projects. So I wrote Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast and pleasant for me.
 
-You can prepare your templates in any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest engine in the world to help you with templates. You can build now all your UX with a graphical design, JS functionality, and AJAX with PHP microservices without leaving Hugo.
-
-#### Hugonette as an engine for your static site
-
-If you have already a static site, you probably manage with some easy tasks, such as a contact mailbox, using an external service. Few are hosting their static files on Netlify. But if you want to host your static pages independently, try Hugonette. Hugonette works well in more challenging scenarios also. If the increase in requirements means that your site can no longer be pure static, here is the solution!
-
-#### Hugonette customization to existing projects
-
-Hugonette is flexible to meet your needs, also when you are going to develop an existing project. The recommended solution is to build new functionality on Hugonette, allowing to run old code in parallel, and consecutively transferring all that mess to the new technology.
-
-If you have a website on WordPress and you can't find any WordPress plugin to meet your needs, don't try to write the next WordPress plugin! Hugonette will perfectly fit to patch up the hole, giving you seamless integration and ease of use.
-
-Whatever your needs, start an adventure with Hugonette to bring simplicity and order to your project. With its help you can build a real app on your page, utilizing the most popular hosting service -- LAMP stack without any special needs.
+You can prepare your templates in any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest web development engine in the world.
 
 
-## Cautions
+## Tutorial
 
-* This tutorial is in the process of being written.
-
-* Hugonette perfectly fits Hugo. Usage of static site generators other than Hugo is not tested yet.
-
-
-## Technologies
-
-Hugonette runs on PHP version 7.1 or higher.
-
-[Hugo static site generator](https://gohugo.io) is one of the favorite tools for preparing page design and functionality. Its advantage is a really fast response to change during development. Simply set your browser to localhost:1313 and when you save changes to any file in your project, you see results immediately on your browser. After debugging, Hugo generates a static site, where all files are ready exactly as you see them while browsing.
-
-[Nette Web Framework](https://nette.org/en/) is a flexible, feature-rich, modular PHP framework. Hugonette is a little friend of Nette, sharing its project structure and using several Nette awesome components. Thanks to Nette guys, our work on Hugonette projects will be much nicer & faster.
+You can find some useful advices [on GitBook](https://andygrond.gitbook.io/hugonette/). This tutorial is still in the process of being written.
 
 
 ## Installation
@@ -72,12 +49,10 @@ cd myblog
 You will probably want to build your own theme. Use any html template for a good start.
 
 ```
-hugo new theme ...
+hugo new theme your-theme-name
 ```
 
-Hugo is a powerful tool, with some difficulties on start, but when your project is bigger than a blog I recommend you to go this way. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
-
-Start a Web Server: `hugo server` and watch your changes at `http://localhost:1313/`. At the end of the design process, you will issue `hugo` command. After a while your static site will be ready to publish in the `public` folder. Place it inside the `static` folder and rename it to `myblog`. That's all.
+Hugo is a powerful tool, but you don't need to use all its power with Hugonette. Please check [Hugonette tutorial](https://andygrond.gitbook.io/hugonette/) to easily make Hugo your friend. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
 
 
 ## Basic usage
@@ -113,7 +88,9 @@ protected function default()
 
 Now type the address into your browser: `http://localhost/myblog` -- and you will see `Hello world`. But if you made any mistake, Tracy debugging tool would show you what to fix. So... make a mistake now to see Tracy in action.
 
+Head to [Hugonette GitBook Documentation](https://andygrond.gitbook.io/hugonette/) for useful advices. Set the star if you like Hugonette.
 
-## To be continued...
 
-I will continue writing this tutorial. But if you don't have time to wait, please look at the code to see all possibilities.
+## License
+
+Hugonette is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
