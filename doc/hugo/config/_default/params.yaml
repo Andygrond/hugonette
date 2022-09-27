@@ -1,0 +1,27 @@
+scripts:
+# Core JS Files
+  - js/core/jquery.min.js
+  - js/core/bootstrap.bundle.min.js
+
+other-scripts:
+# Scrollbar: https://plugins.jquery.com/perfect-scrollbar/
+  - js/perfect-scrollbar.jquery.min.js
+# Client side form validations: https://jqueryvalidation.org/
+  - js/jquery.validate.min.js
+#	Select picker: https://developer.snapappointments.com/bootstrap-select/
+  - js/bootstrap-select.js
+# DateTime picker: https://getdatepicker.com/
+  - js/tempus-dominus.js
+# Table interactions: https://datatables.net/
+  - js/jquery.dataTables.min.js
+# File upload: https://www.dropzone.dev/
+  - js/dropzone-min.js
+# Calendar: https://github.com/fullcalendar/fullcalendar
+  - js/fullcalendar/fullcalendar.min.js
+  - js/fullcalendar/daygrid.min.js
+  - js/fullcalendar/timegrid.min.js
+  - js/fullcalendar/interaction.min.js
+# Range slider: https://refreshless.com/nouislider/
+  - js/nouislider.min.js
+# Charts: https://apexcharts.com/docs/
+  - js/apexcharts.min.js

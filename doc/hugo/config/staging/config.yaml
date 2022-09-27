@@ -1,0 +1,6 @@
+title: Staging
+baseURL: http://localhost/my-project/
+publishDir: ../../www/static/my-project
+
+params:
+  debug: true

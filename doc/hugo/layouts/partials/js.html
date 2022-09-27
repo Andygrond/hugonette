@@ -1,0 +1,17 @@
+{{- $js := slice }}
+{{- range .Site.Params.scripts }}
+  {{- $js = $js | append (resources.Get . ) }}
+{{- end }}
+
+{{- if .Site.Params.debug }}
+  {{- range $js }}
+<script src="{{ .RelPermalink }}"></script>
+  {{- end }}
+{{- else }}
+  {{- $js = $js | resources.Concat "js/bundle.js" | minify | fingerprint "md5" }}
+<script src="{{ $js.RelPermalink }}"></script>
+{{ end -}}
+
+{{- with .Params.script }}
+<script src="{{ . | relURL }}"></script>
+{{ end -}}

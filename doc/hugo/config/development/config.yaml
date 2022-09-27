@@ -1,0 +1,5 @@
+title: My Project Dev
+baseURL: http://localhost:1313/
+
+params:
+  debug: true

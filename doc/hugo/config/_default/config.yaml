@@ -1,0 +1,9 @@
+title: My Project
+baseURL: https://any.site.com/my-project/
+theme: my-theme
+disableKinds:
+  - sitemap
+  - RSS
+
+params:
+  debug: false

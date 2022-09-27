@@ -1,0 +1,23 @@
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+{{ hugo.Generator }}
+<link rel="canonical" href="{{ .Site.BaseURL }}" />
+<link rel="icon" type="image/png" href="{{ "/favicon.ico" | relURL }}">
+<title>{{.Title}}</title>
+<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+<!-- Fonts and icons -->
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+<!-- CSS Files -->
+<link href="{{ "css/bootstrap.min.css" | relURL }}" rel="stylesheet" />
+
+{{- if .Site.Params.debug }}
+{{- $options := (dict "targetPath" "styles/bundle.css" "enableSourceMap" true ) }}
+{{- $styles := resources.Get "main.scss" | toCSS $options }}
+<link rel="stylesheet" href="{{ $styles.Permalink }}" media="screen">
+{{- else }}
+{{- $options := (dict "targetPath" "styles/bundle.css" "outputStyle" "compressed" ) }}
+{{- $styles := resources.Get "main.scss" | toCSS $options | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $styles.Permalink }}" media="screen">
+{{ end -}}
+</head>

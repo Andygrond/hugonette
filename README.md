@@ -1,15 +1,22 @@
-# Hugonette PHP micro-framework
+# Hugonette: PHP micro-framework for static pages
 
-Lightweight, fast, and easy to use. Provides everything you need to build not only your blog but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
+Lightweight, fast, and easy to use. Provides everything you expect from a framework, to build not only your blog but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
 
-I like to use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX for my projects. So I wrote Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool. With their help, writing code will be fast and pleasant for me.
+I like to use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX for my projects. So I wrote Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool.
 
-You can prepare your templates in any way. However, if you have more sophisticated purposes, don't do it by hand. Try Hugo. It is the fastest web development engine in the world.
+
+## Technologies
+
+Hugonette runs on PHP version 7.1 or higher.
+
+[Hugo static site generator](https://gohugo.io) is one of the favorite tools for preparing page design and functionality. Its advantage is a really fast response to change during development. After debugging, Hugo generates a static site, where all files are ready exactly as you see them while browsing.
+
+[Nette PHP framework](https://nette.org/en/) is a flexible, feature-rich, modular PHP framework. Hugonette is a little friend of Nette, sharing its project structure and using several Nette awesome components. Thanks to Nette guys, our work on Hugonette projects will be nice & fast.
 
 
 ## Tutorial
 
-You can find some useful advices [on GitBook](https://andygrond.gitbook.io/hugonette/). This tutorial is still in the process of being written.
+Go to [Hugonette GitBook](https://andygrond.gitbook.io/hugonette/). You will find there the Hugonette documentation as well as some useful advices on how to use Hugo.
 
 
 ## Installation
@@ -37,27 +44,13 @@ Take a look at your project folder. If you are working on Linux or macOS, make `
 
 #### Hugo project
 
-You will also need the Hugo environment to prepare some static pages for your project. If you wish, you can take advantage of another tool or even use an existing template, making some necessary changes in a text editor. Your choice.
+My suggestion is to use Hugo to prepare static pages for your project. But if you wish, you can take advantage of another tool or even use an existing template, making necessary changes in a text editor. Your choice.
 
-If you decide to give Hugo a chance, please head over to the [Hugo documentation](https://gohugo.io/documentation/) for details. The first step after installation:
-
-```
-hugo new site myblog
-cd myblog
-```
-
-You will probably want to build your own theme. Use any html template for a good start.
-
-```
-hugo new theme your-theme-name
-```
-
-Hugo is a powerful tool, but you don't need to use all its power with Hugonette. Please check [Hugonette tutorial](https://andygrond.gitbook.io/hugonette/) to easily make Hugo your friend. You will find some useful hints when you look into `hugonette/doc/hugo` folder.
 
 
 ## Next steps
 
-Head to [Hugonette GitBook Documentation](https://andygrond.gitbook.io/hugonette/) for useful advices. Set the star if you like Hugonette.
+Head to [Hugonette GitBook](https://andygrond.gitbook.io/hugonette/) for useful advices.
 
 
 ## License

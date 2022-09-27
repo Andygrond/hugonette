@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pl">
+  {{ partial "head.html" . }}
+<body {{ with .Params.body_class }}class="{{.}}"{{ end }}>
+  {{ partial "header.html" . }}
+<div class="content">
+    {{ block "main" . }}{{ end }}
+</div>
+  {{ partial "footer.html" . }}
+  {{ partial "js.html" . }}
+</body>
+</html>

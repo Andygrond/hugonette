@@ -1,0 +1,25 @@
+{{ define "main" }}
+  <div class="container">
+    <div class="col-lg-4 col-md-6">
+      <form class="form" id="login-form" method="post" action="{{ "api/login" | relURL }}">
+        <div class="card text-center">
+          <h3 class="card-header text-center">Login</h3>
+          <div class="card-body">
+            <p class="invalid-feedback" id="form-message">{{.Content}}</p>
+            <div class="input-group mb-3">
+              <input type="email" name="login" class="form-control" placeholder="e-mail" autocomplete="username">
+            </div>
+            <div class="input-group mb-3">
+              <input type="password" name="pass" class="form-control" placeholder="password" autocomplete="current-password">
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="d-grid gap-2 d-md-block">
+              <a href="javascript:;" onclick="page.loginAttempt();" class="btn btn-primary mb-3">Enter</a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{{ end }}
