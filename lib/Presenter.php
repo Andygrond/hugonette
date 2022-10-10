@@ -28,7 +28,7 @@ abstract class Presenter
       }
 
       // dump Env if Tracy and development mode
-      if (Env::get('mode') == 'development' && Log::debug == 'tracy') {
+      if (Env::get('mode') == 'development' && Log::$debugMode == 'tracy') {
         bdump(Env::get(), 'Env');
       }
 

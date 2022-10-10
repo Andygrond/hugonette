@@ -1,6 +1,6 @@
 # Hugonette: PHP micro-framework for static pages
 
-Lightweight, fast, and easy to use. Provides everything you expect from a framework, to build not only your blog but also a powerful web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
+Lightweight, fast, and easy to use. Provides everything you expect from a framework, to build a powerful small to medium web application. Ready for new projects, but flexible enough to use in existing scenarios. Scalable as your project grows.
 
 I like to use [Hugo static site generator](https://gohugo.io) to prepare a web design and JavaScript UX for my projects. So I wrote Hugonette to mix it with the power of [Nette PHP framework](https://nette.org/en/): an intuitive templating engine and awesome debugging tool.
 

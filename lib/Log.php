@@ -24,7 +24,7 @@ class Log
   private static $jobStack = [];  // job names stack
   private static $sendFireLog;    // Chrome FireLog console enabled
 
-  public static $debug = 'plain';   // Debugger mode [plain|tracy]
+  public static $debugMode = 'plain';   // Debugger mode [plain|tracy]
   public static $viewMessages = []; // messages collected to be passed to view
 
   /**
@@ -104,14 +104,14 @@ class Log
     switch($name) {
       case 'tracy':  // enable Tracy in given mode
         if (self::$logger) {
-          self::$debug = 'tracy';
+          self::$debugMode = 'tracy';
           $tracyMode = (Env::get('mode') == 'production')? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
           Debugger::enable($tracyMode, self::$logger->logPath);
         }
         break;
 
       case 'ajax':   // log to Chrome console with FireLogger extension - Tracy must be active
-        if (self::$logger && self::$debug == 'tracy') {
+        if (self::$logger && self::$debugMode == 'tracy') {
           self::$sendFireLog = true;
         }
         break;
