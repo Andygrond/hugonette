@@ -122,15 +122,6 @@ class Log
     }
   }
 
-  /** dump data to screen and die
-  * @param data debugged data structure
-  */
-  public static function dump($data)
-  {
-    dump($data);
-    exit;
-  }
-
   // measured time lengths
   public static function times()
   {
