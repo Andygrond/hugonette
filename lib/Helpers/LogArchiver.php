@@ -20,11 +20,15 @@ class LogArchiver
     $this->logName = $path['basename'];
   }
 
-  public function shift($shift = 1)
+  /**
+  * @param cut max archived file number
+  * @param shift increment or decrement by
+  */
+  public function shift(int $cut, int $shift = 1)
   {
     if (file_exists($this->logName .'.1')) {
       $shiftedLogs = $this->getShiftedLogs($shift);
-      $this->renum($shiftedLogs);
+      $this->renum($shiftedLogs, $cut);
     } else {
       if (!rename($this->logName, $this->logName .'.1')) {
         Log::error("LogArchive: {$this->logName} not renamed - check credentials");
@@ -55,18 +59,22 @@ class LogArchiver
   }
 
   // perform log renumbering
-  private function renum($shiftedLogs)
+  private function renum($shiftedLogs, $cut)
   {
     foreach ($shiftedLogs as $old => $new) {
       $oldName = $old? $this->logName .'.'.$old : $this->logName;
-      $newName = $this->logName .'.'.$new;
-
-      if (!is_file($newName)) {
-        if (!rename($oldName, $newName)) {
-          Log::error("LogArchive: $oldName not renumbered - check credentials");
-        }
+      if ($new > $cut) {
+        unlink($oldName);
       } else {
-        Log::error("LogArchive: $oldName not renumbered - file $newName exists");
+        $newName = $this->logName .'.'.$new;
+
+        if (!is_file($newName)) {
+          if (!rename($oldName, $newName)) {
+            Log::error("LogArchive: $oldName not renumbered - check credentials");
+          }
+        } else {
+          Log::error("LogArchive: $oldName not renumbered - file $newName exists");
+        }
       }
     }
   }

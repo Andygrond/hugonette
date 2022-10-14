@@ -33,10 +33,11 @@ class Logger
   /** log initialization
   * @param filename path to log file or folder relative to system log folder
   * @param filesize max size in megabytes
+  * @param cut max number of archived files
   * File with obligatory .log extension - uses Hugonette log format
   * When directory is given - uses Tracy native logger
   */
-  public function __construct(string $filename, float $filesize = 1)
+  public function __construct(string $filename, float $filesize = 1, int $cut = 10)
   {
     $this->formatter = new LogFormatter;
     // set log dir and file
@@ -48,7 +49,7 @@ class Logger
         }
         chmod($path, 0666); // for cron and CLI obviously
       } elseif (filesize($path)/1024 > 1024*$filesize) {
-        (new LogArchiver($path))->shift();
+        (new LogArchiver($path))->shift($cut);
       }
 
       ini_set('error_log', $path);

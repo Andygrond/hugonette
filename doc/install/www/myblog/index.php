@@ -1,7 +1,5 @@
 <?php
 
-namespace Andygrond\Hugonette;
-
 /** Hugonette single access point
 * @author: Andygrond 2022
 */
