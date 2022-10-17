@@ -18,13 +18,12 @@ class Route
   {
     // set Env request
     [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
-    if (substr($path, -5) == '.html') {
-      $path = substr($path, strlen(Env::get('base.uri')), -5);
-    } else {
-      $path = substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
-    }
+//    if (substr($path, -5) == '.html') {
+//      $path = substr($path, strlen(Env::get('base.uri')), -5);
+//    } else {
+    $path = substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
+//    }
 
-// zrobiłem rozróżnienie: gdy jest to katalog ma slash na końcu - plik nie ma - czy to jest potrzebne?
     Env::set('request', [
       'group' => '',    // router group base
       'item' => $path,  // request details (path in group)
@@ -46,7 +45,7 @@ class Route
         $this->run($args[1]);
       }
     } elseif (!in_array($method, $this->allowedMethods)) {
-      throw new \UnexpectedValueException("Router method not found: $method");
+      throw new \UnexpectedValueException("Unknown router method: $method");
     }
   }
 
@@ -78,10 +77,13 @@ class Route
   public function redirect(string $pattern, string $url, bool $permanent = true)
   {
     if (!$pattern || $this->exactMatch($pattern)) {
-      (new RedirectView())->view([
+      new Views\RedirectView([
         'url' => $url,
         'permanent' => $permanent,
       ]);
+
+      Log::close(); // effective only when set previously
+      exit;
     }
   }
 
