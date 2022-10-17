@@ -18,11 +18,7 @@ class Route
   {
     // set Env request
     [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
-//    if (substr($path, -5) == '.html') {
-//      $path = substr($path, strlen(Env::get('base.uri')), -5);
-//    } else {
     $path = substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
-//    }
 
     Env::set('request', [
       'group' => '',    // router group base
@@ -30,8 +26,10 @@ class Route
       'segments' => explode('/', trim($path, '/')),
     ]);
 
-//    Env::set('trace', []);  // trace must be an array
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
+    if ($this->httpMethod == 'get') {
+      $this->template($path);
+    }
   }
 
   /** route for single request method
@@ -54,7 +52,7 @@ class Route
   */
   public function staticPages(string $presenter)
   {
-    if ($this->httpMethod == 'get' && $this->template()) {
+    if (Env::get('template')) {
       $this->run($presenter);
     }
   }
@@ -136,19 +134,15 @@ class Route
     PresenterFactory::create($presenter);
   }
 
-  /** calculate template file name based on the URL
-  * @return = file exists
+  /** find template file name based on the URL
   */
-  private function template(): bool
+  private function template($path)
   {
-    $template = Env::get('request.group') .Env::get('request.item');
-    $template .= (substr($template, -1) == '/')? 'index.html' : '.html';
+    $template = Env::get('request.group') .$path .'index.html';
 
     if (is_file(Env::get('base.template') .$template)) {
       Env::set('template', $template);
-      return true;
     }
-    return false;
   }
 
 }

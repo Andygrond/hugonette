@@ -82,7 +82,6 @@ class Env
   public static function push(string $attrName, string $pushed)
   {
     $attr =& self::findAttr($attrName);
-    bdump($attr);
     if (is_array($attr)) {
       $attr[] = $pushed;
     }
