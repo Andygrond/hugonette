@@ -52,26 +52,39 @@ class Env
   }
 
   /** concatenate string argument with an attribute
-  * @param prepend value to be prepended
+  * @param prepended value to be prepended
   * @param attrName attribute name
   */
-  public static function prepend(string $prepend, string $attrName)
+  public static function prepend(string $prepended, string $attrName)
   {
     $attr =& self::findAttr($attrName);
     if (is_string($attr)) {
-      $attr = $prepend .$attr;
+      $attr = $prepended .$attr;
     }
   }
 
   /** concatenate attribute with a string argument
   * @param attrName attribute name
-  * @param append value to be appended
+  * @param appended value to be appended
   */
-  public static function append(string $attrName, string $append)
+  public static function append(string $attrName, string $appended)
   {
     $attr =& self::findAttr($attrName);
     if (is_string($attr)) {
-      $attr .= $append;
+      $attr .= $appended;
+    }
+  }
+
+  /** add the last element od an array
+  * @param attrName attribute name
+  * @param pushed variable to be pushed
+  */
+  public static function push(string $attrName, string $pushed)
+  {
+    $attr =& self::findAttr($attrName);
+    bdump($attr);
+    if (is_array($attr)) {
+      $attr[] = $pushed;
     }
   }
 

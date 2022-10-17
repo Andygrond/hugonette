@@ -30,7 +30,7 @@ class Route
       'segments' => explode('/', trim($path, '/')),
     ]);
 
-    Env::set('trace', []);  // trace must be an array
+//    Env::set('trace', []);  // trace must be an array
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
   }
 
@@ -131,7 +131,7 @@ class Route
   private function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    Env::append('trace', debug_backtrace()[1]['line'] .': ' .$presenter);
+    Env::push('route', debug_backtrace()[1]['line'] .': ' .$presenter);
     // call Presenter
     PresenterFactory::create($presenter);
   }
