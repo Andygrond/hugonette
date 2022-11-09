@@ -129,7 +129,7 @@ class Route
   private function run(string $presenter)
   {
     // keep trace of matched routes for the request
-    Env::push('route', debug_backtrace()[1]['line'] .': ' .$presenter);
+    Env::set('route.' .debug_backtrace()[1]['line'], $presenter);
     // call Presenter
     PresenterFactory::create($presenter);
   }
