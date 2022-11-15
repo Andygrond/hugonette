@@ -16,7 +16,6 @@ class Route
   */
   public function __construct()
   {
-    // set Env request
     [ $path ] = explode('?', urldecode($_SERVER['REQUEST_URI']));
     $path = substr(rtrim($path, '/'), strlen(Env::get('base.uri'))) .'/';
 
@@ -26,10 +25,8 @@ class Route
       'segments' => explode('/', trim($path, '/')),
     ]);
 
+    $this->template($path);
     $this->httpMethod = strtolower($_SERVER['REQUEST_METHOD']);
-    if ($this->httpMethod == 'get') {
-      $this->template($path);
-    }
   }
 
   /** route for single request method
