@@ -32,10 +32,10 @@ abstract class ApiPresenter extends Presenter
       if ($req = $this->validRequest()) {
         $data = $this->getResponse($req);
 
-        if ($data === false) {
-          if (!$this->status) {
-            $this->setStatus(406, 'Unknown resource type');
-          }
+        if (is_string($data)) {
+          $this->setStatus(400, $data);
+        } elseif ($data === false) {
+          $this->setStatus(406, 'Unknown resource type');
         } elseif ($data === null) {
           $this->setStatus(404, 'Resource not found');
         } else {
