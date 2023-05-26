@@ -25,11 +25,19 @@ abstract class ApiPresenter extends Presenter
    */
   abstract protected function serviceProvider(array $req);
 
+  /** Authentication & authorization
+   * return bool
+   * @param req request args
+   */
+  abstract protected function authorized();
+
   // Provider default class called in Route
   protected function default()
   {
     try {
-      if ($req = $this->validRequest()) {
+      if (!$this->authorized()) {
+        $this->setStatus(401, 'Unauthorized');
+      } elseif ($req = $this->validRequest()) {
         $data = $this->getResponse($req);
 
         if (is_string($data)) {
