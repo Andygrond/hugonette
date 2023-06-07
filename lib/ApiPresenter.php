@@ -19,35 +19,36 @@ abstract class ApiPresenter extends Presenter
    */
   abstract protected function validRequest():array;
 
-  /** Service provider object injection
-   * methods of serviceProvider class return model data for a resource type
-   * @param req request args
-   */
-  abstract protected function serviceProvider(array $req);
-
   /** Authentication & authorization
    * return bool
    * @param req request args
    */
-  abstract protected function authorized();
+  abstract protected function authorizedClent(array $req);
+
+  /** Gets response array or data object
+   * @param req request args
+   */
+  abstract protected function getResponse(array $req);
 
   // Provider default class called in Route
   protected function default()
   {
     try {
-      if (!$this->authorized()) {
-        $this->setStatus(401, 'Unauthorized');
-      } elseif ($req = $this->validRequest()) {
-        $data = $this->getResponse($req);
+      if ($req = $this->validRequest()) {
+        if ($this->authorizedClent($req)) {
+          $data = $this->getResponse($req);
 
-        if (is_string($data)) {
-          $this->setStatus(400, $data);
-        } elseif ($data === false) {
-          $this->setStatus(406, 'Unknown resource type');
-        } elseif ($data === null) {
-          $this->setStatus(404, 'Resource not found');
+          if (is_string($data)) {
+            $this->setStatus(400, $data);
+          } elseif ($data === false) {
+            $this->setStatus(406, 'Unknown resource type');
+          } elseif ($data === null) {
+            $this->setStatus(404, 'Resource not found');
+          } else {
+            return $data;
+          }
         } else {
-          return $data;
+          $this->setStatus(401, 'Access denied');
         }
       } else {
         $this->setStatus(400, 'Invalid syntax');
@@ -62,33 +63,21 @@ abstract class ApiPresenter extends Presenter
     ];
   }
 
-  /** Gets response data
-   * Presumption: defined $req 'type' and 'id'
-   * For non standard usage redefine this method
-   * @param req request args
-   */
-  protected function getResponse(array $req)
-  {
-    $obj = $this->serviceProvider($req);
-    $type = $req['type'];
-    if (!$type || !method_exists($obj, $type)) {
-      $this->allowedTypes($obj);
-      return false;
-    }
-
-    return $obj->$type($req['id']);
-  }
-
-  /** Sets friendly info on resource type mismatch
+  /** Typical resource calculation or friendly info on resource type mismatch
    * Presumption: all methods of $obj not starting with '_' are resource types
    * @param obj data provider object for present resource type
    */
-  protected function allowedTypes(object $obj)
+  protected function resource(object $obj, $type, $id)
   {
-    $methods = array_filter(get_class_methods($obj), function($method){
-      return $method[0] != '_';
-    });
-    $this->setStatus(406, 'Possible resource types: ' .implode('|', $methods));
+    if ($type && method_exists($obj, $type) && $type[0] != '_') {
+      return $obj->$type($id);
+
+    } else {
+      $methods = array_filter(get_class_methods($obj), function($method){
+        return $method[0] != '_';
+      });
+      $this->setStatus(406, 'Possible resource types: ' .implode('|', $methods));
+    }
   }
 
   protected function setStatus($code, $message)
