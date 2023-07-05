@@ -11,7 +11,7 @@ use DateTime;
 
 class JsonLogger
 {
-  private $logFile = '';    // path to log filename
+  public $logFile = '';    // path to log filename
 
 /** log initialization
   * @param filename path to log file or folder relative to system log folder
@@ -42,7 +42,7 @@ class JsonLogger
   public function __call(string $name, array $args)
   {
     $context = @$args[2]? $args[2] : [];
-    $this->event($name .':' .$args[0], $args[1], $context);
+    $this->event($name .':' .@$args[0], $args[1]?? [], $context);
   }
 
 /**
@@ -54,32 +54,63 @@ class JsonLogger
   public function event($message, $data, $event = null)
   {
     if ($event === null) {
-      $message = $this->log($message, $data);
+      $message = $this->prepare($message, $data);
     } else {
-      $message .= "\t" .$this->log($data, $event);
+      $message .= "\t" .$this->prepare($data, $event);
     }
-    $this->flush($message);
+    $this->save($message);
+  }
+
+/** logs with an arbitrary level 
+ * for compatibility with Log static class
+ */
+  public function log(string $level, $message, $data = [])
+  {
+    if ($level == 'request') {
+      $this->request($message);
+    } else {
+      $this->event($level, $data, $message);
+    }
   }
 
 /** request log message output
   * @param client client data 
   */
-  public function request($client = [])
+  public function request($clientInfo = [])
   {
+    if (is_array($clientInfo)) {
+      $client = $clientInfo;
+    } else {
+      $client['info'] = $clientInfo;
+    }
     $client['agent'] = $this->agent();
     $client['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR']?? $_SERVER['REMOTE_ADDR'];
 
     $data = [
       'time' => $this->time(),
+      'caller' => $this->tracePoint(),
       'client' => $client,
       'server' => $this->serverInfo(),
     ];
     
-    $this->flush('request' ."\t" .$this->encode($data));
+    $this->save('request' ."\t" .json_encode($data, JSON_UNESCAPED_UNICODE));
+  }
+
+  // get caller function info
+  protected function tracePoint():string
+  {
+    $trace = debug_backtrace();
+    foreach($trace as $k => $t) {
+      if (strpos($t['file'], 'hugonette') === false) {
+        break;
+      }
+    }
+    $t = $trace[++$k];
+    return $t['class'] .'::' .$t['function'];
   }
 
   // prepare and encode data structure
-  protected function log($data, $context): string
+  protected function prepare($data, $context): string
   {
     if (is_array($context)) {
       $out = $context;
@@ -90,7 +121,7 @@ class JsonLogger
     isset($out['time']) or $out['time'] = (new DateTime())->format('Y-m-d\TH:i:s.uP');
     $out['data'] = $this->noNulls($data);
 
-    return $this->encode($out);
+    return json_encode($out, JSON_UNESCAPED_UNICODE);
   }
 
   // delete null values
@@ -109,14 +140,8 @@ class JsonLogger
     }
   }
 
-  // encode data structure
-  protected function encode(array $data): string
-  {
-    return json_encode($data, JSON_UNESCAPED_UNICODE);
-  }
-
   // write message to file
-  protected function flush(string $message)
+  protected function save(string $message)
   {
     if ($this->logFile) {
       file_put_contents($this->logFile, $message ."\n", FILE_APPEND | LOCK_EX);
@@ -152,6 +177,16 @@ class JsonLogger
       }
     }
     return $_SERVER['HTTP_USER_AGENT']?? 'API';
+  }
+
+  // static Log compatibility
+  public function flush()
+  {
+  }
+
+  // static Log compatibility
+  public function addLevel()
+  {
   }
 
 }

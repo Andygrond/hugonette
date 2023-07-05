@@ -15,7 +15,6 @@ namespace Andygrond\Hugonette;
 use Tracy\Debugger;
 use Tracy\OutputDebugger;
 use Andygrond\Hugonette\Helpers\Duration;
-use Andygrond\Hugonette\Views\JsonView;
 
 class Log
 {
@@ -28,15 +27,18 @@ class Log
   public static $viewMessages = []; // messages collected to be passed to view
 
   /**
-  * @param logger - PSR-3 compatible logger object
+  * @param logger - PSR-3 or beyond compatible logger object
   */
-  public static function set(Logger $logger = null)
+  public static function set(object $logger = null)
   {
-    if ($logger) {
+    if (is_object($logger)) {
       if (method_exists($logger, 'addLevel')) {
         $logger->addLevel('view', 35);  // create level 'view' for sending messages to view
       }
       self::$logger = $logger;
+      if ($logger->logFile) {
+        ini_set('error_log', $logger->logFile);
+      }
     }
     self::$duration = new Duration;
   }
@@ -91,7 +93,7 @@ class Log
     if ($name == $lastName) {
       self::$duration->stop($name);
     } else {
-      throw new \ValueError("Job $name is interlacing with $lastName which should be ended first.");
+      self::$logger->log('warning', "Job $name is interlacing with $lastName which should be ended first using Log::done.");
     }
   }
 
@@ -106,7 +108,8 @@ class Log
         if (self::$logger) {
           self::$debugMode = 'tracy';
           $tracyMode = (Env::get('mode') == 'production')? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
-          Debugger::enable($tracyMode, self::$logger->logPath);
+          $logPath = dirname(self::$logger->logFile) .'/';
+          Debugger::enable($tracyMode, $logPath);
         }
         break;
 

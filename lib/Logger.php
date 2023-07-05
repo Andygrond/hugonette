@@ -25,10 +25,10 @@ class Logger
 
   private $collection = []; // messages waiting for output
   private $minLevel = 0;    // lowest level of logged messages
-  private $logFile = '';    // path to log filename
   private $formatter;       // Formatter object
-
-  public $logPath;          // path to log
+  
+  public $logFile = '';    // path to log filename
+//  public $logPath;          // path to log
 
   /** log initialization
   * @param filename path to log file or folder relative to system log folder
@@ -40,23 +40,17 @@ class Logger
   public function __construct(string $filename, float $filesize = 1, int $cut = 10)
   {
     $this->formatter = new LogFormatter;
-    // set log dir and file
-    $path = Env::get('base.system') .'/log/' .$filename;
-    if (strrchr($path, '.') == '.log') {
-      if (!file_exists($path)) {
-        if (!@touch($path)) {
-          throw new \RuntimeException('Log file is unavailable: ' .$path);
-        }
-        chmod($path, 0666); // for cron and CLI obviously
-      } elseif (filesize($path)/1024 > 1024*$filesize) {
-        (new LogArchiver($path))->shift($cut);
-      }
+    $filename or $filename = 'hugonette_app.log';
+    $this->logFile = $path = Env::get('base.system') .'/log/' .$filename;
 
-      ini_set('error_log', $path);
-      $this->logFile = $path;
-      $this->logPath = dirname($path) .'/';
-    } else {
-      $this->logPath = rtrim($path, '/') .'/';
+    if (!file_exists($path)) {
+      if (@touch($path)) {
+        chmod($path, 0666); // for cron and CLI obviously
+      } else {
+        $this->logFile = '';
+      }
+    } elseif (filesize($path)/1024 > 1024*$filesize) {
+      (new LogArchiver($path))->shift($cut);
     }
   }
 
@@ -80,9 +74,9 @@ class Logger
   // logs with an arbitrary level
   public function log(string $level, $message, $context = [])
   {
-    if (!$levelNo = @$this->levels[$level]) {
-      throw new \UnexpectedValueException('Log method not found: ' .$level);
-    } elseif ($levelNo >= $this->minLevel) {  // message filtering
+    $levelNo = $this->levels[$level]?? 100;
+      
+    if ($levelNo >= $this->minLevel) {  // message filtering
       $this->collection[] = [
         'level' => strtoupper($level),
         'message' => $message,
@@ -94,11 +88,7 @@ class Logger
   // set lowest level of registered messages
   public function minLevel(string $level)
   {
-    if (isset($this->levels[$level])) {
-      $this->minLevel = $this->levels[$level];
-    } else {
-      throw new \UnexpectedValueException("Log level: $level is not valid.");
-    }
+    $this->minLevel = (int) $level;
   }
 
   // add extra level $name
