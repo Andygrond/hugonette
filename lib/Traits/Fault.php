@@ -231,20 +231,28 @@ trait Fault
     ],
   ];
 
+  public function faultMessage($code, $lang = 'en')
+  {
+    if (isset(self::$httpStatusCodes[$code])) {
+      if ($lang == false) {
+        http_response_code((int) $code);
+      }
+      return self::$httpStatusCodes[$code][$lang]?? self::$httpStatusCodes[$code]['s'];
+    }
+    return '';
+  }
+
   // get the last json error
   public function fault($code, $message = '', $lang = 'en')
   {
     if (isset(self::$httpStatusCodes[$code])) {
-      http_response_code($code);
-      if (!$message) {
-        $message = self::$httpStatusCodes[$code][$lang]?? self::$httpStatusCodes[$code]['s'];
-      }
+      http_response_code((int) $code);
     }
 
     return [
       'fault' => [
         'code' => $code,
-        'message' => $message,
+        'message' => $message?: $this->message($code, $lang),
       ]
     ];
   }
