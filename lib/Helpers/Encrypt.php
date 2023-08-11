@@ -35,7 +35,7 @@ class Encrypt
   }
 
   /** Initialize secret data with a new set
-  * @param orgFile ini formatted file name of original data
+  * @param $orgFile ini formatted file name of original data
   */
   public function source(string $orgFile)
   {
@@ -58,7 +58,7 @@ class Encrypt
   }
 
   /** Initialize secret data from file
-  * @param secretFile encrypted file name
+  * @param $secretFile encrypted file name
   */
   public function read(string $secretFile)
   {
@@ -73,8 +73,8 @@ class Encrypt
   }
 
   /** append or replace a data chunk
-  * @param dataKey key for data chunk
-  * @param value data chunk itself
+  * @param $dataKey key for data chunk
+  * @param $value data chunk itself
   */
   public function set($dataKey, $value)
   {
@@ -89,7 +89,7 @@ class Encrypt
   }
 
   /**
-  * @param secretFile encrypted file name
+  * @param $secretFile encrypted file name
   */
   public function save(string $secretFile)
   {
@@ -108,7 +108,7 @@ class Encrypt
 
   /** Delete encryption key file
   * Proceed with "do" variable defined in URL
-  * @param deleteDir delete directory also?
+  * @param $deleteDir delete directory also?
   */
   public function destroyKey(string $keyCode = null, bool $deleteDir = null)
   {
@@ -184,7 +184,7 @@ class Encrypt
   }
 
   /** $this->quit PHP notice with caller identification
-  * @param message - output error message
+  * @param $message - output error message
   */
   public function quit($message)
   {

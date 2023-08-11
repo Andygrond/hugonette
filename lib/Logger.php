@@ -31,9 +31,9 @@ class Logger
 //  public $logPath;          // path to log
 
   /** log initialization
-  * @param filename path to log file or folder relative to system log folder
-  * @param filesize max size in megabytes
-  * @param cut max number of archived files
+  * @param $filename path to log file or folder relative to system log folder
+  * @param $filesize max size in megabytes
+  * @param $cut max number of archived files
   * File with obligatory .log extension - uses Hugonette log format
   * When directory is given - uses Tracy native logger
   */
@@ -62,8 +62,8 @@ class Logger
 
   /**
   * all log level messages goes here
-  * @param level - PSR-3 level
-  * @param args = [$message, $context]
+  * @param $level - PSR-3 level
+  * @param $args = [$message, $context]
   */
   public function __call(string $level, array $args)
   {

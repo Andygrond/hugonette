@@ -24,8 +24,8 @@ class Examples extends Presenter
     if (isset($_SESSION['user'])) {
       Env::set('view', 'redirect');
       return [
-        'url' => Env::get('base.uri') .'/';
-      ]
+        'url' => Env::get('base.uri') .'/',
+      ];
     }
 
     return [

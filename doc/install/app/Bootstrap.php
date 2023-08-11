@@ -10,7 +10,7 @@ use Andygrond\Hugonette\Env;
 
 class Bootstrap
 {
-  public static function boot(): Configurator
+  public static function boot()
   {
     define('SYS_DIR', dirname(__DIR__));
     Env::init(SYS_DIR);

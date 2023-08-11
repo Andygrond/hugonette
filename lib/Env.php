@@ -18,8 +18,8 @@ class Env
   private static $hidden = [];
 
   /** set initial values of attributes - can be set only once
-  * @param sysDir framework base directory
-  * @param filename initial attributes file path; standard values are provided if not set
+  * @param $sysDir framework base directory
+  * @param $filename initial attributes file path; standard values are provided if not set
   */
   public static function init(string $sysDir, string $filename = null)
   {
@@ -33,7 +33,7 @@ class Env
   }
 
   /** get attribute value
-  * @param attrName attribute name - when not set get all but hidden
+  * @param $attrName attribute name - when not set get all but hidden
   * @return mixed value of variable
   */
   public static function get(string $attrName = null)
@@ -42,8 +42,8 @@ class Env
   }
 
   /** set attribute value
-  * @param attrName attribute name
-  * @param attrValue value to be set
+  * @param $attrName attribute name
+  * @param $attrValue value to be set
   */
   public static function set(string $attrName, $attrValue)
   {
@@ -52,8 +52,8 @@ class Env
   }
 
   /** concatenate string argument with an attribute
-  * @param prepended value to be prepended
-  * @param attrName attribute name
+  * @param $prepended value to be prepended
+  * @param $attrName attribute name
   */
   public static function prepend(string $prepended, string $attrName)
   {
@@ -64,8 +64,8 @@ class Env
   }
 
   /** concatenate attribute with a string argument
-  * @param attrName attribute name
-  * @param appended value to be appended
+  * @param $attrName attribute name
+  * @param $appended value to be appended
   */
   public static function append(string $attrName, string $appended)
   {
@@ -76,8 +76,8 @@ class Env
   }
 
   /** add the last element od an array
-  * @param attrName attribute name
-  * @param pushed variable to be pushed
+  * @param $attrName attribute name
+  * @param $pushed variable to be pushed
   */
   public static function push(string $attrName, string $pushed)
   {
@@ -89,7 +89,7 @@ class Env
 
   /** replace full set of attributes
   * call is not effective outside Route class
-  * @param attrib full set of attributes (all but hidden)
+  * @param $attrib full set of attributes (all but hidden)
   */
   public static function restore(array $attrib)
   {
@@ -99,7 +99,7 @@ class Env
   }
 
   /** find attribute element by reference
-  * @param attrName attribute name
+  * @param $attrName attribute name
   */
   private static function &findAttr(string $attrName)
   {
@@ -121,7 +121,7 @@ class Env
   }
 
   /** get attribute value
-  * @param attrName attribute name
+  * @param $attrName attribute name
   */
   private static function getAttrValue(string $attrName)
   {

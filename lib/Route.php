@@ -12,7 +12,7 @@ class Route
   private $httpMethod; // http method lowercase
 
   /**
-  * @param sysDir - path to framework (i.e. Nette system)
+  * @param $sysDir - path to framework (i.e. Nette system)
   */
   public function __construct()
   {
@@ -30,8 +30,8 @@ class Route
   }
 
   /** route for single request method
-  * @param method - http method as a route function name
-  * @param args = [$pattern, $model]
+  * @param $method - http method as a route function name
+  * @param $args = [$pattern, $model]
   */
   public function __call(string $method, array $args)
   {
@@ -45,7 +45,7 @@ class Route
   }
 
   /** full static GET with one common presenter (runs all static pages at once)
-  * @param presenter name as declared in route
+  * @param $presenter name as declared in route
   */
   public function staticPages(string $presenter)
   {
@@ -55,7 +55,7 @@ class Route
   }
 
   /** if applicable, should be placed as the last routing directive in a group - for not routed URI
-  * @param presenter usually shows status 404 with the native navigation panels
+  * @param $presenter usually shows status 404 with the native navigation panels
   */
   public function notFound(string $presenter)
   {
@@ -64,9 +64,9 @@ class Route
 
   /** redirect if URI simply starts from $pattern or $pattern is empty
   * this can be used freely, but typically as the last routing directive in group
-  * @param pattern string to match
-  * @param url addres to redirect to
-  * @param permanent in Route defaults to http code 301 Moved Permanently
+  * @param $pattern string to match
+  * @param $url addres to redirect to
+  * @param $permanent in Route defaults to http code 301 Moved Permanently
   * $permanent set to false = doesn't inform search engines about the change
   */
   public function redirect(string $pattern, string $url, bool $permanent = true)
@@ -83,7 +83,7 @@ class Route
   }
 
   /** run a set of routes with shared attributes
-  * @param pattern string to match
+  * @param $pattern string to match
   * @param callback function to run when matched
   */
   public function group(string $pattern, \Closure $callback)
@@ -103,7 +103,7 @@ class Route
   }
 
   /** simple pattern matching test - no variable segments
-  * @param pattern string to match
+  * @param $pattern string to match
   * @return = matched
   */
   private function exactMatch(string $pattern): bool
@@ -112,7 +112,7 @@ class Route
   }
 
   /** check regular expression pattern matching
-  * @param pattern string to match
+  * @param $pattern string to match
   * @return = matched
   */
   private function regMatch(string $pattern): bool
@@ -121,7 +121,7 @@ class Route
   }
 
   /** run presenter instance and exit if truly presented
-  * @param presenter name as declared in route
+  * @param $presenter name as declared in route
   */
   private function run(string $presenter)
   {

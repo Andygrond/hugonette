@@ -37,10 +37,10 @@ class UploadView implements ViewInterface
   ];
 
 /** upload file based on Env $upload array
-  * @param upload.inline true: try to display the content, default: try save the file
-  * @param upload.destinationFile - suggest 'filename.ext' of file or '.ext' to send Content-Type header
-  * @param upload.sourceFile uploaded file name or upload.sourceData'] uploaded content
-  * @param upload.data with latte template
+  * upload.inline true: try to display the content, default: try save the file
+  * upload.destinationFile - suggest 'filename.ext' of file or '.ext' to send Content-Type header
+  * upload.sourceFile uploaded file name or upload.sourceData'] uploaded content
+  * upload.data with latte template
   */
   public function __construct(array $model)
   {
@@ -52,7 +52,6 @@ class UploadView implements ViewInterface
       if (!is_file($upload['sourceFile'])) {
         http_response_code(404);
         Log::warning('Uploaded file not found: ' .$upload['sourceFile']);
-        return false;
       }
     }
 

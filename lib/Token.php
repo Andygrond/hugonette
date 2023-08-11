@@ -13,13 +13,13 @@ class Token
   protected $cfg = [
     'tokenLifetime' => 900,
     'recycleAfter' => 512,
-    'indexKey' => 'csrf_index';
-    'tokenKey' => 'csrf_token';
+    'indexKey' => 'csrf_index',
+    'tokenKey' => 'csrf_token',
   ];
 
   /**
-  * @param debug - enable logging
-  * @param cfg - non standard config options
+  * @param $debug - enable logging
+  * @param $cfg - non standard config options
   */
   public function __construct($debug = false, $cfg = [])
   {
@@ -29,7 +29,7 @@ class Token
 
   /**
   * Generate hidden inputs for token and index to use inside the form
-  * @param lock must be set to URI, from which token will be validated
+  * @param $lock must be set to URI, from which token will be validated
   * or current URI will be assumed
   */
   public function hiddenInput($lock = false)
@@ -48,7 +48,7 @@ class Token
 
   /**
   * New token generator
-  * @param lock can be given in case of AJAX - see hiddenInput method
+  * @param $lock can be given in case of AJAX - see hiddenInput method
   */
   public function getToken($lock = false): array
   {
@@ -76,7 +76,7 @@ class Token
 
   /**
   * Validate a request token with session token
-  * @param data index and token to be validated, or will be taken from $_POST
+  * @param $data index and token to be validated, or will be taken from $_POST
   */
   public function validateRequest($data = false): int
   {
@@ -112,7 +112,7 @@ class Token
     return 0;
   }
 
-  public function getStoredToken(string $index): array
+  public function getStoredToken(string $index): array|bool
   {
     if (!isset($_SESSION['CSRF'])) {
       return false;

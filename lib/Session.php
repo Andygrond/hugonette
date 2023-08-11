@@ -9,8 +9,8 @@ namespace Andygrond\Hugonette;
 class Session
 {
   /**
-  * @param redirectUrl - switch to another URL in case of danger
-  * @param cookieOptions - non standard cookie options
+  * @param $redirectUrl - switch to another URL in case of danger
+  * @param $cookieOptions - non standard cookie options
   */
   public function __construct(string $redirectUrl = null, $cookieOptions = [])
   {

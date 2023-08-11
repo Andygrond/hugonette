@@ -27,9 +27,9 @@ class Log
   public static $viewMessages = []; // messages collected to be passed to view
 
   /**
-  * @param logger - PSR-3 or beyond compatible logger object
+  * @param $logger - PSR-3 or beyond compatible logger object
   */
-  public static function set(object $logger = null)
+  public static function set($logger = null)
   {
     if (is_object($logger)) {
       if (method_exists($logger, 'addLevel')) {
@@ -44,7 +44,7 @@ class Log
   }
 
   /** output the message - Log must be set prior to calling this function
-  * @param args = [record, data]
+  * @param $args = [record, data]
   */
   public static function __callStatic(string $level, array $args)
   {
@@ -75,7 +75,7 @@ class Log
   }
 
   /** start job
-  * @param name - name of the job
+  * @param $name - name of the job
   * reserved names: [pre] for preprocessing and [run] for runtime
   */
   public static function job(string $name)
@@ -85,7 +85,7 @@ class Log
   }
 
   /** quit current job, reset old job name and save job duration
-  * @param name - name of the job
+  * @param $name - name of the job
   */
   public static function done(string $name)
   {
@@ -99,7 +99,7 @@ class Log
 
   /** shortcuts to enable special debugger functions
   * once enabled function can not be disabled
-  * @param name - name of the functionality
+  * @param $name - name of the functionality
   */
   public static function enable(string $name)
   {

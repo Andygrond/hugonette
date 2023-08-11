@@ -7,6 +7,7 @@ namespace Andygrond\Hugonette\Access;
 */
 
 use Andygrond\Hugonette\Traits\JsonError;
+use Andygrond\Hugonette\Log;
 
 class CacheRefresher
 {

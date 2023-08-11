@@ -21,8 +21,8 @@ class LogArchiver
   }
 
   /**
-  * @param cut max archived file number
-  * @param shift increment or decrement by
+  * @param $cut max archived file number
+  * @param $shift increment or decrement by
   */
   public function shift(int $cut, int $shift = 1)
   {

@@ -31,8 +31,8 @@ class Mailer
   public $lastRejected;
 
 /**
- * @param from - array [mail => name] or string mail
- * @param smtp - credentials array [server, user, pass]
+ * @param $from - array [mail => name] or string mail
+ * @param $smtp - credentials array [server, user, pass]
  */
   public function __construct($from, $profile)
   {
@@ -59,7 +59,7 @@ class Mailer
   }
 
   /** Get new Swift Message
-  * @param subject - mail subject
+  * @param $subject - mail subject
   */
   public function message(string $subject)
   {
@@ -67,7 +67,7 @@ class Mailer
   }
 
   /** Get new Swift Message
-  * @param template - template file name
+  * @param $template - template file name
   */
   public function template(string $template)
   {
@@ -83,8 +83,8 @@ class Mailer
   }
 
   /** Format message body according to model
-  * @param model - data will be passed to template
-  * @param replace - pairs for replacing in rendered string
+  * @param $model - data will be passed to template
+  * @param $replace - pairs for replacing in rendered string
   */
   public function body($model, array $replace = [])
   {
@@ -97,12 +97,12 @@ class Mailer
   }
 
   /** Attach the file to the message
-  * @param file - path to the file
-  * @param name - string: set the file name / boolean: takes the role of @param inline
-  * @param inline - display the image within the message
-  * @return cid - to embed inline image: <img src="cid" ... />
+  * @param $file - path to the file
+  * @param $name - string: set the file name / boolean: takes the role of @param inline
+  * @param $inline - display the image within the message
+  * @return $cid - to embed inline image: <img src="cid" ... />
   */
-  public function attach(string $file, $name = false, bool $inline = false): string
+  public function attach(string $file, $name = false, bool $inline = false)
   {
     $attachment = Swift_Attachment::fromPath($file);
     if (is_bool($name)) {
@@ -118,10 +118,10 @@ class Mailer
   }
 
   /** Attach the data content to the message
-  * @param data - data string
-  * @param name - set the file name
-  * @param contentType - content type of the data
-  * @param inline - display the image within the message
+  * @param $data - data string
+  * @param $name - set the file name
+  * @param $contentType - content type of the data
+  * @param $inline - display the image within the message
   */
   public function attachData(string $data, string $name, string $contentType, bool $inline = false)
   {

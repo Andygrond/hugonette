@@ -19,7 +19,7 @@ class Decrypt
 
  /** save secret data
   * unable to instatiate from outside the class
-  * @param secret encrypted secret data array
+  * @param $secret encrypted secret data array
   */
   private function __construct(array $secret)
   {
@@ -28,7 +28,7 @@ class Decrypt
   }
 
  /** assign instance of Decrypt which uses given secret data file
-  * @param filename encrypted file name
+  * @param $filename encrypted file name
   */
   public static function data(string $filename)
   {
@@ -44,10 +44,10 @@ class Decrypt
   }
 
  /**
-  * @param dataKey secret data key
+  * @param $dataKey secret data key
   * @return - secret data for the $dataKey
   */
-  public function get(string $dataKey, string $keyCode = null): ?object
+  public function get(string $dataKey, string $keyCode = null): \stdClass|null
   {
     $hash = md5($dataKey);
 

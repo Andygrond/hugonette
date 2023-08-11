@@ -14,12 +14,12 @@ class Validate {
 
   /**
   * validate or sanitize $_GET | $_POST etc. array
-  * @param source [get|post|cookie|server|env]
-  * @param definition array of <variable_name> => [string <filter_type> or array filter_input_array like argument]
+  * @param $source [get|post|cookie|server|env]
+  * @param $definition array of <variable_name> => [string <filter_type> or array filter_input_array like argument]
   * @return array of values on success, false on failure, null if source not populated
   * array values: false if filter fails or null when not set
   */
-  public static function input(string $source, array $definition): mixed
+  public static function input(string $source, array $definition)
   {
     foreach ($definition as &$def) {
       $def = self::getSingleDef($def);
@@ -29,8 +29,8 @@ class Validate {
 
   /**
   * validate or sanitize indexed array and replace keys to strings
-  * @param values indexed array of values
-  * @param definition array of <variable_name> => [string <filter_type> or array filter_input_array like argument]
+  * @param $values indexed array of values
+  * @param $definition array of <variable_name> => [string <filter_type> or array filter_input_array like argument]
   * @return array of named values on success, false on failure
   * array values: false if filter fails or null when not set
   */

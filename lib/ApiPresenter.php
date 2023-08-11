@@ -15,18 +15,18 @@ abstract class ApiPresenter extends Presenter
 
   /** Input data validation and naming
    * For standard usage: define 'type' and 'id'
-   * @return request args
+   * return request args
    */
   abstract protected function validRequest():array;
 
   /** Authentication & authorization
    * return bool
-   * @param req request args
+   * @param $req request args
    */
   abstract protected function authorizedClent(array $req);
 
   /** Gets response array or data object
-   * @param req request args
+   * @param $req request args
    */
   abstract protected function getResponse(array $req);
 
@@ -65,9 +65,9 @@ abstract class ApiPresenter extends Presenter
 
   /** Typical resource calculation or friendly info on resource type mismatch
    * Presumption: all methods of $obj not starting with '_' are resource types
-   * @param obj data provider object for present resource type
+   * @param $obj data provider object for present resource type
    */
-  protected function resource(object $obj, $type, $id)
+  protected function resource(\stdClass $obj, $type, $id)
   {
     if ($type && method_exists($obj, $type) && $type[0] != '_') {
       return $obj->$type($id);

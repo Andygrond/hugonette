@@ -16,7 +16,7 @@ abstract class Presenter
   protected $model = []; // base model data - can be set separately
 
   /** calculate Model data using Presenter class:method and pass it to View
-  * @param method = presenter method name determined in route definition
+  * @param $method = presenter method name determined in route definition
   */
   final public function run(string $method)
   {

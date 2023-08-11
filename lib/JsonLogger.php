@@ -14,9 +14,9 @@ class JsonLogger
   public $logFile = '';    // path to log filename
 
 /** log initialization
-  * @param filename path to log file or folder relative to system log folder
-  * @param filesize max size in megabytes
-  * @param cut max number of archived files
+  * @param $filename path to log file or folder relative to system log folder
+  * @param $filesize max size in megabytes
+  * @param $cut max number of archived files
   */
   public function __construct(string $filename, float $filesize = 30, int $cut = 0)
   {
@@ -36,8 +36,8 @@ class JsonLogger
 /**
   * log message will be preceded with this method name:$id
   * $context can be omitted
-  * @param name - name
-  * @param args = [$id, $data, $context]
+  * @param $name - name
+  * @param $args = [$id, $data, $context]
   */
   public function __call(string $name, array $args)
   {
@@ -47,9 +47,9 @@ class JsonLogger
 
 /**
   * general event log message output
-  * @param message if string is given - will be logged before JSON code
-  * @param data data structure - can be given as first param
-  * @param event event name or context array - when omitted, $message is assumed to be empty
+  * @param $message if string is given - will be logged before JSON code
+  * @param $data data structure - can be given as first param
+  * @param $event event name or context array - when omitted, $message is assumed to be empty
   */
   public function event($message, $data, $event = null)
   {
@@ -74,7 +74,7 @@ class JsonLogger
   }
 
 /** request log message output
-  * @param client client data 
+  * @param $client client data 
   */
   public function request($clientInfo = [])
   {

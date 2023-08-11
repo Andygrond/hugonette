@@ -34,7 +34,7 @@ class Smb
 
 /** Initialize and log in
  * smbclient_state_init returns true on bad login, nothing to check!
- * @param profile - profile name of credentials
+ * @param $profile - profile name of credentials
  */
   public function __construct(string $profile)
   {
@@ -57,8 +57,8 @@ class Smb
   }
 
 /** get remote file last modification time
- * @param file - file name
- * @return timestamp
+ * @param $file - file name
+ * @return $timestamp
  */
   public function mtime(string $file)
   {
@@ -66,8 +66,8 @@ class Smb
   }
 
 /** get list of files in folder
- * @param folderName - folder name
- * @param mark - distinguishing string which must be found in file name (usually extension)
+ * @param $folderName - folder name
+ * @param $mark - distinguishing string which must be found in file name (usually extension)
  * @return array of filenames
  */
   public function folderFiles(string $folderName, string $mark = ''): array
@@ -85,7 +85,7 @@ class Smb
   }
 
 /** get full dir list
- * @param folderName - folder name
+ * @param $folderName - folder name
  * @return array of ['name'] ['type']
  */
   public function folder(string $folderName): array
@@ -102,8 +102,8 @@ class Smb
   }
 
 /** copy remote file to local destination
- * @param orgFile - remote file name
- * @param localFile - local copy file name
+ * @param $orgFile - remote file name
+ * @param $localFile - local copy file name
  */
   public function download(string $orgFile, string $localFile): bool
   {
@@ -134,7 +134,7 @@ class Smb
   }
 
 /** return remote file content
- * @param orgFile - remote file name
+ * @param $orgFile - remote file name
  */
   public function read(string $orgFile): string
   {
