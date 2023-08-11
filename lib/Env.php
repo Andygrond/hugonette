@@ -149,6 +149,6 @@ class Env
   private function __clone(){}
 
   // prevented unserialization
-  private function __wakeup(){}
+  public function __wakeup(){}
 
 }
