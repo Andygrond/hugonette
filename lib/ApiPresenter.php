@@ -67,7 +67,7 @@ abstract class ApiPresenter extends Presenter
    * Presumption: all methods of $obj not starting with '_' are resource types
    * @param $obj data provider object for present resource type
    */
-  protected function resource(\stdClass $obj, $type, $id)
+  protected function resource($obj, $type, $id)
   {
     if ($type && method_exists($obj, $type) && $type[0] != '_') {
       return $obj->$type($id);
