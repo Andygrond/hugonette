@@ -2,28 +2,29 @@
 
 namespace Andygrond\Hugonette;
 
-/** JSON API Presenter abstract class for Hugonette
- * ApiPresenter extension class must provide methods: validRequest and serviceProvider
+/** JSON API Provider abstract class for Hugonette
+ * Use ApiProvider extension class for API entry point
  * 
  * @author Andygrond 2023
 **/
 
+use Andygrond\Hugonette\Env;
 
 abstract class ApiProvider extends Presenter
 {
   private $status = [];
 
   /** Input data validation and naming
-   * For standard usage: define 'type' and 'id'
-   * return request args
+   * @param $segm request URL segments
+   * @return array $req request args
    */
-  abstract protected function validRequest():array;
+  abstract protected function getRequest(array $segm);
 
   /** Authentication & authorization
-   * return bool
    * @param $req request args
+   * @return bool
    */
-  abstract protected function authorizedClent(array $req);
+  abstract protected function isAuthorized(array $req);
 
   /** Gets response array or data object
    * @param $req request args
@@ -34,8 +35,8 @@ abstract class ApiProvider extends Presenter
   protected function default()
   {
     try {
-      if ($req = $this->validRequest()) {
-        if ($this->authorizedClent($req)) {
+      if ($req = $this->getRequest(Env::get('request.segments'))) {
+        if ($this->isAuthorized($req)) {
           $data = $this->getResponse($req);
 
           if (is_string($data)) {
