@@ -9,7 +9,7 @@ namespace Andygrond\Hugonette;
 **/
 
 
-abstract class ApiPresenter extends Presenter
+abstract class ApiProvider extends Presenter
 {
   private $status = [];
 
