@@ -47,7 +47,7 @@ class Decrypt
   * @param $dataKey secret data key
   * @return - secret data for the $dataKey
   */
-  public function get(string $dataKey, string $keyCode = null): \stdClass|null
+  public function get(string $dataKey, string $keyCode = null)
   {
     $hash = md5($dataKey);
 
