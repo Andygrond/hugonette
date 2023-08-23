@@ -12,32 +12,53 @@ use Andygrond\Hugonette\Env;
 
 abstract class ApiProvider extends Presenter
 {
-  private $status = [];
+  protected $status = [
+    'code' => 200,
+    'message' => 'OK',
+  ];
 
-  /** Input data validation and naming
-   * @param $segm request URL segments
-   * @return array $req request args
+  /** Define this method in the child class if needed
+   * Input data validation and naming
+   * @param array $segm request URL segments
+   * @return bool request syntax is valid
    */
-  abstract protected function getRequest(array $segm);
+  protected function request(array $segm)
+  {
+    return true;
+  }
 
-  /** Authentication & authorization
-   * @param $req request args
-   * @return bool
+  /** Define this method in the child class if needed
+   * Authentication & authorization
+   * @return bool request is authorized
    */
-  abstract protected function isAuthorized(array $req);
+  protected function authorize()
+  {
+    return true;
+  }
 
-  /** Gets response array or data object
-   * @param $req request args
+  /** Define this method in the child class
+   * Get response payload
+   * @return mixed response payload | error message | false | null
    */
-  abstract protected function getResponse(array $req);
+  abstract protected function response();
+
+  /** Define this method in the child class if needed
+   * Full response
+   * @param mixed $data response payload or error message
+   * @return mixed full response
+   */
+  protected function envelope($data)
+  {
+    return $data;
+  }
 
   // Provider default class called in Route
   protected function default()
   {
     try {
-      if ($req = $this->getRequest(Env::get('request.segments'))) {
-        if ($this->isAuthorized($req)) {
-          $data = $this->getResponse($req);
+      if ($req = $this->request(Env::get('request.segments'))) {
+        if ($this->authorize()) {
+          $data = $this->response();
 
           if (is_string($data)) {
             $this->setStatus(400, $data);
@@ -46,7 +67,7 @@ abstract class ApiProvider extends Presenter
           } elseif ($data === null) {
             $this->setStatus(404, 'Resource not found');
           } else {
-            return $data;
+            return $this->envelope($data);
           }
         } else {
           $this->setStatus(401, 'Access denied');
@@ -84,10 +105,8 @@ abstract class ApiProvider extends Presenter
   protected function setStatus($code, $message)
   {
     http_response_code($code);
-    $this->status = [
-      'code' => $code,
-      'message' => $message,
-    ];
+    $this->status['code'] = $code;
+    $this->status['message'] = $message;
     Log::info('API status', $this->status);
   }
 
