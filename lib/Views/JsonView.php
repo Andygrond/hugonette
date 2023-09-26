@@ -18,7 +18,7 @@ class JsonView implements ViewInterface
     if (Env::get('mode') != 'development') {  // make possible trace actions
       header('Content-Type: application/json');
     }
-    echo json_encode($model, JSON_UNESCAPED_UNICODE);
+    echo json_encode($model, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
   }
 
 }
