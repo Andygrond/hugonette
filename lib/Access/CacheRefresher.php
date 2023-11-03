@@ -76,7 +76,7 @@ class CacheRefresher
         if ($this->serialize) {
           try {
             $data = unserialize($content);
-          } catch (Throwable $t) {
+          } catch (\Throwable $t) {
             Log::warning('CacheRefresher: file: ' .$this->cacheName .' data not unserialized: ' .$t->getMessage());
           }
         } else {
