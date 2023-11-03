@@ -5,7 +5,7 @@ namespace Andygrond\Hugonette;
 /* MVP Presenter class for Hugonette
  * methods of Presenter extension class will return an array of model data
  * when Presenter method returns false (means: route not relevant), next route will be checked
- * @author Andygrond 2022
+ * @author Andygrond 2023
 **/
 
 use Andygrond\Hugonette\Log;
@@ -21,33 +21,46 @@ abstract class Presenter
   final public function run(string $method)
   {
     $model = $this->$method();
+    $view = ucfirst(Env::get('view'));
+    $viewClass = Env::get('namespace.view') .$view .'View';
+    $lastRoute = false;
 
-    if (false !== $model) {
-      if (!is_array($model)) {
-        throw new \TypeError(get_class($this) ."::$method has returned " .gettype($model) .". Allowed: array or false.");
+    if ($model === false) {
+      if (isset($this->model['status'])) { // error to be presented
+        Env::set('template', Env::get('hidden.file.error'));
+        new $viewClass($this->model);
+        $lastRoute = true;
       }
 
-      // dump Env if Tracy and development mode
-      if (Env::get('mode') == 'development' && Log::$debugMode == 'tracy') {
-        bdump(Env::get(), 'Env');
+    } else {
+      if (!is_array($model)) {
+        throw new \TypeError(get_class($this) ."::$method has returned " .gettype($model) .". Allowed: array or false.");
       }
 
       if ($callback = Env::get('afterLifeCallback')) {
         $finish = new FinishResponse;
       }
 
-      $view = Env::get('namespace.view') .ucfirst(Env::get('view')) .'View';
-      new $view($model + $this->model);
+      new $viewClass($model + $this->model);
+      $lastRoute = true;
 
       if ($callback) {
         $finish->finish();
         Env::set('afterLife', true);
         $callback($model);
       }
+    }
+
+    if ($lastRoute) { // this route is the last one
+      // dump Env if Tracy and development mode
+      if (Env::get('mode') == 'development' && Log::$debugMode == 'tracy') {
+        bdump(Env::get(), 'Env');
+      }
 
       Log::close(); // effective only when set previously
       exit;
     }
+
   }
 
 }

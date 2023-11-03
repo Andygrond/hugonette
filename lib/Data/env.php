@@ -1,7 +1,7 @@
 <?php
 
 /** Standard initial environment attributes for Hugonette
- * @author Andygrond 2020
+ * @author Andygrond 2023
  */
 
 $uriBase = dirname($_SERVER['SCRIPT_NAME']);
@@ -33,6 +33,8 @@ return [
     'file' => [
       // Browser identification table
       'bots' => __DIR__ .DIRECTORY_SEPARATOR .'bots.ini',
+      // error template
+      'error' => '/index.html',
       // Encryption key
       'key' => $keyDir .'/.secure/key.php',
       // DB credentials
