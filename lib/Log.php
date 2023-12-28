@@ -69,7 +69,7 @@ class Log
   public static function close()
   {
     if (self::$logger) {
-      self::$logger->debug('Duration', self::$duration->timeLen());
+      self::$logger->debug('Duration', self::$duration->timing());
       self::$logger->flush();
     }
   }
@@ -93,7 +93,7 @@ class Log
     if ($name == $lastName) {
       self::$duration->stop($name);
     } else {
-      self::$logger->log('warning', "Job $name is interlacing with $lastName which should be ended first using Log::done.");
+      self::$logger->log('warning', "Job $name is interlacing with $lastName which should be ended first using Log::done('$lastName')");
     }
   }
 
@@ -126,9 +126,9 @@ class Log
   }
 
   // measured time lengths
-  public static function times()
+  public static function timing()
   {
-    self::$duration->timeLen();
+    return self::$duration->timing();
   }
 
   // prevented instantiating

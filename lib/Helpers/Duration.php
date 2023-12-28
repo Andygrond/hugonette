@@ -44,17 +44,26 @@ class Duration
   }
 
   // get array of all duration times
-  public function timeLen(): array
+  public function timing(): array
   {
     $this->times['run']['duration'] = microtime(true) - $this->times['run']['start'];
 
     $len = [];
     if ($this->times) {
       foreach ($this->times as $name => $frame) {
-        $len[] = $name .':' .round(1000 * $frame['duration']);
+        $len[$name] = $this->msToTime($frame['duration']);
       }
     }
     return $len;
   }
+
+  // Time distance given in a user-friendly form
+  private static function msToTime($delta)
+	{
+		$lo = ($delta > 10)? 1 : (($delta > 1)? 2 : 3);
+		$answer = ($delta > 0.8)? round($delta, $lo) .' s' : 1000*round($delta, 3) .' ms';
+		$info = ($delta > 90)? round($delta/60, 1) .' min' : $answer;
+		return $info;
+	}
 
 }
