@@ -162,8 +162,10 @@ class JsonLogger
   // get ISO request time
   protected function time(): string
   {
-    [$sec, $msec] = explode('.', $_SERVER["REQUEST_TIME_FLOAT"]);
-    return date('Y-m-d\TH:i:s.', $sec) .$msec;
+    $tfloat = $_SERVER["REQUEST_TIME_FLOAT"];
+    $sec = floor($tfloat);
+    $msec = (string) round($tfloat - $sec, 3);
+    return date('Y-m-d\TH:i:s.', $sec) .substr($msec, 2);
   }
 
   // get general agent info
