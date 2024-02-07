@@ -36,9 +36,6 @@ class Log
         $logger->addLevel('view', 35);  // create level 'view' for sending messages to view
       }
       self::$logger = $logger;
-      if ($logger->logFile) {
-        ini_set('error_log', $logger->logFile);
-      }
     }
     self::$duration = new Duration;
   }
