@@ -12,6 +12,7 @@ use DateTime;
 class JsonLogger
 {
   public $logFile = '';    // path to log filename
+  private $cliMode = false;
 
 /** log initialization
   * @param $filename path to log file or folder relative to system log folder
@@ -84,13 +85,16 @@ class JsonLogger
       $client['info'] = $clientInfo;
     }
     $client['agent'] = $this->agent();
-    $client['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR']?? $_SERVER['REMOTE_ADDR'];
+    if (!$this->cliMode) {
+      $client['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR']?? $_SERVER['REMOTE_ADDR'];
+      $server = $this->serverInfo();
+    }
 
     $data = [
       'time' => $this->time(),
       'caller' => $this->tracePoint(),
       'client' => $client,
-      'server' => $this->serverInfo(),
+      'server' => $server?? 'localhost',
     ];
     
     $this->save('request' ."\t" .json_encode($data, JSON_UNESCAPED_UNICODE));
@@ -172,6 +176,7 @@ class JsonLogger
   protected function agent(): string
   {
     if (php_sapi_name() == 'cli') {
+      $this->cliMode = true;
       if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
         return 'Windows CLI';  // $_SERVER['TERM'] is not defined on Win
       } else {
