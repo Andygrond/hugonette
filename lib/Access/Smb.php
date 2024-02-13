@@ -108,29 +108,46 @@ class Smb
   public function download(string $orgFile, string $localFile): bool
   {
     $file = smbclient_open($this->state, $orgFile, 'r');
-    $sent = false;
-
-    if ($fp = fopen ($localFile, 'w')) {
-      while (true) {
-        $data = smbclient_read($this->state, $file, 100000);
-        if ($data === false || strlen($data) === 0) {
-          break;
-        }
-        if (fwrite($fp, $data)) {
-          $sent = true;
-        }
+    $localTempFile = $localFile .'.part';
+    if (is_file($localTempFile)) {
+      if (!unlink($localTempFile)) {
+        Log::warning('cannot delete local file ' .$localTempFile);
+        return false;
       }
-
-      fclose($fp);
-      if ($mtime = @$this->mtimes[$orgFile]) {	// original mtime will be set only when $this->mtime() for source file was called first
-        touch($localFile, $mtime);
-      }
-    } else {
-      Log::warning($localFile .' local file cannot be open');
     }
 
+    if ($fp = fopen($localTempFile, 'w')) {
+      $received = $this->transfer($file, $fp);
+      fclose($fp);
+
+      if ($mtime = @$this->mtimes[$orgFile]) {	// original mtime will be set only when $this->mtime() for source file was called first
+        touch($localTempFile, $mtime);
+      }
+
+      if (!rename($localTempFile, $localFile)) {
+        Log::warning('cannot rename local file to ' .$localFile);
+        return false;
+      }
+    } else {
+      Log::warning('cannot open local file ' .$localTempFile);
+    }
     smbclient_close($this->state, $file);
-    return $sent;
+    
+    return $received;
+  }
+
+  private function transfer($remote, $fp)
+  {
+    while (true) {
+      $data = smbclient_read($this->state, $remote, 100000);
+      if ($data === false || strlen($data) === 0) {
+        break;
+      }
+      if (fwrite($fp, $data)) {
+        $received = true;
+      }
+    }
+    return $received?? false;
   }
 
 /** return remote file content

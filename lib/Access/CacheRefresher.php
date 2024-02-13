@@ -29,17 +29,21 @@ class CacheRefresher
   // refresh the cache, return status
   public function refresh($data, $mtimeSrc = null): bool
   {
-    if (!is_file($this->cacheName)) {
-      @touch($this->cacheName);
-      chmod($this->cacheName, 0666);
-    }
-    $dataString = $this->serialize? serialize($data) : json_encode($data, JSON_UNESCAPED_UNICODE);
+    $dataString = $this->serialize? serialize($data) : json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 
     if ($data) {
-      if (file_put_contents($this->cacheName, $dataString, LOCK_EX)) {
+      $tempFile = $this->cacheName .'.part';
+
+      if (file_put_contents($tempFile, $dataString, LOCK_EX)) {
+        chmod($tempFile, 0666);
         $mtimeSrc = $mtimeSrc?? $this->mtimeSrc;
         if ($mtimeSrc) {
-          touch($this->cacheName, $mtimeSrc);	// ustaw oryginalny czas
+          touch($tempFile, $mtimeSrc);	// ustaw oryginalny czas
+        }
+
+        if (!rename($tempFile, $this->cacheName)) {
+          Log::warning('cannot rename file.part to ' .$this->cacheName);
+          return false;
         }
         return true;
       }
