@@ -23,8 +23,15 @@ class Env
   */
   public static function init(string $sysDir, string $filename = null)
   {
+    if (!$filename) {
+      $filename = $sysDir .DIRECTORY_SEPARATOR .'app' .DIRECTORY_SEPARATOR .'config' .DIRECTORY_SEPARATOR .'env.php';
+    }
+    if (!is_file($filename)) {
+      $filename = __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'env.php';
+    }
+
     if (!self::$attrib) {
-      self::$attrib = require($filename?? __DIR__ .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'env.php');
+      self::$attrib = require($filename);
       self::$hidden = self::$attrib['hidden'];
       unset(self::$attrib['hidden']);
     }
