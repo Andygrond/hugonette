@@ -30,8 +30,13 @@ class JsonApi
     curl_close($this->ch);
   }
 
+  public function headers(array $headers)
+  {
+    curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+  }
+
   // ustaw folder zdalny
-  public function get($url)
+  public function get(string $url)
   {
     $this->url = $url;
     [$protocol] = explode(':', $url);
