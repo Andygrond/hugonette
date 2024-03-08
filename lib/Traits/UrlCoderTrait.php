@@ -7,7 +7,7 @@ namespace Andygrond\Hugonette\Traits;
  * @author Andygrond 2020
 **/
 
-trait UrlCoder
+trait UrlCoderTrait
 {
   function smartUrlEncode($input) {
    return strtr(base64_encode($input), '+/=', '._$');

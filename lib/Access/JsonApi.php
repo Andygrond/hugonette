@@ -6,12 +6,12 @@ namespace Andygrond\Hugonette\Access;
  * @author Andygrond 2020
 **/
 
-use Andygrond\Hugonette\Traits\JsonError;
+use Andygrond\Hugonette\Traits\JsonErrorTrait;
 use Andygrond\Hugonette\Log;
 
 class JsonApi
 {
-  use JsonError;
+  use JsonErrorTrait;
 
   protected $ch;  // curl handle
   protected $url; // last url request

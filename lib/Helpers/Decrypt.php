@@ -7,11 +7,11 @@ namespace Andygrond\Hugonette\Helpers;
  */
 
 use Andygrond\Hugonette\Env;
-use Andygrond\Hugonette\Traits\JsonError;
+use Andygrond\Hugonette\Traits\JsonErrorTrait;
 
 class Decrypt
 {
-  use JsonError;
+  use JsonErrorTrait;
 
   private static $instances = []; // remember secret data once read
   private $secret; // secret data

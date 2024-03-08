@@ -6,12 +6,12 @@ namespace Andygrond\Hugonette\Access;
 * @author Andygrond 2020
 */
 
-use Andygrond\Hugonette\Traits\JsonError;
+use Andygrond\Hugonette\Traits\JsonErrorTrait;
 use Andygrond\Hugonette\Log;
 
 class CacheRefresher
 {
-  use JsonError;
+  use JsonErrorTrait;
 
   private $cacheName; // cache file name
   private $serialize; // format of saved data: serialization vs. JSON

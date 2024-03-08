@@ -2,13 +2,13 @@
 
 namespace Andygrond\Hugonette\Traits;
 
-/* JSON Error human friendly
+/** 
+ * JSON Error human friendly
  * @author Andygrond 2020
-**/
+ */
 
-use Andygrond\Hugonette\Log;
 
-trait JsonError
+trait JsonErrorTrait
 {
   // get the last json error
   public function jsonError()

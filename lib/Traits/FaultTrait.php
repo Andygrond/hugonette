@@ -2,11 +2,12 @@
 
 namespace Andygrond\Hugonette\Traits;
 
-/* JSON Error human friendly
+/**
+ * Http codes human friendly
  * @author Andygrond 2020
-**/
+ */
 
-trait Fault
+trait FaultTrait
 {
   private static $httpStatusCodes = [
 
