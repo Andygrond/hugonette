@@ -55,22 +55,25 @@ class JsonApi
 
   // decode json data from string
   // returns response object or fault object
-  public function decode($string)
+  public function decode(string $response)
   {
-    $fault = [];
-
-    if (!$string) {
+    if (!$response) {
       return $this->fault('Service error', 'Empty response');
     }
-    $response = json_decode($string);
 
-    if ($response === null) {
-      return $this->fault('JSON fault', $this->jsonError(), $string);
-    } elseif (@$response->fault) {
-      Log::error('Fault in response', $response);
+    $json = @explode('<!-- Tracy', $response);
+    $rdata = json_decode($json[0]);
+
+    if ($rdata === null) {
+      return $this->fault('JSON fault', $this->jsonError(), $response);
+    } elseif (@$rdata->fault) {
+      Log::error('Fault in response', $rdata);
     }
 
-    return $response;
+    if (isset($json[1]) && is_object($rdata)) {
+      $rdata->tracy = 'detected'; // informacja o usunięciu kodu Tracy
+    }
+    return $rdata;
   }
 
   // get structured fault info
