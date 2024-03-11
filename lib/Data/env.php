@@ -32,7 +32,7 @@ return [
     // File locations
     'file' => [
       // Browser identification table
-      'bots' => __DIR__ .DIRECTORY_SEPARATOR .'bots.ini',
+      'bots' => false,
       // error template
       'error' => '/index.html',
       // Encryption key

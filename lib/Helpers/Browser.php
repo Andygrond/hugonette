@@ -70,7 +70,8 @@ class Browser
   private static function findAgent($agent): bool
   {
     $agent = strtolower($agent);
-    $agentList = parse_ini_file(Env::get('hidden.file.bots'), true);
+    $botsFile = Env::get('hidden.file.bots')?: dirname(__DIR__) .DIRECTORY_SEPARATOR .'Data' .DIRECTORY_SEPARATOR .'bots.ini';
+    $agentList = parse_ini_file($botsFile, true);
 
     foreach ($agentList as $type => $alist) {
       foreach ($alist as $pattern => $name) {
