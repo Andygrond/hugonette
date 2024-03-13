@@ -16,11 +16,11 @@ class JsonApi
   protected $ch;  // curl handle
   protected $url; // last url request
 
-  public function __construct()
+  public function __construct($timeout = 300)
   {
     $this->ch = curl_init();
 
-    curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($this->ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($this->ch, CURLOPT_FAILONERROR, true);
     curl_setopt($this->ch, CURLOPT_HEADER, false);
   }
