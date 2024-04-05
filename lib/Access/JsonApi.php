@@ -6,6 +6,7 @@ namespace Andygrond\Hugonette\Access;
  * @author Andygrond 2020
 **/
 
+use Andygrond\Hugonette\Helpers\Status;
 use Andygrond\Hugonette\Traits\JsonErrorTrait;
 use Andygrond\Hugonette\Log;
 
@@ -50,20 +51,24 @@ class JsonApi
     curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 
     $response = curl_exec($this->ch);
-    return curl_errno($this->ch)? $this->fault('CURL fault', curl_error($this->ch)) : $this->decode($response);
+    if (curl_errno($this->ch)) {
+      $code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+      $message = curl_error($this->ch) .' ' .(new Status($code, 'pl'))->message();
+      return $this->fault('CURL fault', $message);
+    }
+    return $this->decode($response);
   }
 
   // decode json data from string
   // returns response object or fault object
   public function decode(string $response)
   {
-    if (!$response) {
+    [$json] = explode('<!-- Tracy', $response);
+    if (!$response || !trim($json)) {
       return $this->fault('Service error', 'Empty response');
     }
 
-    $json = @explode('<!-- Tracy', $response);
-    $rdata = json_decode($json[0]);
-
+    $rdata = json_decode($json);
     if ($rdata === null) {
       return $this->fault('JSON fault', $this->jsonError(), $response);
     } elseif (@$rdata->fault) {
