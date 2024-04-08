@@ -16,6 +16,7 @@ class JsonApi
 
   protected $ch;  // curl handle
   protected $url; // last url request
+  protected $logFile; // optional log
 
   public function __construct($timeout = 300)
   {
@@ -36,6 +37,19 @@ class JsonApi
     curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
   }
 
+  public function log(string $logFile = SYS_DIR .'/log/curl.log')
+  {
+    $this->logFile = fopen($logFile, 'w');
+    curl_setopt($this->ch, CURLOPT_VERBOSE, true);
+    curl_setopt($this->ch, CURLOPT_STDERR, $this->logFile);
+  }
+
+  // ignore proxy on localhost
+  public function noProxy()
+  {
+    curl_setopt($this->ch, CURLOPT_PROXY, '');
+  }
+
   // ustaw folder zdalny
   public function get(string $url)
   {
@@ -51,6 +65,11 @@ class JsonApi
     curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 
     $response = curl_exec($this->ch);
+
+    if ($this->logFile) {
+      fclose($this->logFile);
+    }
+
     if (curl_errno($this->ch)) {
       $code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
       $message = curl_error($this->ch) .' ' .(new Status($code, 'pl'))->message();
