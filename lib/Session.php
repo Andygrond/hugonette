@@ -20,7 +20,7 @@ class Session
       session_start();
 
       if (!$redirectUrl) {
-        $redirectUrl = $_SERVER['REQUEST_URI'];
+        $redirectUrl = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
       }
 
       if (!isset($_SESSION['started_at'])) {
