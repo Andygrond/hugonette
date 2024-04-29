@@ -5,7 +5,7 @@
  */
 
 $uriBase = dirname($_SERVER['SCRIPT_NAME']);
-$keyDir = defined('KEY_DIR')? rtrim(KEY_DIR, '/') : '';
+($uriBase >1) or $uriBase = ''; // in subfolder or in documentroot
 
 return [
   // App mode: [ development | production | maintenance ]
@@ -36,7 +36,7 @@ return [
       // error template
       'error' => '/index.html',
       // Encryption key
-      'key' => $keyDir .'/.secure/key.php',
+      'key' => '/.secure/key.php',
       // DB credentials
       'db' => '/app/config/db.data',
       // SMB credentials
