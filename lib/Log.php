@@ -104,7 +104,7 @@ class Log
       case 'tracy':  // enable Tracy in given mode
         if (self::$logger) {
           self::$debugMode = 'tracy';
-          $tracyMode = (Env::get('mode') == 'production')? Debugger::PRODUCTION : Debugger::DEVELOPMENT;
+          $tracyMode = (Env::get('mode') == 'development')? Debugger::Development : Debugger::Production;
           $logPath = dirname(self::$logger->logFile) .'/';
           Debugger::enable($tracyMode, $logPath);
         }
