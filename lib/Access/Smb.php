@@ -14,6 +14,7 @@ class Smb
 {
   private $state;       // state of smb object
   private $mtimes = []; // mtimes collected by mtime method
+  private $error = '';  // error message
 
   private $errorCode = [
     0 => 'Reason outside SMB',
@@ -42,9 +43,11 @@ class Smb
     $file = Env::get('hidden.file.smb');
     $access = (array) Decrypt::data($file)->get($profile);
     if (extract($access) < 3) {
-      throw new \InvalidArgumentException("Missing credentials");
+      $this->error = "Missing credentials";
     }
-    smbclient_state_init($this->state, $domain, $user, $pass);
+    if (!smbclient_state_init($this->state, $domain, $user, $pass)) {
+      $this->error = "SMB state init error";
+    }
   }
 
 /** get last error in common format
@@ -52,6 +55,9 @@ class Smb
  */
   public function lastError(): string
   {
+    if ($this->error) {
+      return $this->error;
+    }
     $errno = smbclient_state_errno($this->state);
     return 'SMB: ' .$this->errorCode[$errno]?? "error code $errno";
   }
@@ -62,6 +68,9 @@ class Smb
  */
   public function mtime(string $file)
   {
+    if ($this->error) {
+      return 0;
+    }
     return $this->mtimes[$file] = (int) smbclient_getxattr($this->state, $file, 'system.dos_attr.write_time');
   }
 
