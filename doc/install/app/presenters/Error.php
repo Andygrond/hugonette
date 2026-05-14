@@ -13,7 +13,8 @@ class Error extends Presenter
 {
   public function __call($code, $args)
   {
-    if ($message = Status::message($code, 'pl')) {
+    $status = new Status($code, 'pl');
+    if ($message = $status->message()) {
       http_response_code($code);
     }
 
