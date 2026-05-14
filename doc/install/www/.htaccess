@@ -1,0 +1,24 @@
+php_flag  log_errors on
+php_value error_reporting -1
+php_value error_log ./../../log/php-compile-error.log
+
+RewriteEngine On
+
+# block external /static calls
+RewriteCond %{REQUEST_URI} ^/static/
+RewriteRule ^ - [L]
+
+# run .php
+RewriteCond %{REQUEST_URI} \.php$ [NC]
+RewriteRule ^ - [L]
+
+# run framework when .html
+RewriteCond %{REQUEST_URI} (/|\.html?)$ [NC]
+RewriteRule ^ /index.php [L]
+
+# assets to static/
+RewriteCond %{DOCUMENT_ROOT}/static/$1 -f
+RewriteRule ^(.+)$ /static/$1 [L]
+
+# fallback to 404
+RewriteRule ^ - [R=404,L]

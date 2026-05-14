@@ -7,7 +7,7 @@ namespace App\Presenters;
 */
 
 use Andygrond\Hugonette\Presenter;
-use App\Library\Status;
+use Andygrond\Hugonette\Helpers\Status;
 
 class Error extends Presenter
 {
